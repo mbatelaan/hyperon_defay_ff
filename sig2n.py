@@ -138,13 +138,22 @@ def evffplot(filename, plotdir, plotname, fnum, extra_point=[None], show=False):
     pypl.close()
 
 
-def evffplot2(filename, plotdir, plotname, fnum, extra_point=[None], show=False):
+def evffplot2(
+    filename,
+    plotdir,
+    plotname,
+    fnum,
+    extra_point=[None],
+    extra_point2=[None],
+    show=False,
+):
     """read the evff file and plot the data"""
     threept_file = evffdir / Path(filename)
     threept_data = evffdata(threept_file)
     qsq = -1 * threept_data["par0"] * (0.1973 ** 2) / (0.074 ** 2)
 
-    pypl.figure(figsize=(9, 6))
+    # pypl.figure(figsize=(9, 6))
+    pypl.figure(figsize=(5, 4))
     pypl.errorbar(
         qsq,
         threept_data["val"][:, 0] - 0.05 * threept_data["val"][:, 1],
@@ -166,33 +175,276 @@ def evffplot2(filename, plotdir, plotname, fnum, extra_point=[None], show=False)
             elinewidth=1,
             color=_colors[1],
             fmt="o",
+            label=r"$\theta_1$",
+        )
+    if any(extra_point2):
+        print(np.average(extra_point2), np.std(extra_point2))
+        pypl.errorbar(
+            0.29 + 0.01,
+            np.average(extra_point2),
+            np.std(extra_point2),
+            capsize=4,
+            elinewidth=1,
+            color=_colors[2],
+            fmt="^",
+            label=r"$\theta_2$",
         )
 
+    pypl.legend(fontsize="x-small")
     _metadata["Title"] = plotname
     pypl.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(m_{N}+m_{\Sigma})^{2}} F_{2}$")
     pypl.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
-    pypl.ylim(0, 2)
-    pypl.grid(True, alpha=0.4)
+    pypl.ylim(0, 1.5)
+    # pypl.grid(True, alpha=0.4)
     pypl.savefig(plotdir / (plotname + ".pdf"), metadata=_metadata)
     if show:
         pypl.show()
     pypl.close()
+    return
+
+
+def evffplot3(
+    filename,
+    plotdir,
+    plotname,
+    fnum,
+    extra_point=[None],
+    extra_point2=[None],
+    extra_point3=[None],
+    extra_point4=[None],
+    show=False,
+):
+    """read the evff file and plot the data"""
+    threept_file = evffdir / Path(filename)
+    threept_data = evffdata(threept_file)
+    qsq = -1 * threept_data["par0"] * (0.1973 ** 2) / (0.074 ** 2)
+
+    # pypl.figure(figsize=(9, 6))
+    pypl.figure(figsize=(5, 4))
+    pypl.errorbar(
+        qsq,
+        threept_data["val"][:, 0] - 0.05 * threept_data["val"][:, 1],
+        threept_data["val_err"][:, 0] - 0.05 * threept_data["val_err"][:, 1],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="s",
+        markerfacecolor="none",
+    )
+
+    if any(extra_point2):
+        pypl.errorbar(
+            0.338,
+            extra_point2[0],
+            extra_point2[1],
+            capsize=4,
+            elinewidth=1,
+            color=_colors[2],
+            fmt="^",
+            label=r"$\theta_1$",
+        )
+    if any(extra_point):
+        pypl.errorbar(
+            0.29,
+            extra_point[0],
+            extra_point[1],
+            capsize=4,
+            elinewidth=1,
+            color=_colors[1],
+            fmt="o",
+            label=r"$\theta_2$",
+        )
+    if any(extra_point3):
+        pypl.errorbar(
+            0.29 - 0.005,
+            extra_point3[0],
+            extra_point3[1],
+            capsize=4,
+            elinewidth=1,
+            color=_colors[3],
+            fmt="s",
+            label=r"$\theta_2$, twisted gauge3",
+        )
+    if any(extra_point4):
+        pypl.errorbar(
+            0.29 + 0.005,
+            extra_point4[0],
+            extra_point4[1],
+            capsize=4,
+            elinewidth=1,
+            color=_colors[4],
+            fmt="*",
+            label=r"$\theta_2$, twisted gauge5",
+        )
+
+    pypl.legend(fontsize="x-small")
+    _metadata["Title"] = plotname
+    pypl.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(m_{N}+m_{\Sigma})^{2}} F_{2}$")
+    pypl.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
+    pypl.ylim(0, 1.5)
+    # pypl.grid(True, alpha=0.4)
+    pypl.savefig(plotdir / (plotname + "_2.pdf"), metadata=_metadata)
+    if show:
+        pypl.show()
+    pypl.close()
+
+
+def evffplot4(
+    filename,
+    plotdir,
+    plotname,
+    fnum,
+    extra_point=[None],
+    extra_point2=[None],
+    extra_point3=[None],
+    extra_point4=[None],
+    extra_point5=[None],
+    show=False,
+):
+    """read the evff file and plot the data"""
+    threept_file = evffdir / Path(filename)
+    threept_data = evffdata(threept_file)
+    qsq = -1 * threept_data["par0"] * (0.1973 ** 2) / (0.074 ** 2)
+
+    # pypl.figure(figsize=(9, 6))
+    print(f"{threept_data['val'][-1, 3]=}")
+    F_0_manual = threept_data["val"][-1, 0] + threept_data["val"][-1, 2]
+    print(f"{F_0_manual=}")
+    pypl.figure(figsize=(5, 4))
+    pypl.errorbar(
+        qsq[-1],
+        threept_data["val"][-1, 3],
+        threept_data["val_err"][-1, 3],
+        # threept_data["val"][:, 0] + 1.257757581573699 * threept_data["val"][:, 1],
+        # threept_data["val_err"][:, 0]
+        # +1.257757581573699 * threept_data["val_err"][:, 1],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="s",
+        markerfacecolor="none",
+    )
+    pypl.errorbar(
+        qsq,
+        threept_data["val"][:, 0] - 0.05 * threept_data["val"][:, 1],
+        threept_data["val_err"][:, 0] - 0.05 * threept_data["val_err"][:, 1],
+        # threept_data["val"][:, 0] + 1.257757581573699 * threept_data["val"][:, 1],
+        # threept_data["val_err"][:, 0]
+        # +1.257757581573699 * threept_data["val_err"][:, 1],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="s",
+        markerfacecolor="none",
+    )
+
+    if any(extra_point2):
+        pypl.errorbar(
+            0.338,
+            extra_point2[0],
+            extra_point2[1],
+            capsize=4,
+            elinewidth=1,
+            color=_colors[2],
+            fmt="^",
+            label=r"$\theta_1$",
+        )
+    if any(extra_point):
+        pypl.errorbar(
+            0.29,
+            extra_point[0],
+            extra_point[1],
+            capsize=4,
+            elinewidth=1,
+            color=_colors[1],
+            fmt="o",
+            label=r"$\theta_2$",
+        )
+    if any(extra_point3):
+        pypl.errorbar(
+            0.29 - 0.005,
+            extra_point3[0],
+            extra_point3[1],
+            capsize=4,
+            elinewidth=1,
+            color=_colors[3],
+            fmt="s",
+            label=r"$\theta_2$, twisted gauge3",
+        )
+    if any(extra_point4):
+        pypl.errorbar(
+            0.29 + 0.005,
+            extra_point4[0],
+            extra_point4[1],
+            capsize=4,
+            elinewidth=1,
+            color=_colors[4],
+            fmt="*",
+            label=r"$\theta_2$, twisted gauge5",
+        )
+    if any(extra_point5):
+        pypl.errorbar(
+            extra_point5[2],
+            extra_point5[0],
+            extra_point5[1],
+            capsize=4,
+            elinewidth=1,
+            color=_colors[5],
+            fmt="*",
+            label=r"$\theta_2$, twisted gauge5",
+        )
+
+    pypl.legend(fontsize="xx-small")
+    _metadata["Title"] = plotname
+    # pypl.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(m_{N}+m_{\Sigma})^{2}} F_{2}$")
+    pypl.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2}$")
+    pypl.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
+    pypl.ylim(0, 1.5)
+    # pypl.grid(True, alpha=0.4)
+    pypl.savefig(plotdir / (plotname + "_3.pdf"), metadata=_metadata)
+    if show:
+        pypl.show()
+    pypl.close()
+
+
+def energy(m, L, n):
+    """return the energy of the state"""
+    return np.sqrt(m ** 2 + (n * 2 * np.pi / L) ** 2)
 
 
 if __name__ == "__main__":
     pypl.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
     pypl.rc("text", usetex=True)
     rcParams.update({"figure.autolayout": True})
-    plotdir = Path.home() / Path("Documents/PhD/analysis_results/twistedBC16/")
+
+    NX = 32
+    NT = 64
 
     # From the theta tuning:
     m_N = 0.4179255
     m_S = 0.4641829
+    E_N = energy(m_N, NX, 1)
+
+    F1_factor = np.sqrt(0.5 * (1 + m_N / E_N))
+    print(F1_factor)
+    pvec = np.array([1, 0, 0])
+    pvec_sq = np.dot(pvec, pvec) * (np.pi / NX) ** 2 * (0.1973 ** 2) / (0.074 ** 2)
+    print(f"{pvec_sq=}")
+    F2_factor = np.sqrt(0.5 * (1 + m_N / E_N)) * (
+        (np.dot(pvec, pvec) * (np.pi / NX) ** 2) / ((E_N + m_N) * (m_N + m_S))
+    )
+    print(F2_factor)
+    F3_factor = -1 * np.sqrt(0.5 * (1 + m_N / E_N)) * ((E_N - m_S) / (m_N + m_S))
+    print(F3_factor)
 
     nboot = 500  # 700
     nbin = 1  # 10
     evffdir = Path.home() / Path("Documents/PhD/lattice_results/eddie/sig2n/ff/")
     plotdir = Path.home() / Path("Documents/PhD/analysis_results/sig2n/")
+    datadir = Path.home() / Path(
+        "Documents/PhD/analysis_results/six_point_fn_theta2/data/"
+    )
+    datadir2 = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn4/data/")
     plotdir.mkdir(parents=True, exist_ok=True)
     momenta = ["mass"]
     lambdas = ["lp01", "lp-01"]
@@ -202,20 +454,51 @@ if __name__ == "__main__":
         mat_elements = pickle.load(file_in)
     print(f"{np.shape(mat_elements)=}")
 
-    with open("mat_elements_2.pkl", "rb") as file_in:
-        mat_elements_2 = pickle.load(file_in)
-    print(f"{np.shape(mat_elements_2)=}")
+    # with open("mat_elements_2.pkl", "rb") as file_in:
+    #     mat_elements_2 = pickle.load(file_in)
+    # print(f"{np.shape(mat_elements_2)=}")
 
-    # print(f"{mat_elements[0]=}")
-    # print(f"{np.average(mat_elements[0])=}")
+    with open(datadir / "matrix_element.pkl", "rb") as file_in:
+        mat_elements_theta2 = pickle.load(file_in)
+    mat_elements_2 = np.array([mat_elements_theta2["bootfit3"].T[1]])
 
-    evffplot2(
+    with open(datadir2 / "matrix_element.pkl", "rb") as file_in:
+        mat_elements_theta2 = pickle.load(file_in)
+    mat_elements_3 = np.array([mat_elements_theta2["bootfit3"].T[1]])
+
+    # evffplot2(
+    #     "evff.res_slvec-notwist",
+    #     plotdir,
+    #     "notwist_evff",
+    #     fnum=0,
+    #     # extra_point=-1 * mat_elements[2],
+    #     extra_point=mat_elements_2[0],
+    #     extra_point2=mat_elements_3[0],
+    #     show=True,
+    # )
+    # evffplot3(
+    #     "evff.res_slvec-notwist",
+    #     plotdir,
+    #     "notwist_evff",
+    #     fnum=0,
+    #     # extra_point=-1 * mat_elements[2],
+    #     extra_point=[0.722, 0.019],  # theta2
+    #     extra_point2=[0.695, 0.031],  # theta1
+    #     extra_point3=[0.701, 0.047],  # twisted_gauge3
+    #     extra_point4=[0.674, 0.065],  # twisted_gauge5
+    #     show=True,
+    # )
+    evffplot4(
         "evff.res_slvec-notwist",
         plotdir,
         "notwist_evff",
         fnum=0,
         # extra_point=-1 * mat_elements[2],
-        extra_point=-1 * mat_elements_2[0],
+        extra_point=[0.722, 0.019],  # theta2
+        extra_point2=[0.695, 0.031],  # theta1
+        extra_point3=[0.701, 0.047],  # twisted_gauge3
+        extra_point4=[0.674, 0.065],  # twisted_gauge5
+        extra_point5=[1.179, 0.022, -0.015210838956772907],  # twisted_gauge5
         show=True,
     )
     # evffplot(
