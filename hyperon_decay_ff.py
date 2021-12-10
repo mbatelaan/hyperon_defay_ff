@@ -228,7 +228,7 @@ if __name__ == "__main__":
     # --- directories ---
     evffdir = Path.home() / Path("Dropbox/PhD/lattice_results/eddie/sig2n/ff/")
     plotdir = Path.home() / Path("Documents/PhD/analysis_results/sig2n/")
-    datadir = Path.home() / Path(
+    datadir1 = Path.home() / Path(
         "Documents/PhD/analysis_results/six_point_fn_theta2/data/"
     )
     datadir2 = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn4/data/")
@@ -253,26 +253,10 @@ if __name__ == "__main__":
     # --- Energy factors ---
     FF_facs = FF_factors(m_N, m_S, pvec, twist, NX)
     pvec_sq = np.dot(pvec, pvec) * (0.074 ** 2) / (0.1973 ** 2)
-    print(f"{FF_facs[0]=}")
+    print(f"{FF_facs[0]=}")  # common factor
     print(f"{FF_facs[1]=}")
     print(f"{FF_facs[2]=}")
     print(f"{FF_facs[3]=}")
-
-    with open(datadir / "matrix_element.pkl", "rb") as file_in:
-        mat_elements_theta1 = pickle.load(file_in)
-    mat_elements_1 = np.array([mat_elements_theta1["bootfit3"].T[1]])
-
-    with open(datadir2 / "matrix_element.pkl", "rb") as file_in:
-        mat_elements_theta2 = pickle.load(file_in)
-    mat_elements_2 = np.array([mat_elements_theta2["bootfit3"].T[1]])
-
-    with open(datadir3 / "matrix_element.pkl", "rb") as file_in:
-        mat_elements_theta3 = pickle.load(file_in)
-    mat_elements_3 = np.array([mat_elements_theta3["bootfit3"].T[1]])
-
-    with open(datadir4 / "matrix_element.pkl", "rb") as file_in:
-        mat_elements_theta4 = pickle.load(file_in)
-    mat_elements_4 = np.array([mat_elements_theta4["bootfit3"].T[1]])
 
     # --- Read the data from the 3pt fns ---
     threept_file = evffdir / Path("evff.res_slvec-notwist")
@@ -287,10 +271,6 @@ if __name__ == "__main__":
     pvec = np.array([0, 0, 0])
     twist = np.array([0, 0, 0])
     FF_facs_qmax = FF_factors(m_N, m_S, pvec, twist, NX)
-    FF_comb = (evff_data["val"][:, 0] - 0.05 * evff_data["val"][:, 1],)
-    print(FF_comb)
-    F_0 = evff_data["val"][-1, 3]
-    F_0_manual = evff_data["val"][-1, 0] + FF_facs_qmax[2] * evff_data["val"][-1, 2]
     FF_comb1 = FF_combination(
         evff_data["val"][-1, 0],
         evff_data["val"][-1, 1],
@@ -311,8 +291,6 @@ if __name__ == "__main__":
         twist,
         NX,
     )
-    print(f"{F_0=}")
-    print(f"{F_0_manual=}")
     print(f"{FF_comb1=}")
 
     # --- second q form factors ---
@@ -365,10 +343,36 @@ if __name__ == "__main__":
     )
     print(f"{FF_comb3=}")
 
+    # --- Read the sequential src data ---
+    with open(datadir1 / "matrix_element.pkl", "rb") as file_in:
+        mat_elements1 = pickle.load(file_in)
+    mat_element_theta2 = np.array([mat_elements1["bootfit3"].T[1]])
+
+    with open(datadir2 / "matrix_element.pkl", "rb") as file_in:
+        mat_elements2 = pickle.load(file_in)
+    mat_element_fn4 = np.array([mat_elements2["bootfit3"].T[1]])
+
+    with open(datadir3 / "matrix_element.pkl", "rb") as file_in:
+        mat_elements3 = pickle.load(file_in)
+    mat_element_twisted_gauge3 = np.array([mat_elements3["bootfit3"].T[1]])
+
+    with open(datadir4 / "matrix_element.pkl", "rb") as file_in:
+        mat_elements4 = pickle.load(file_in)
+    mat_element_twisted_gauge5 = np.array([mat_elements4["bootfit3"].T[1]])
+
+    # --- Multiply factors ---
+
+    # --- Construct arrays for the plotting function ---
     ydata = np.array([FF_comb1, FF_comb2, FF_comb3])
     # errordata = np.array([FF_comb1 / 10, FF_comb2 / 10, FF_comb3 / 10])
     errordata = np.array([FF_comb1_err, FF_comb2_err, FF_comb3_err])
-    extra_points = [mat_elements_1, mat_elements_2, mat_elements_3, mat_elements_4]
+
+    extra_points = [
+        mat_element_theta2,
+        mat_element_fn4,
+        mat_element_twisted_gauge3,
+        mat_element_twisted_gauge5,
+    ]
     extra_points_qsq = [0.29, 0.338, 0.29, 0.29, -0.015210838956772907]
     evffplot5(
         qsq[::-1],
