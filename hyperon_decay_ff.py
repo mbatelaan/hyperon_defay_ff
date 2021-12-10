@@ -133,6 +133,7 @@ def evffplot5(
                 elinewidth=1,
                 color=_colors[i],
                 fmt=_fmts[i],
+                markerfacecolor="none",
                 label=r"$\theta_" + str(i) + "$",
             )
 
@@ -243,20 +244,20 @@ if __name__ == "__main__":
     # --- Masses from the theta tuning ---
     m_N = 0.4179255
     m_S = 0.4641829
-    pvec = np.array([1, 0, 0])
-    twist = np.array([0, 0.48325694, 0])
-    E_N = energy_full(m_N, twist, pvec, NX)
+    # pvec = np.array([1, 0, 0])
+    # twist = np.array([0, 0.48325694, 0])
+    # E_N = energy_full(m_N, twist, pvec, NX)
     print(f"{m_N=}")
     print(f"{m_S=}")
-    print(f"{E_N=}")
+    # print(f"{E_N=}")
 
     # --- Energy factors ---
-    FF_facs = FF_factors(m_N, m_S, pvec, twist, NX)
-    pvec_sq = np.dot(pvec, pvec) * (0.074 ** 2) / (0.1973 ** 2)
-    print(f"{FF_facs[0]=}")  # common factor
-    print(f"{FF_facs[1]=}")
-    print(f"{FF_facs[2]=}")
-    print(f"{FF_facs[3]=}")
+    # FF_facs = FF_factors(m_N, m_S, pvec, twist, NX)
+    # pvec_sq = np.dot(pvec, pvec) * (0.074 ** 2) / (0.1973 ** 2)
+    # print(f"{FF_facs[0]=}")  # common factor
+    # print(f"{FF_facs[1]=}")
+    # print(f"{FF_facs[2]=}")
+    # print(f"{FF_facs[3]=}")
 
     # --- Read the data from the 3pt fns ---
     threept_file = evffdir / Path("evff.res_slvec-notwist")
@@ -267,112 +268,91 @@ if __name__ == "__main__":
     print(evff_data["type"])
     print(f"{qsq=}")
 
-    # --- qmax form factors ---
-    pvec = np.array([0, 0, 0])
+    # --- Form factor combinations ---
+    pvec_list = [np.array([0, 0, 0]), np.array([1, 0, 0]), np.array([1, 1, 0])]
     twist = np.array([0, 0, 0])
-    FF_facs_qmax = FF_factors(m_N, m_S, pvec, twist, NX)
-    FF_comb1 = FF_combination(
-        evff_data["val"][-1, 0],
-        evff_data["val"][-1, 1],
-        evff_data["val"][-1, 2],
-        m_N,
-        m_S,
-        pvec,
-        twist,
-        NX,
-    )
-    FF_comb1_err = FF_combination(
-        evff_data["val_err"][-1, 0],
-        evff_data["val_err"][-1, 1],
-        evff_data["val_err"][-1, 2],
-        m_N,
-        m_S,
-        pvec,
-        twist,
-        NX,
-    )
-    print(f"{FF_comb1=}")
-
-    # --- second q form factors ---
-    pvec = np.array([1, 0, 0])
-    twist = np.array([0, 0, 0])
-    FF_comb2 = FF_combination(
-        evff_data["val"][-2, 0],
-        evff_data["val"][-2, 1],
-        evff_data["val"][-2, 2],
-        m_N,
-        m_S,
-        pvec,
-        twist,
-        NX,
-    )
-    FF_comb2_err = FF_combination(
-        evff_data["val_err"][-2, 0],
-        evff_data["val_err"][-2, 1],
-        evff_data["val_err"][-2, 2],
-        m_N,
-        m_S,
-        pvec,
-        twist,
-        NX,
-    )
-    print(f"{FF_comb2=}")
-
-    # --- third q form factors ---
-    pvec = np.array([1, 1, 0])
-    twist = np.array([0, 0, 0])
-    FF_comb3 = FF_combination(
-        evff_data["val"][-3, 0],
-        evff_data["val"][-3, 1],
-        evff_data["val"][-3, 2],
-        m_N,
-        m_S,
-        pvec,
-        twist,
-        NX,
-    )
-    FF_comb3_err = FF_combination(
-        evff_data["val_err"][-3, 0],
-        evff_data["val_err"][-3, 1],
-        evff_data["val_err"][-3, 2],
-        m_N,
-        m_S,
-        pvec,
-        twist,
-        NX,
-    )
-    print(f"{FF_comb3=}")
+    FF_comb = np.array([])
+    FF_comb_err = np.array([])
+    for i, pvec in enumerate(pvec_list):
+        FF_comb1 = FF_combination(
+            evff_data["val"][-(i + 1), 0],
+            evff_data["val"][-(i + 1), 1],
+            evff_data["val"][-(i + 1), 2],
+            m_N,
+            m_S,
+            pvec,
+            twist,
+            NX,
+        )
+        FF_comb = np.append(FF_comb, FF_comb1)
+        FF_comb1_err = FF_combination(
+            evff_data["val_err"][-(i + 1), 0],
+            evff_data["val_err"][-(i + 1), 1],
+            evff_data["val_err"][-(i + 1), 2],
+            m_N,
+            m_S,
+            pvec,
+            twist,
+            NX,
+        )
+        FF_comb_err = np.append(FF_comb_err, FF_comb1_err)
+    print(f"{FF_comb=}")
+    print(f"{FF_comb_err=}")
 
     # --- Read the sequential src data ---
-    with open(datadir1 / "matrix_element.pkl", "rb") as file_in:
+    with open(datadir1 / "matrix_element.pkl", "rb") as file_in:  # theta2
         mat_elements1 = pickle.load(file_in)
     mat_element_theta2 = np.array([mat_elements1["bootfit3"].T[1]])
 
-    with open(datadir2 / "matrix_element.pkl", "rb") as file_in:
+    with open(datadir2 / "matrix_element.pkl", "rb") as file_in:  # fn4
         mat_elements2 = pickle.load(file_in)
     mat_element_fn4 = np.array([mat_elements2["bootfit3"].T[1]])
 
-    with open(datadir3 / "matrix_element.pkl", "rb") as file_in:
+    with open(datadir3 / "matrix_element.pkl", "rb") as file_in:  # twisted_gauge3
         mat_elements3 = pickle.load(file_in)
     mat_element_twisted_gauge3 = np.array([mat_elements3["bootfit3"].T[1]])
 
-    with open(datadir4 / "matrix_element.pkl", "rb") as file_in:
+    with open(datadir4 / "matrix_element.pkl", "rb") as file_in:  # twisted_gauge5
         mat_elements4 = pickle.load(file_in)
     mat_element_twisted_gauge5 = np.array([mat_elements4["bootfit3"].T[1]])
 
     # --- Multiply factors ---
-
-    # --- Construct arrays for the plotting function ---
-    ydata = np.array([FF_comb1, FF_comb2, FF_comb3])
-    # errordata = np.array([FF_comb1 / 10, FF_comb2 / 10, FF_comb3 / 10])
-    errordata = np.array([FF_comb1_err, FF_comb2_err, FF_comb3_err])
-
+    pvec_list2 = np.array([[1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0]])
+    twist_list = np.array(
+        [
+            [0, 0.48325694, 0],
+            [0, 0.96651388, 0],
+            [0, 0.48325694, 0],
+            [0, 0.48325694, 0],
+        ]
+    )
     extra_points = [
         mat_element_theta2,
         mat_element_fn4,
         mat_element_twisted_gauge3,
         mat_element_twisted_gauge5,
     ]
+    FF_seq = []
+    for i, pvec in enumerate(pvec_list2):
+        FF_facs = FF_factors(m_N, m_S, pvec, twist_list[i], NX)
+        print(f"{FF_facs[-1]=}")
+        print(f"{np.average(extra_points[i])=}")
+        new_point = extra_points[i] / FF_facs[-1]
+        print(f"{np.average(new_point)=}")
+        FF_seq.append(new_point)
+    print(f"{len(FF_seq)=}")
+    print(f"{[np.average(i) for i in FF_seq]=}")
+    print(f"{[np.average(i) for i in extra_points]=}")
+
+    # --- Construct arrays for the plotting function ---
+    ydata = FF_comb
+    errordata = FF_comb_err
+    # extra_points = [
+    #     mat_element_theta2,
+    #     mat_element_fn4,
+    #     mat_element_twisted_gauge3,
+    #     mat_element_twisted_gauge5,
+    # ]
     extra_points_qsq = [0.29, 0.338, 0.29, 0.29, -0.015210838956772907]
     evffplot5(
         qsq[::-1],
@@ -380,7 +360,8 @@ if __name__ == "__main__":
         errordata,
         plotdir,
         "notwist_evff",
-        extra_points=extra_points,
+        extra_points=FF_seq,
+        # extra_points=extra_points,
         extra_points_qsq=extra_points_qsq,
         show=True,
     )
