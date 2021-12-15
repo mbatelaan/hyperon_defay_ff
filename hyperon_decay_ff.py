@@ -125,7 +125,7 @@ def evffplot5(
 
     # if any(extra_points):
     if extra_points != None:
-        for i, point in enumerate(extra_points["xdata"]):
+        for i, point in enumerate(extra_points["xdata"][:-1]):
             pypl.errorbar(
                 extra_points["xdata"][i],
                 np.average(extra_points["ydata"][i]),
@@ -138,7 +138,7 @@ def evffplot5(
                 # label=r"$\theta_" + str(i) + "$",
                 label=extra_points["labels"][i],
             )
-
+    pypl.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
     pypl.legend(fontsize="xx-small")
     # _metadata["Title"] = plotname
     # pypl.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2}$")
@@ -180,27 +180,44 @@ def evffplot6(
         markerfacecolor="none",
     )
 
-    extra_point5 = [1.179, 0.022, -0.015210838956772907]  # twisted_gauge5
+    if extra_points != None:
+        pypl.errorbar(
+            extra_points["xdata"][-1],
+            np.average(extra_points["ydata"][-1]),
+            np.std(extra_points["ydata"][-1]),
+            capsize=4,
+            elinewidth=1,
+            color=_colors[-1],
+            fmt=_fmts[1],
+            markerfacecolor="none",
+            label=extra_points["labels"][-1],
+        )
 
-    pypl.errorbar(
-        extra_point5[2],
-        extra_point5[0],
-        extra_point5[1],
-        capsize=4,
-        elinewidth=1,
-        color=_colors[1],
-        fmt=_fmts[1],
-        markerfacecolor="none",
-        # label=r"$\theta_" + str(i) + "$",
-        label=r"$\theta_2$",
-    )
+    # extra_point5 = [1.179, 0.022, -0.015210838956772907]  # twisted_gauge5
+    # pypl.errorbar(
+    #     extra_point5[2] + 0.001,
+    #     extra_point5[0],
+    #     extra_point5[1],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     color=_colors[1],
+    #     fmt=_fmts[1],
+    #     markerfacecolor="none",
+    #     # label=r"$\theta_" + str(i) + "$",
+    #     label=r"$\theta_2$",
+    # )
+    pypl.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
 
     pypl.legend(fontsize="xx-small")
     # _metadata["Title"] = plotname
     # pypl.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2}$")
+    # pypl.ylabel(
+    #     r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2} + \frac{m_{\Sigma} - E_N}{m_N+m_{\Sigma}}F_3$",
+    #     fontsize="x-small",
+    # )
     pypl.ylabel(
-        r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2} + \frac{m_{\Sigma} - E_N}{m_N+m_{\Sigma}}F_3$",
-        fontsize="x-small",
+        r"$F_{0}(Q^2)$",
+        fontsize="small",
     )
     pypl.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
     pypl.ylim(0, 1.5)
@@ -318,6 +335,9 @@ if __name__ == "__main__":
     datadir2 = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn4/data/")
     datadir3 = Path.home() / Path("Documents/PhD/analysis_results/twisted_gauge3/data/")
     datadir4 = Path.home() / Path("Documents/PhD/analysis_results/twisted_gauge5/data/")
+    datadir_qmax = Path.home() / Path(
+        "Documents/PhD/analysis_results/six_point_fn_qmax/data/"
+    )
     plotdir.mkdir(parents=True, exist_ok=True)
 
     # --- Lattice specs ---
@@ -348,10 +368,10 @@ if __name__ == "__main__":
     q_vec_sq_list = []
     for qsq in q_squared_lattice:
         # Need to choose one of the momenta to be set to zero (also change the FF_factors_evff function
-        # # Sigma mom = 0
+        # # case Sigma mom = 0
         # q_vec_squared = ((m_N ** 2 + m_S ** 2 - qsq) / (2 * m_S)) ** 2 - m_N ** 2
 
-        # Neutron mom = 0
+        # case Neutron mom = 0
         q_vec_squared = ((m_S ** 2 + m_N ** 2 - qsq) / (2 * m_N)) ** 2 - m_S ** 2
 
         q_vec_sq_list.append(q_vec_squared)
@@ -359,17 +379,7 @@ if __name__ == "__main__":
         print(f"{qsq=}")
     print("\n")
 
-    # pvec_list = [np.array([0, 0, 0]), np.array([1, 0, 0]), np.array([1, 1, 0])]
-    # pvec_list_lat = []
-    # for pvec in pvec_list[::-1]:
-    #     qsq = np.dot(2 * pvec, 2 * pvec) * (np.pi / NX) ** 2
-    #     pvec_list_lat.append(qsq)
-    #     print(f"{qsq=}")
-    # print("\n")
-    # print(np.array(q_vec_sq_list) - np.array(pvec_list_lat))
-    # print("\n")
-
-    # --- Form factor combinations ---
+    # --- Form factor combinations for 3-pt. fn. data ---
     FF_comb = np.array([])
     FF_comb_err = np.array([])
     for i, q_vec_sq in enumerate(q_vec_sq_list):
@@ -394,6 +404,10 @@ if __name__ == "__main__":
         )
         FF_comb_err = np.append(FF_comb_err, FF_comb1_err)
 
+    print(f"{Q_squared=}")
+    print(f"{FF_comb=}")
+    print(f"{FF_comb_err=}")
+
     # --- Read the sequential src data ---
     with open(datadir1 / "matrix_element.pkl", "rb") as file_in:  # theta2
         mat_elements1 = pickle.load(file_in)
@@ -411,14 +425,19 @@ if __name__ == "__main__":
         mat_elements4 = pickle.load(file_in)
     mat_element_twisted_gauge5 = np.array([mat_elements4["bootfit3"].T[1]])
 
-    # --- Multiply factors ---
-    pvec_list2 = np.array([[1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0]])
+    with open(datadir_qmax / "matrix_element.pkl", "rb") as file_in:  # qmax
+        mat_element_qmax_data = pickle.load(file_in)
+    mat_element_qmax = np.array([mat_element_qmax_data["bootfit3"].T[1]])
+
+    # --- Multiply energy factors for the form factors ---
+    pvec_list2 = np.array([[1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0], [0, 0, 0]])
     twist_list = np.array(
         [
             [0, 0.48325694, 0],
             [0, 0.96651388, 0],
             [0, 0.48325694, 0],
             [0, 0.48325694, 0],
+            [0, 0, 0],
         ]
     )
     seq_src_points = [
@@ -426,32 +445,33 @@ if __name__ == "__main__":
         mat_element_theta2,
         mat_element_twisted_gauge3,
         mat_element_twisted_gauge5,
+        mat_element_qmax,
     ]
     FF_seq = []
     for i, pvec in enumerate(pvec_list2):
         FF_facs = FF_factors(m_N, m_S, pvec, twist_list[i], NX)
-        # print(f"{FF_facs[-1]=}")
-        # print(f"{np.average(seq_src_points[i])=}")
+        print(f"\n{FF_facs=}")
+        print(f"{np.average(seq_src_points[i])=}")
         new_point = seq_src_points[i] / FF_facs[-1]
-        # print(f"{np.average(new_point)=}")
+        print(f"{np.average(new_point)=}")
         FF_seq.append(new_point)
 
     # --- Construct arrays for the plotting function ---
     ydata = FF_comb
     errordata = FF_comb_err
-    # extra_points = [
-    #     mat_element_theta2,
-    #     mat_element_fn4,
-    #     mat_element_twisted_gauge3,
-    #     mat_element_twisted_gauge5,
-    # ]
     # extra_points_qsq = [0.29, 0.338, 0.29, 0.29, -0.015210838956772907]
-    extra_points_qsq = [0.338, 0.29 - 0.002, 0.29, 0.29 + 0.002]
+    extra_points_qsq = [0.338, 0.29 - 0.002, 0.29, 0.29 + 0.002, -0.015210838956772907]
 
     extra_points = {
         "xdata": extra_points_qsq,
         "ydata": seq_src_points,
-        "labels": [r"$\theta_1$", r"$\theta_2$", r"$\theta_2$", r"$\theta_2$"],
+        "labels": [
+            r"$\theta_1$",
+            r"$\theta_2$",
+            r"$\theta_2$",
+            r"$\theta_2$",
+            r"seq. src. at $q_{\textrm{max}}$",
+        ],
     }
 
     evffplot5(
