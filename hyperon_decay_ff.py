@@ -126,7 +126,6 @@ def evffplot5(
     # if any(extra_points):
     if extra_points != None:
         for i, point in enumerate(extra_points["xdata"]):
-            print(i)
             pypl.errorbar(
                 extra_points["xdata"][i],
                 np.average(extra_points["ydata"][i]),
@@ -263,6 +262,8 @@ def qsquared(m1, m2, theta1, theta2, n1, n2, L, a):
 def FF_factors(m_N, m_S, pvec, twist, NX):
     """Calculate the values of the factors that multiply the three form factors.
     These will consist of  energies, masses and momenta, these values will all be kept in lattice units as the units will cancel out anyway, so there is no need to convert them.
+
+    Written for the case where \vec{p}_\Sigma = 0 and \vec{p}_N = \vec{q}
     """
     E_N = energy_full(m_N, twist, pvec, NX)
 
@@ -272,14 +273,33 @@ def FF_factors(m_N, m_S, pvec, twist, NX):
         (E_N + m_N) * (m_S + m_N)
     )
     F3_factor = -1 * (E_N - m_S) / (m_N + m_S)
-    print(f"{[F1_factor, F2_factor, F3_factor]=}")
+    # print(f"{[F1_factor, F2_factor, F3_factor]=}")
+    return [F1_factor, F2_factor, F3_factor, common_factor]
+
+
+def FF_factors_evff(m_N, m_S, q_vec_squared, NX):
+    """Calculate the values of the factors that multiply the three form factors.
+    These will consist of  energies, masses and momenta, these values will all be kept in lattice units as the units will cancel out anyway, so there is no need to convert them.
+
+    Written for the case where \vec{p}_N = 0 and \vec{p}_\Sigma = \vec{q}
+    """
+    E_S = np.sqrt(m_S ** 2 + q_vec_squared)
+
+    common_factor = np.sqrt(0.5 * (1 + m_S / E_S))
+    F1_factor = 1
+    F2_factor = q_vec_squared / ((E_S + m_S) * (m_N + m_S))
+    F3_factor = -1 * (E_S - m_N) / (m_S + m_N)
     return [F1_factor, F2_factor, F3_factor, common_factor]
 
 
 def FF_combination(F1, F2, F3, m_N, m_S, pvec, twist, NX):
-    print(f"{[F1,F2,F3]=}")
-    E_N = energy_full(m_N, twist, pvec, NX)
     FF_facs = FF_factors(m_N, m_S, pvec, twist, NX)
+    FF_comb = FF_facs[0] * F1 + FF_facs[1] * F2 + FF_facs[2] * F3
+    return FF_comb
+
+
+def FF_combination_evff(F1, F2, F3, m_N, m_S, q_vec_squared, NX):
+    FF_facs = FF_factors_evff(m_N, m_S, q_vec_squared, NX)
     FF_comb = FF_facs[0] * F1 + FF_facs[1] * F2 + FF_facs[2] * F3
     return FF_comb
 
@@ -324,44 +344,52 @@ if __name__ == "__main__":
     # print(evff_data["type"])
     # print(f"{Q_squared=}")
 
+    # --- Get \vec{q}^2 from the value of q^2 ---
+    q_vec_sq_list = []
     for qsq in q_squared_lattice:
+        # Need to choose one of the momenta to be set to zero (also change the FF_factors_evff function
+        # # Sigma mom = 0
         # q_vec_squared = ((m_N ** 2 + m_S ** 2 - qsq) / (2 * m_S)) ** 2 - m_N ** 2
+
+        # Neutron mom = 0
         q_vec_squared = ((m_S ** 2 + m_N ** 2 - qsq) / (2 * m_N)) ** 2 - m_S ** 2
+
+        q_vec_sq_list.append(q_vec_squared)
         print(f"\n{q_vec_squared=}")
         print(f"{qsq=}")
-
     print("\n")
 
     # pvec_list = [np.array([0, 0, 0]), np.array([1, 0, 0]), np.array([1, 1, 0])]
+    # pvec_list_lat = []
     # for pvec in pvec_list[::-1]:
     #     qsq = np.dot(2 * pvec, 2 * pvec) * (np.pi / NX) ** 2
+    #     pvec_list_lat.append(qsq)
     #     print(f"{qsq=}")
+    # print("\n")
+    # print(np.array(q_vec_sq_list) - np.array(pvec_list_lat))
+    # print("\n")
 
     # --- Form factor combinations ---
-    pvec_list = [np.array([0, 0, 0]), np.array([1, 0, 0]), np.array([1, 1, 0])]
-    twist = np.array([0, 0, 0])
     FF_comb = np.array([])
     FF_comb_err = np.array([])
-    for i, pvec in enumerate(pvec_list):
-        FF_comb1 = FF_combination(
-            evff_data["val"][-(i + 1), 0],
-            evff_data["val"][-(i + 1), 1],
-            evff_data["val"][-(i + 1), 2],
+    for i, q_vec_sq in enumerate(q_vec_sq_list):
+        FF_comb1 = FF_combination_evff(
+            evff_data["val"][i, 0],
+            evff_data["val"][i, 1],
+            evff_data["val"][i, 2],
             m_N,
             m_S,
-            pvec,
-            twist,
+            q_vec_sq,
             NX,
         )
         FF_comb = np.append(FF_comb, FF_comb1)
-        FF_comb1_err = FF_combination(
-            evff_data["val_err"][-(i + 1), 0],
-            evff_data["val_err"][-(i + 1), 1],
-            evff_data["val_err"][-(i + 1), 2],
+        FF_comb1_err = FF_combination_evff(
+            evff_data["val_err"][i, 0],
+            evff_data["val_err"][i, 1],
+            evff_data["val_err"][i, 2],
             m_N,
             m_S,
-            pvec,
-            twist,
+            q_vec_sq,
             NX,
         )
         FF_comb_err = np.append(FF_comb_err, FF_comb1_err)
@@ -427,7 +455,7 @@ if __name__ == "__main__":
     }
 
     evffplot5(
-        Q_squared[::-1],
+        Q_squared,
         ydata,
         errordata,
         plotdir,
@@ -439,7 +467,7 @@ if __name__ == "__main__":
     )
 
     evffplot6(
-        Q_squared[::-1],
+        Q_squared,
         ydata,
         errordata,
         plotdir,
