@@ -105,7 +105,7 @@ def evffplot5(
     plotdir,
     plotname,
     extra_points=None,
-    extra_points_qsq=None,
+    # extra_points_qsq=None,
     show=False,
 ):
     """plot the form factor data against Q^2"""
@@ -115,6 +115,7 @@ def evffplot5(
         xdata,
         ydata,
         errordata,
+        label="3-pt fn",
         capsize=4,
         elinewidth=1,
         color=_colors[0],
@@ -124,26 +125,88 @@ def evffplot5(
 
     # if any(extra_points):
     if extra_points != None:
-        for i, point in enumerate(extra_points):
+        for i, point in enumerate(extra_points["xdata"]):
+            print(i)
             pypl.errorbar(
-                extra_points_qsq[i],
-                np.average(point),
-                np.std(point),
+                extra_points["xdata"][i],
+                np.average(extra_points["ydata"][i]),
+                np.std(extra_points["ydata"][i]),
                 capsize=4,
                 elinewidth=1,
-                color=_colors[i],
-                fmt=_fmts[i],
+                color=_colors[i + 1],
+                fmt=_fmts[i + 1],
                 markerfacecolor="none",
-                label=r"$\theta_" + str(i) + "$",
+                # label=r"$\theta_" + str(i) + "$",
+                label=extra_points["labels"][i],
             )
 
     pypl.legend(fontsize="xx-small")
     # _metadata["Title"] = plotname
-    pypl.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2}$")
+    # pypl.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2}$")
+    pypl.ylabel(
+        r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2} + \frac{m_{\Sigma} - E_N}{m_N+m_{\Sigma}}F_3$",
+        fontsize="x-small",
+    )
     pypl.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
     pypl.ylim(0, 1.5)
     # pypl.grid(True, alpha=0.4)
     pypl.savefig(plotdir / (plotname + "_4.pdf"))  # , metadata=_metadata)
+    if show:
+        pypl.show()
+    pypl.close()
+
+
+def evffplot6(
+    xdata,
+    ydata,
+    errordata,
+    plotdir,
+    plotname,
+    extra_points=None,
+    # extra_points_qsq=None,
+    show=False,
+):
+    """plot the form factor data against Q^2"""
+    # pypl.figure(figsize=(9, 6))
+    pypl.figure(figsize=(5, 4))
+    pypl.errorbar(
+        xdata,
+        ydata,
+        errordata,
+        label="3-pt fn",
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="s",
+        markerfacecolor="none",
+    )
+
+    extra_point5 = [1.179, 0.022, -0.015210838956772907]  # twisted_gauge5
+
+    pypl.errorbar(
+        extra_point5[2],
+        extra_point5[0],
+        extra_point5[1],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[1],
+        fmt=_fmts[1],
+        markerfacecolor="none",
+        # label=r"$\theta_" + str(i) + "$",
+        label=r"$\theta_2$",
+    )
+
+    pypl.legend(fontsize="xx-small")
+    # _metadata["Title"] = plotname
+    # pypl.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2}$")
+    pypl.ylabel(
+        r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2} + \frac{m_{\Sigma} - E_N}{m_N+m_{\Sigma}}F_3$",
+        fontsize="x-small",
+    )
+    pypl.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
+    pypl.ylim(0, 1.5)
+    # pypl.grid(True, alpha=0.4)
+    pypl.savefig(plotdir / (plotname + "_qmax.pdf"))  # , metadata=_metadata)
     if show:
         pypl.show()
     pypl.close()
@@ -251,22 +314,28 @@ if __name__ == "__main__":
     print(f"{m_S=}")
     # print(f"{E_N=}")
 
-    # --- Energy factors ---
-    # FF_facs = FF_factors(m_N, m_S, pvec, twist, NX)
-    # pvec_sq = np.dot(pvec, pvec) * (0.074 ** 2) / (0.1973 ** 2)
-    # print(f"{FF_facs[0]=}")  # common factor
-    # print(f"{FF_facs[1]=}")
-    # print(f"{FF_facs[2]=}")
-    # print(f"{FF_facs[3]=}")
-
     # --- Read the data from the 3pt fns ---
     threept_file = evffdir / Path("evff.res_slvec-notwist")
     evff_data = evffdata(threept_file)
-    qsq = -1 * evff_data["par0"] * (0.1973 ** 2) / (0.074 ** 2)
+    q_squared_lattice = evff_data["par0"]
+    Q_squared = -1 * evff_data["par0"] * (0.1973 ** 2) / (0.074 ** 2)
 
-    print([key for key in evff_data])
-    print(evff_data["type"])
-    print(f"{qsq=}")
+    # print([key for key in evff_data])
+    # print(evff_data["type"])
+    # print(f"{Q_squared=}")
+
+    for qsq in q_squared_lattice:
+        # q_vec_squared = ((m_N ** 2 + m_S ** 2 - qsq) / (2 * m_S)) ** 2 - m_N ** 2
+        q_vec_squared = ((m_S ** 2 + m_N ** 2 - qsq) / (2 * m_N)) ** 2 - m_S ** 2
+        print(f"\n{q_vec_squared=}")
+        print(f"{qsq=}")
+
+    print("\n")
+
+    # pvec_list = [np.array([0, 0, 0]), np.array([1, 0, 0]), np.array([1, 1, 0])]
+    # for pvec in pvec_list[::-1]:
+    #     qsq = np.dot(2 * pvec, 2 * pvec) * (np.pi / NX) ** 2
+    #     print(f"{qsq=}")
 
     # --- Form factor combinations ---
     pvec_list = [np.array([0, 0, 0]), np.array([1, 0, 0]), np.array([1, 1, 0])]
@@ -296,8 +365,6 @@ if __name__ == "__main__":
             NX,
         )
         FF_comb_err = np.append(FF_comb_err, FF_comb1_err)
-    print(f"{FF_comb=}")
-    print(f"{FF_comb_err=}")
 
     # --- Read the sequential src data ---
     with open(datadir1 / "matrix_element.pkl", "rb") as file_in:  # theta2
@@ -326,23 +393,20 @@ if __name__ == "__main__":
             [0, 0.48325694, 0],
         ]
     )
-    extra_points = [
-        mat_element_theta2,
+    seq_src_points = [
         mat_element_fn4,
+        mat_element_theta2,
         mat_element_twisted_gauge3,
         mat_element_twisted_gauge5,
     ]
     FF_seq = []
     for i, pvec in enumerate(pvec_list2):
         FF_facs = FF_factors(m_N, m_S, pvec, twist_list[i], NX)
-        print(f"{FF_facs[-1]=}")
-        print(f"{np.average(extra_points[i])=}")
-        new_point = extra_points[i] / FF_facs[-1]
-        print(f"{np.average(new_point)=}")
+        # print(f"{FF_facs[-1]=}")
+        # print(f"{np.average(seq_src_points[i])=}")
+        new_point = seq_src_points[i] / FF_facs[-1]
+        # print(f"{np.average(new_point)=}")
         FF_seq.append(new_point)
-    print(f"{len(FF_seq)=}")
-    print(f"{[np.average(i) for i in FF_seq]=}")
-    print(f"{[np.average(i) for i in extra_points]=}")
 
     # --- Construct arrays for the plotting function ---
     ydata = FF_comb
@@ -353,15 +417,35 @@ if __name__ == "__main__":
     #     mat_element_twisted_gauge3,
     #     mat_element_twisted_gauge5,
     # ]
-    extra_points_qsq = [0.29, 0.338, 0.29, 0.29, -0.015210838956772907]
+    # extra_points_qsq = [0.29, 0.338, 0.29, 0.29, -0.015210838956772907]
+    extra_points_qsq = [0.338, 0.29 - 0.002, 0.29, 0.29 + 0.002]
+
+    extra_points = {
+        "xdata": extra_points_qsq,
+        "ydata": seq_src_points,
+        "labels": [r"$\theta_1$", r"$\theta_2$", r"$\theta_2$", r"$\theta_2$"],
+    }
+
     evffplot5(
-        qsq[::-1],
+        Q_squared[::-1],
         ydata,
         errordata,
         plotdir,
         "notwist_evff",
-        extra_points=FF_seq,
+        extra_points=extra_points,
         # extra_points=extra_points,
-        extra_points_qsq=extra_points_qsq,
+        # extra_points_qsq=extra_points_qsq,
+        show=True,
+    )
+
+    evffplot6(
+        Q_squared[::-1],
+        ydata,
+        errordata,
+        plotdir,
+        "notwist_evff",
+        extra_points=extra_points,
+        # extra_points=extra_points,
+        # extra_points_qsq=extra_points_qsq,
         show=True,
     )
