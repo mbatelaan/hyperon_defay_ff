@@ -228,6 +228,66 @@ def evffplot6(
     pypl.close()
 
 
+def evffplot7(
+    xdata,
+    ydata,
+    errordata,
+    plotdir,
+    plotname,
+    extra_points=None,
+    # extra_points_qsq=None,
+    show=False,
+):
+    """plot the form factor data against Q^2
+
+    Plot all of the points
+    """
+    # pypl.figure(figsize=(9, 6))
+    pypl.figure(figsize=(5, 4))
+    pypl.errorbar(
+        xdata,
+        ydata,
+        errordata,
+        label="3-pt fn",
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="s",
+        markerfacecolor="none",
+    )
+
+    # if any(extra_points):
+    if extra_points != None:
+        for i, point in enumerate(extra_points["xdata"]):
+            pypl.errorbar(
+                extra_points["xdata"][i],
+                np.average(extra_points["ydata"][i]),
+                np.std(extra_points["ydata"][i]),
+                capsize=4,
+                elinewidth=1,
+                color=_colors[i + 1],
+                fmt=_fmts[i + 1],
+                markerfacecolor="none",
+                # label=r"$\theta_" + str(i) + "$",
+                label=extra_points["labels"][i],
+            )
+    pypl.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
+    pypl.legend(fontsize="xx-small")
+    # _metadata["Title"] = plotname
+    # pypl.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2}$")
+    pypl.ylabel(
+        r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2} + \frac{m_{\Sigma} - E_N}{m_N+m_{\Sigma}}F_3$",
+        fontsize="x-small",
+    )
+    pypl.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
+    pypl.ylim(0, 1.5)
+    # pypl.grid(True, alpha=0.4)
+    pypl.savefig(plotdir / (plotname + "_all.pdf"))  # , metadata=_metadata)
+    if show:
+        pypl.show()
+    pypl.close()
+
+
 def energy(m, L, n):
     """return the energy of the state"""
     return np.sqrt(m ** 2 + (n * 2 * np.pi / L) ** 2)
@@ -487,6 +547,17 @@ if __name__ == "__main__":
     )
 
     evffplot6(
+        Q_squared,
+        ydata,
+        errordata,
+        plotdir,
+        "notwist_evff",
+        extra_points=extra_points,
+        # extra_points=extra_points,
+        # extra_points_qsq=extra_points_qsq,
+        show=True,
+    )
+    evffplot7(
         Q_squared,
         ydata,
         errordata,
