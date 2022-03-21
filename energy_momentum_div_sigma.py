@@ -456,25 +456,41 @@ if __name__ == "__main__":
     # --- directories ---
     evffdir = Path.home() / Path("Dropbox/PhD/lattice_results/eddie/sig2n/ff/")
     plotdir = Path.home() / Path("Documents/PhD/analysis_results/sig2n/")
-    datadir0 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn4/analysis2/data/"
-    )
+    datadir0 = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn4/data/")
     datadir1 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_theta2/analysis2/data/"
+        "Documents/PhD/analysis_results/six_point_fn_theta2_fix/data/"
     )
     datadir2 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_theta3/analysis2/data/"
+        "Documents/PhD/analysis_results/six_point_fn_theta3/data/"
     )
     datadir4 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_theta4/analysis2/data/"
+        "Documents/PhD/analysis_results/six_point_fn_theta4/data/"
     )
-    # datadir3 = Path.home() / Path("Documents/PhD/analysis_results/twisted_gauge3/analysis2/data/")
-    # datadir1 = Path.home() / Path(
-    #     "Documents/PhD/analysis_results/twisted_gauge5/analysis2/data/"
-    # )
+    datadir5 = Path.home() / Path(
+        "Documents/PhD/analysis_results/six_point_fn_theta5/data/"
+    )
     datadir_qmax = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_qmax/analysis2/data/"
+        "Documents/PhD/analysis_results/six_point_fn_qmax/data/"
     )
+
+    # datadir0 = Path.home() / Path(
+    #     "Documents/PhD/analysis_results/six_point_fn4/analysis2/data/"
+    # )
+    # datadir1 = Path.home() / Path(
+    #     "Documents/PhD/analysis_results/six_point_fn_theta2/analysis2/data/"
+    # )
+    # datadir2 = Path.home() / Path(
+    #     "Documents/PhD/analysis_results/six_point_fn_theta3/analysis2/data/"
+    # )
+    # datadir4 = Path.home() / Path(
+    #     "Documents/PhD/analysis_results/six_point_fn_theta4/analysis2/data/"
+    # )
+    # datadir5 = Path.home() / Path(
+    #     "Documents/PhD/analysis_results/six_point_fn_theta5/data/"
+    # )
+    # datadir_qmax = Path.home() / Path(
+    #     "Documents/PhD/analysis_results/six_point_fn_qmax/analysis2/data/"
+    # )
     plotdir.mkdir(parents=True, exist_ok=True)
 
     # --- Lattice specs ---
@@ -489,7 +505,8 @@ if __name__ == "__main__":
 
     extra_points_qsq = [0.338, 0.29 - 0.002, 0.29, 0.29 + 0.002, -0.015210838956772907]
 
-    lambda_index = 14
+    # lambda_index = 14
+    lambda_index = 5
 
     # --- Read the sequential src data ---
     with open(datadir0 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # fn4
@@ -587,11 +604,29 @@ if __name__ == "__main__":
         ]
     )
     states_l0p4_4 = order3_fit_4[lambda_index, :, :, 1]
-    # print(f"{np.average(order3_fit_4[0,:,:,1],axis=1)=}")
-    # print(f"{np.average(order3_fit_4[lambda_index,:,:,1],axis=1)=}")
-    # print(np.shape(order3_fit_4))
     qsq_4 = 0.17317010421581466
     psq_4 = 0.1754003619003296
+
+    with open(datadir5 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # theta5
+        data_set5 = pickle.load(file_in)
+    lambdas_5 = data_set5["lambdas"]
+    order3_fit_5 = data_set5["order3_states_fit_divsigma"]
+    states_l0_5 = np.array(
+        [
+            data_set5["bootfit_effratio"][:, 1],
+            np.zeros(np.shape(data_set5["bootfit_effratio"][:, 1])),
+        ]
+    )
+    states_l0p4_5 = order3_fit_5[lambda_index, :, :, 1]
+    # states_l0_5 = np.array(
+    #     [
+    #         data_set5["bootfit_unpert_sigma"][:, 1],
+    #         data_set5["bootfit_unpert_nucl"][:, 1],
+    #     ]
+    # )
+    # states_l0p4_5 = order3_fit_5[lambda_index, :, :, 1]
+    qsq_5 = 0
+    psq_5 = 0.01373279121924232
 
     with open(datadir_qmax / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # qmax
         data_set_qmax = pickle.load(file_in)
@@ -623,6 +658,7 @@ if __name__ == "__main__":
             np.sqrt(psq_1),
             np.sqrt(psq_2),
             np.sqrt(psq_4),
+            np.sqrt(psq_5),
             np.sqrt(psq_qmax),
         ]
     )
@@ -632,6 +668,7 @@ if __name__ == "__main__":
             states_l0_1[0, :],
             states_l0_2[0, :],
             states_l0_4[0, :],
+            states_l0_5[0, :],
             states_l0_qmax[0, :],
         ]
     )
@@ -641,6 +678,7 @@ if __name__ == "__main__":
             states_l0_1[1, :],
             states_l0_2[1, :],
             states_l0_4[1, :],
+            states_l0_5[1, :],
             states_l0_qmax[1, :],
         ]
     )
@@ -650,6 +688,7 @@ if __name__ == "__main__":
             states_l0p4_1[0, :],
             states_l0p4_2[0, :],
             states_l0p4_4[0, :],
+            states_l0p4_5[0, :],
             states_l0p4_qmax[0, :],
         ]
     )
@@ -659,6 +698,7 @@ if __name__ == "__main__":
             states_l0p4_1[1, :],
             states_l0p4_2[1, :],
             states_l0p4_4[1, :],
+            states_l0p4_5[1, :],
             states_l0p4_qmax[1, :],
         ]
     )
