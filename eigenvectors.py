@@ -715,32 +715,32 @@ if __name__ == "__main__":
     state1 = np.array(
         [
             order3_evecs_0[lambda_index, 0, 0] ** 2
-            + order3_evecs_0[lambda_index, 1, 0] ** 2,
+            + order3_evecs_0[lambda_index, 0, 1] ** 2,
             order3_evecs_1[lambda_index, 0, 0] ** 2
-            + order3_evecs_1[lambda_index, 1, 0] ** 2,
+            + order3_evecs_1[lambda_index, 0, 1] ** 2,
             order3_evecs_2[lambda_index, 0, 0] ** 2
-            + order3_evecs_2[lambda_index, 1, 0] ** 2,
+            + order3_evecs_2[lambda_index, 0, 1] ** 2,
             order3_evecs_4[lambda_index, 0, 0] ** 2
-            + order3_evecs_4[lambda_index, 1, 0] ** 2,
+            + order3_evecs_4[lambda_index, 0, 1] ** 2,
             order3_evecs_5[lambda_index, 0, 0] ** 2
-            + order3_evecs_5[lambda_index, 1, 0] ** 2,
+            + order3_evecs_5[lambda_index, 0, 1] ** 2,
             order3_evecs_qmax[lambda_index, 0, 0] ** 2
-            + order3_evecs_qmax[lambda_index, 1, 0] ** 2,
+            + order3_evecs_qmax[lambda_index, 0, 1] ** 2,
         ]
     )
     state2 = np.array(
         [
-            order3_evecs_0[lambda_index, 0, 1] ** 2
+            order3_evecs_0[lambda_index, 1, 0] ** 2
             + order3_evecs_0[lambda_index, 1, 1] ** 2,
-            order3_evecs_1[lambda_index, 0, 1] ** 2
+            order3_evecs_1[lambda_index, 1, 0] ** 2
             + order3_evecs_1[lambda_index, 1, 1] ** 2,
-            order3_evecs_2[lambda_index, 0, 1] ** 2
+            order3_evecs_2[lambda_index, 1, 0] ** 2
             + order3_evecs_2[lambda_index, 1, 1] ** 2,
-            order3_evecs_4[lambda_index, 0, 1] ** 2
+            order3_evecs_4[lambda_index, 1, 0] ** 2
             + order3_evecs_4[lambda_index, 1, 1] ** 2,
-            order3_evecs_5[lambda_index, 0, 1] ** 2
+            order3_evecs_5[lambda_index, 1, 0] ** 2
             + order3_evecs_5[lambda_index, 1, 1] ** 2,
-            order3_evecs_qmax[lambda_index, 0, 1] ** 2
+            order3_evecs_qmax[lambda_index, 1, 0] ** 2
             + order3_evecs_qmax[lambda_index, 1, 1] ** 2,
         ]
     )
