@@ -512,6 +512,7 @@ if __name__ == "__main__":
 
     # with open(datadir1 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # theta2
     with open(datadir1 / "lambda_dep_t7_dt2_fit8-23.pkl", "rb") as file_in:  # theta2
+        # with open(datadir1 / "lambda_dep_t7_dt2_fit7-17.pkl", "rb") as file_in:  # theta2
         data_set1 = pickle.load(file_in)
     # print([key for key in data_set1])
     order3_fit_1 = data_set1["order3_states_fit"]
