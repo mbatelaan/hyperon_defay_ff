@@ -290,7 +290,7 @@ def evffplot7(
 
 def energy(m, L, n):
     """return the energy of the state"""
-    return np.sqrt(m ** 2 + (n * 2 * np.pi / L) ** 2)
+    return np.sqrt(m**2 + (n * 2 * np.pi / L) ** 2)
 
 
 def energydiff_gen(m1, m2, theta1, theta2, n1, n2, L):
@@ -301,8 +301,8 @@ def energydiff_gen(m1, m2, theta1, theta2, n1, n2, L):
     L is the lattice extent
     """
     energydiff = np.sqrt(
-        m2 ** 2 + np.sum(((2 * n2 + theta2) * (np.pi / L)) ** 2)
-    ) - np.sqrt(m1 ** 2 + np.sum(((2 * n1 + theta1) * (np.pi / L)) ** 2))
+        m2**2 + np.sum(((2 * n2 + theta2) * (np.pi / L)) ** 2)
+    ) - np.sqrt(m1**2 + np.sum(((2 * n1 + theta1) * (np.pi / L)) ** 2))
     return energydiff
 
 
@@ -313,7 +313,7 @@ def energy_full(m, theta, n, L):
     m1, m2 are the masses of the states, where m2 is the mass corresponding to the state with TBC
     L is the lattice extent
     """
-    energy = np.sqrt(m ** 2 + np.sum(((2 * n + theta) * (np.pi / L)) ** 2))
+    energy = np.sqrt(m**2 + np.sum(((2 * n + theta) * (np.pi / L)) ** 2))
     return energy
 
 
@@ -325,14 +325,14 @@ def qsquared(m1, m2, theta1, theta2, n1, n2, L, a):
     L is the lattice extent
     """
     energydiff = np.sqrt(
-        m2 ** 2 + np.sum(((2 * n2 + theta2) * (np.pi / L)) ** 2)
-    ) - np.sqrt(m1 ** 2 + np.sum(((2 * n1 + theta1) * (np.pi / L)) ** 2))
+        m2**2 + np.sum(((2 * n2 + theta2) * (np.pi / L)) ** 2)
+    ) - np.sqrt(m1**2 + np.sum(((2 * n1 + theta1) * (np.pi / L)) ** 2))
     # qvector_diff = np.sum((((2 * n2 + theta2) - (2 * n1 + theta1)) * (np.pi / L)) ** 2)
     qvector_diff = ((2 * n2 + theta2) - (2 * n1 + theta1)) * (np.pi / L)
     return (
-        (energydiff ** 2 - np.dot(qvector_diff, qvector_diff))
-        * (0.1973 ** 2)
-        / (a ** 2)
+        (energydiff**2 - np.dot(qvector_diff, qvector_diff))
+        * (0.1973**2)
+        / (a**2)
     )
 
 
@@ -360,7 +360,7 @@ def FF_factors_evff(m_N, m_S, q_vec_squared, NX):
 
     Written for the case where \vec{p}_N = 0 and \vec{p}_\Sigma = \vec{q}
     """
-    E_S = np.sqrt(m_S ** 2 + q_vec_squared)
+    E_S = np.sqrt(m_S**2 + q_vec_squared)
 
     common_factor = np.sqrt(0.5 * (1 + m_S / E_S))
     F1_factor = 1
@@ -390,7 +390,7 @@ if __name__ == "__main__":
     evffdir = Path.home() / Path("Dropbox/PhD/lattice_results/eddie/sig2n/ff/")
     plotdir = Path.home() / Path("Documents/PhD/analysis_results/sig2n/")
     datadir1 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_theta2/data/"
+        "Documents/PhD/analysis_results/six_point_fn_theta2_fix/data/"
     )
     datadir2 = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn4/data/")
     datadir3 = Path.home() / Path("Documents/PhD/analysis_results/twisted_gauge3/data/")
@@ -418,7 +418,7 @@ if __name__ == "__main__":
     threept_file = evffdir / Path("evff.res_slvec-notwist")
     evff_data = evffdata(threept_file)
     q_squared_lattice = evff_data["par0"]
-    Q_squared = -1 * evff_data["par0"] * (0.1973 ** 2) / (0.074 ** 2)
+    Q_squared = -1 * evff_data["par0"] * (0.1973**2) / (0.074**2)
 
     # print([key for key in evff_data])
     # print(evff_data["type"])
@@ -432,7 +432,7 @@ if __name__ == "__main__":
         # q_vec_squared = ((m_N ** 2 + m_S ** 2 - qsq) / (2 * m_S)) ** 2 - m_N ** 2
 
         # case Neutron mom = 0
-        q_vec_squared = ((m_S ** 2 + m_N ** 2 - qsq) / (2 * m_N)) ** 2 - m_S ** 2
+        q_vec_squared = ((m_S**2 + m_N**2 - qsq) / (2 * m_N)) ** 2 - m_S**2
 
         q_vec_sq_list.append(q_vec_squared)
         print(f"\n{q_vec_squared=}")

@@ -510,8 +510,8 @@ if __name__ == "__main__":
     qsq_0 = 0.3376966834768195
     psq_0 = 0.3380670060434127
 
-    # with open(datadir1 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # theta2
-    with open(datadir1 / "lambda_dep_t7_dt2_fit8-23.pkl", "rb") as file_in:  # theta2
+    with open(datadir1 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # theta2
+        # with open(datadir1 / "lambda_dep_t7_dt2_fit8-23.pkl", "rb") as file_in:  # theta2
         # with open(datadir1 / "lambda_dep_t7_dt2_fit7-17.pkl", "rb") as file_in:  # theta2
         data_set1 = pickle.load(file_in)
     # print([key for key in data_set1])
