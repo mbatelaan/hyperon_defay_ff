@@ -491,7 +491,7 @@ def plot_evecs(plotdir, mod_p, state1, state2, lambda_index):
     # plt.axhline(y=m_N - dm_N, color="b", linestyle="--", alpha=0.3, linewidth=0.5)
 
     plt.xlabel(r"$|\vec{p}_N|$")
-    plt.ylabel(r"eigenvector")
+    plt.ylabel(r"eigenvector values squared")
     # # plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
     plt.savefig(plotdir / ("eigenvectors.pdf"))
     # plt.show()
@@ -563,7 +563,7 @@ def plot_evecs_bs(plotdir, mod_p, state1, state2, lambda_index):
     plt.legend(*zip(*labels), loc="center left", fontsize="x-small")
     # plt.legend(fontsize="x-small")
     plt.xlabel(r"$|\vec{p}_N|$")
-    plt.ylabel(r"eigenvector")
+    plt.ylabel(r"eigenvector values squared")
     plt.savefig(plotdir / ("eigenvectors_bs.pdf"))
 
 
@@ -693,7 +693,7 @@ def plot_evecs_lambda(plotdir, state1, state2, lambdas, name=""):
     )
     plt.legend(fontsize="x-small")
 
-    plt.ylabel(r"eigenvector values")
+    plt.ylabel(r"eigenvector values squared")
     plt.xlabel(r"$\lambda$")
     plt.savefig(plotdir / ("evecs_lambda_" + name + ".pdf"))
 
@@ -708,7 +708,7 @@ def plot_all_evecs_lambda(plotdir, state1, state2, lambdas, name=""):
         lambdas,
         np.average(state1, axis=2)[0],
         np.std(state1, axis=2)[0],
-        fmt="x",
+        fmt=_fmts[0],
         label="fn4",
         color=_colors[0],
         capsize=4,
@@ -719,7 +719,7 @@ def plot_all_evecs_lambda(plotdir, state1, state2, lambdas, name=""):
         lambdas,
         np.average(state2, axis=2)[0],
         np.std(state2, axis=2)[0],
-        fmt="x",
+        fmt=_fmts[0],
         color=_colors[0],
         capsize=4,
         elinewidth=1,
@@ -730,7 +730,7 @@ def plot_all_evecs_lambda(plotdir, state1, state2, lambdas, name=""):
         lambdas,
         np.average(state1, axis=2)[1],
         np.std(state1, axis=2)[1],
-        fmt="x",
+        fmt=_fmts[1],
         label="theta2_fix",
         color=_colors[1],
         capsize=4,
@@ -741,7 +741,7 @@ def plot_all_evecs_lambda(plotdir, state1, state2, lambdas, name=""):
         lambdas,
         np.average(state2, axis=2)[1],
         np.std(state2, axis=2)[1],
-        fmt="x",
+        fmt=_fmts[1],
         color=_colors[1],
         capsize=4,
         elinewidth=1,
@@ -752,7 +752,7 @@ def plot_all_evecs_lambda(plotdir, state1, state2, lambdas, name=""):
         lambdas,
         np.average(state1, axis=2)[2],
         np.std(state1, axis=2)[2],
-        fmt="x",
+        fmt=_fmts[2],
         label="theta3",
         color=_colors[2],
         capsize=4,
@@ -763,7 +763,7 @@ def plot_all_evecs_lambda(plotdir, state1, state2, lambdas, name=""):
         lambdas,
         np.average(state2, axis=2)[2],
         np.std(state2, axis=2)[2],
-        fmt="x",
+        fmt=_fmts[2],
         color=_colors[2],
         capsize=4,
         elinewidth=1,
@@ -774,7 +774,7 @@ def plot_all_evecs_lambda(plotdir, state1, state2, lambdas, name=""):
         lambdas,
         np.average(state1, axis=2)[3],
         np.std(state1, axis=2)[3],
-        fmt="x",
+        fmt=_fmts[3],
         label="theta4",
         color=_colors[3],
         capsize=4,
@@ -785,7 +785,7 @@ def plot_all_evecs_lambda(plotdir, state1, state2, lambdas, name=""):
         lambdas,
         np.average(state2, axis=2)[3],
         np.std(state2, axis=2)[3],
-        fmt="x",
+        fmt=_fmts[3],
         color=_colors[3],
         capsize=4,
         elinewidth=1,
@@ -796,7 +796,7 @@ def plot_all_evecs_lambda(plotdir, state1, state2, lambdas, name=""):
         lambdas,
         np.average(state1, axis=2)[4],
         np.std(state1, axis=2)[4],
-        fmt="x",
+        fmt=_fmts[4],
         label="theta5",
         color=_colors[4],
         capsize=4,
@@ -807,7 +807,7 @@ def plot_all_evecs_lambda(plotdir, state1, state2, lambdas, name=""):
         lambdas,
         np.average(state2, axis=2)[4],
         np.std(state2, axis=2)[4],
-        fmt="x",
+        fmt=_fmts[4],
         color=_colors[4],
         capsize=4,
         elinewidth=1,
@@ -818,7 +818,7 @@ def plot_all_evecs_lambda(plotdir, state1, state2, lambdas, name=""):
         lambdas,
         np.average(state1, axis=2)[5],
         np.std(state1, axis=2)[5],
-        fmt="x",
+        fmt=_fmts[5],
         label="qmax",
         color=_colors[5],
         capsize=4,
@@ -829,7 +829,7 @@ def plot_all_evecs_lambda(plotdir, state1, state2, lambdas, name=""):
         lambdas,
         np.average(state2, axis=2)[5],
         np.std(state2, axis=2)[5],
-        fmt="x",
+        fmt=_fmts[5],
         color=_colors[5],
         capsize=4,
         elinewidth=1,
@@ -837,7 +837,8 @@ def plot_all_evecs_lambda(plotdir, state1, state2, lambdas, name=""):
     )
 
     plt.legend(fontsize="x-small")
-    plt.ylabel(r"eigenvector values")
+    # plt.ylabel(r"eigenvector values")
+    plt.ylabel(r"eigenvector values squared")
     plt.xlabel(r"$\lambda$")
     plt.savefig(plotdir / ("evecs_lambda_" + name + ".pdf"))
 
@@ -937,7 +938,7 @@ def plot_orders_evecs_lambda(plotdir, state1, state2, lambdas, name=""):
     )
 
     plt.legend(fontsize="x-small")
-    plt.ylabel(r"eigenvector values")
+    plt.ylabel(r"eigenvector values squared")
     plt.xlabel(r"$\lambda$")
     plt.savefig(plotdir / ("evecs_lambda_" + name + ".pdf"))
     return
@@ -982,9 +983,9 @@ if __name__ == "__main__":
 
     extra_points_qsq = [0.338, 0.29 - 0.002, 0.29, 0.29 + 0.002, -0.015210838956772907]
 
-    # lambda_index = 5
+    lambda_index = 5
     # lambda_index = 8
-    lambda_index = 14
+    # lambda_index = 14
 
     # --- Read the sequential src data ---
     with open(datadir0 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # fn4
