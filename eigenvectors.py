@@ -7,6 +7,7 @@ import pickle
 
 
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 from matplotlib import rcParams
 
 from formatting import err_brackets
@@ -504,25 +505,53 @@ def plot_evecs_bs(plotdir, mod_p, state1, state2, lambda_index):
     print(np.shape(mod_p))
     print(np.shape(state1))
 
+    labels = []
+
+    def add_label(violin, label):
+        color = violin["bodies"][0].get_facecolor().flatten()
+        labels.append((mpatches.Patch(color=color), label))
+
     plt.figure(figsize=(6, 6))
     # for iboot in range(np.shape(state1)[1]):
-    plt.violinplot(
-        state1.T,
-        mod_p,
-        widths=0.05,
-        showmeans=True,
-        showmedians=True,
-        # color=_colors[3],
-        # marker=",",
+    # plt.violinplot(
+    #     state1.T,
+    #     mod_p,
+    #     widths=0.05,
+    #     showmeans=True,
+    #     showmedians=True,
+    #     # label=rf"State 1 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+    #     # color=_colors[3],
+    #     # marker=",",
+    # )
+    # plt.violinplot(
+    #     state2.T,
+    #     mod_p,
+    #     widths=0.05,
+    #     showmeans=True,
+    #     showmedians=True,
+    #     # label=rf"State 2 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+    #     # color=_colors[3],
+    #     # marker=",",
+    # )
+    add_label(
+        plt.violinplot(
+            state1.T,
+            mod_p,
+            widths=0.05,
+            showmeans=True,
+            showmedians=True,
+        ),
+        rf"State 1 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
     )
-    plt.violinplot(
-        state2.T,
-        mod_p,
-        widths=0.05,
-        showmeans=True,
-        showmedians=True,
-        # color=_colors[3],
-        # marker=",",
+    add_label(
+        plt.violinplot(
+            state2.T,
+            mod_p,
+            widths=0.05,
+            showmeans=True,
+            showmedians=True,
+        ),
+        rf"State 2 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
     )
     # plt.scatter(
     #     mod_p,
@@ -531,7 +560,8 @@ def plot_evecs_bs(plotdir, mod_p, state1, state2, lambda_index):
     #     marker=",",
     # )
 
-    plt.legend(fontsize="x-small")
+    plt.legend(*zip(*labels), loc="center left", fontsize="x-small")
+    # plt.legend(fontsize="x-small")
     plt.xlabel(r"$|\vec{p}_N|$")
     plt.ylabel(r"eigenvector")
     plt.savefig(plotdir / ("eigenvectors_bs.pdf"))
@@ -952,9 +982,9 @@ if __name__ == "__main__":
 
     extra_points_qsq = [0.338, 0.29 - 0.002, 0.29, 0.29 + 0.002, -0.015210838956772907]
 
-    lambda_index = 2
+    # lambda_index = 5
     # lambda_index = 8
-    # lambda_index = 14
+    lambda_index = 14
 
     # --- Read the sequential src data ---
     with open(datadir0 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # fn4
