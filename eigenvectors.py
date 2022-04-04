@@ -382,7 +382,9 @@ def FF_combination_evff(F1, F2, F3, m_N, m_S, q_vec_squared, NX):
     return FF_comb
 
 
-def plot_energy_mom(plotdir, mod_p, nucleon_l0, sigma_l0, state1_l, state2_l):
+def plot_energy_mom(
+    plotdir, mod_p, nucleon_l0, sigma_l0, state1_l, state2_l, lambda_index
+):
     """Plot the energy values against the momentum for the nucleon and sigma states"""
     plt.figure(figsize=(6, 6))
 
@@ -448,7 +450,7 @@ def plot_energy_mom(plotdir, mod_p, nucleon_l0, sigma_l0, state1_l, state2_l):
     # plt.show()
 
 
-def plot_evecs(plotdir, mod_p, state1, state2):
+def plot_evecs(plotdir, mod_p, state1, state2, lambda_index):
     """Plot the overlaps from the eigenvectors against the momentum values"""
     print(f"{mod_p=}")
     print(f"{np.average(state1,axis=1)=}")
@@ -492,6 +494,47 @@ def plot_evecs(plotdir, mod_p, state1, state2):
     # # plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
     plt.savefig(plotdir / ("eigenvectors.pdf"))
     # plt.show()
+
+
+def plot_evecs_bs(plotdir, mod_p, state1, state2, lambda_index):
+    """Plot the overlaps from the eigenvectors against the momentum values, plot the values as violin plots"""
+    print(f"{mod_p=}")
+    print(f"{np.average(state1,axis=1)=}")
+    print(f"{np.average(state2,axis=1)=}")
+    print(np.shape(mod_p))
+    print(np.shape(state1))
+
+    plt.figure(figsize=(6, 6))
+    # for iboot in range(np.shape(state1)[1]):
+    plt.violinplot(
+        state1.T,
+        mod_p,
+        widths=0.05,
+        showmeans=True,
+        showmedians=True,
+        # color=_colors[3],
+        # marker=",",
+    )
+    plt.violinplot(
+        state2.T,
+        mod_p,
+        widths=0.05,
+        showmeans=True,
+        showmedians=True,
+        # color=_colors[3],
+        # marker=",",
+    )
+    # plt.scatter(
+    #     mod_p,
+    #     state2[:, iboot],
+    #     color=_colors[4],
+    #     marker=",",
+    # )
+
+    plt.legend(fontsize="x-small")
+    plt.xlabel(r"$|\vec{p}_N|$")
+    plt.ylabel(r"eigenvector")
+    plt.savefig(plotdir / ("eigenvectors_bs.pdf"))
 
 
 def plot_evals_lambda(plotdir, evals, lambdas, nucleon, sigma, name=""):
@@ -541,7 +584,7 @@ def plot_evals_lambda(plotdir, evals, lambdas, nucleon, sigma, name=""):
     # plt.show()
 
 
-def plot_states_lambda(plotdir, states, lambdas, nucleon, sigma, name=""):
+def plot_energy_lambda(plotdir, states, lambdas, nucleon, sigma, name=""):
     """Plot the eigenvalues against the lambda values"""
     # print(f"{lambdas=}")
     plt.figure(figsize=(6, 6))
@@ -586,7 +629,288 @@ def plot_states_lambda(plotdir, states, lambdas, nucleon, sigma, name=""):
 
     plt.ylabel(r"Energy")
     plt.xlabel(r"$\lambda$")
-    plt.savefig(plotdir / ("states_" + name + ".pdf"))
+    plt.savefig(plotdir / ("energy_values_" + name + ".pdf"))
+
+
+def plot_evecs_lambda(plotdir, state1, state2, lambdas, name=""):
+    """Plot the eigenvalues against the lambda values"""
+    print(f"{lambdas=}")
+
+    plt.figure(figsize=(6, 6))
+
+    plt.errorbar(
+        lambdas,
+        np.average(state1, axis=1),
+        np.std(state1, axis=1),
+        fmt="x",
+        # label=rf"State 1 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+        color=_colors[0],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+
+    plt.errorbar(
+        lambdas,
+        np.average(state2, axis=1),
+        np.std(state2, axis=1),
+        fmt="x",
+        # label=rf"State 1 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+        color=_colors[1],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.legend(fontsize="x-small")
+
+    plt.ylabel(r"eigenvector values")
+    plt.xlabel(r"$\lambda$")
+    plt.savefig(plotdir / ("evecs_lambda_" + name + ".pdf"))
+
+
+def plot_all_evecs_lambda(plotdir, state1, state2, lambdas, name=""):
+    """Plot the eigenvalues against the lambda values"""
+    print(f"{lambdas=}")
+
+    plt.figure(figsize=(6, 6))
+
+    plt.errorbar(
+        lambdas,
+        np.average(state1, axis=2)[0],
+        np.std(state1, axis=2)[0],
+        fmt="x",
+        label="fn4",
+        color=_colors[0],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        lambdas,
+        np.average(state2, axis=2)[0],
+        np.std(state2, axis=2)[0],
+        fmt="x",
+        color=_colors[0],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+
+    plt.errorbar(
+        lambdas,
+        np.average(state1, axis=2)[1],
+        np.std(state1, axis=2)[1],
+        fmt="x",
+        label="theta2_fix",
+        color=_colors[1],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        lambdas,
+        np.average(state2, axis=2)[1],
+        np.std(state2, axis=2)[1],
+        fmt="x",
+        color=_colors[1],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+
+    plt.errorbar(
+        lambdas,
+        np.average(state1, axis=2)[2],
+        np.std(state1, axis=2)[2],
+        fmt="x",
+        label="theta3",
+        color=_colors[2],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        lambdas,
+        np.average(state2, axis=2)[2],
+        np.std(state2, axis=2)[2],
+        fmt="x",
+        color=_colors[2],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+
+    plt.errorbar(
+        lambdas,
+        np.average(state1, axis=2)[3],
+        np.std(state1, axis=2)[3],
+        fmt="x",
+        label="theta4",
+        color=_colors[3],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        lambdas,
+        np.average(state2, axis=2)[3],
+        np.std(state2, axis=2)[3],
+        fmt="x",
+        color=_colors[3],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+
+    plt.errorbar(
+        lambdas,
+        np.average(state1, axis=2)[4],
+        np.std(state1, axis=2)[4],
+        fmt="x",
+        label="theta5",
+        color=_colors[4],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        lambdas,
+        np.average(state2, axis=2)[4],
+        np.std(state2, axis=2)[4],
+        fmt="x",
+        color=_colors[4],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+
+    plt.errorbar(
+        lambdas,
+        np.average(state1, axis=2)[5],
+        np.std(state1, axis=2)[5],
+        fmt="x",
+        label="qmax",
+        color=_colors[5],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        lambdas,
+        np.average(state2, axis=2)[5],
+        np.std(state2, axis=2)[5],
+        fmt="x",
+        color=_colors[5],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+
+    plt.legend(fontsize="x-small")
+    plt.ylabel(r"eigenvector values")
+    plt.xlabel(r"$\lambda$")
+    plt.savefig(plotdir / ("evecs_lambda_" + name + ".pdf"))
+
+
+def plot_orders_evecs_lambda(plotdir, state1, state2, lambdas, name=""):
+    """Plot the eigenvalues against the lambda values"""
+    print(f"{lambdas=}")
+
+    plt.figure(figsize=(6, 6))
+
+    plt.errorbar(
+        lambdas,
+        np.average(state1, axis=2)[0],
+        np.std(state1, axis=2)[0],
+        fmt="x",
+        label="order 0",
+        color=_colors[0],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        lambdas,
+        np.average(state2, axis=2)[0],
+        np.std(state2, axis=2)[0],
+        fmt="x",
+        color=_colors[0],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+
+    plt.errorbar(
+        lambdas,
+        np.average(state1, axis=2)[1],
+        np.std(state1, axis=2)[1],
+        fmt="x",
+        label="order 1",
+        color=_colors[1],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        lambdas,
+        np.average(state2, axis=2)[1],
+        np.std(state2, axis=2)[1],
+        fmt="x",
+        color=_colors[1],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+
+    plt.errorbar(
+        lambdas,
+        np.average(state1, axis=2)[2],
+        np.std(state1, axis=2)[2],
+        fmt="x",
+        label="order 2",
+        color=_colors[2],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        lambdas,
+        np.average(state2, axis=2)[2],
+        np.std(state2, axis=2)[2],
+        fmt="x",
+        color=_colors[2],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+
+    plt.errorbar(
+        lambdas,
+        np.average(state1, axis=2)[3],
+        np.std(state1, axis=2)[3],
+        fmt="x",
+        label="order 3",
+        color=_colors[3],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        lambdas,
+        np.average(state2, axis=2)[3],
+        np.std(state2, axis=2)[3],
+        fmt="x",
+        color=_colors[3],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+
+    plt.legend(fontsize="x-small")
+    plt.ylabel(r"eigenvector values")
+    plt.xlabel(r"$\lambda$")
+    plt.savefig(plotdir / ("evecs_lambda_" + name + ".pdf"))
+    return
 
 
 if __name__ == "__main__":
@@ -628,9 +952,9 @@ if __name__ == "__main__":
 
     extra_points_qsq = [0.338, 0.29 - 0.002, 0.29, 0.29 + 0.002, -0.015210838956772907]
 
+    lambda_index = 2
+    # lambda_index = 8
     # lambda_index = 14
-    lambda_index = 5
-    # lambda_index = 10
 
     # --- Read the sequential src data ---
     with open(datadir0 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # fn4
@@ -653,9 +977,12 @@ if __name__ == "__main__":
     psq_0 = 0.3380670060434127
 
     # with open(datadir1 / "lambda_dep_t7_dt2_fit7-17.pkl", "rb") as file_in:  # theta2
-    with open(datadir1 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # theta2
+    with open(datadir1 / "lambda_dep_t9_dt4_fit8-23.pkl", "rb") as file_in:  # theta2
         # with open(datadir1 / "lambda_dep_t7_dt2_fit8-23.pkl", "rb") as file_in:  # theta2
         data_set1 = pickle.load(file_in)
+    order0_evecs_1 = data_set1["order0_evecs"]
+    order1_evecs_1 = data_set1["order1_evecs"]
+    order2_evecs_1 = data_set1["order2_evecs"]
     order3_evecs_1 = data_set1["order3_evecs"]
     if len(np.shape(order3_evecs_1)) == 4:
         # estate1_ = order3_evecs_1[lambda_index, :, 0, 0] ** 2
@@ -843,7 +1170,7 @@ if __name__ == "__main__":
         ]
     )
 
-    plot_evecs(plotdir, mod_p, state1, state2)
+    plot_evecs(plotdir, mod_p, state1, state2, lambda_index)
     # print(f"{states_l0_1=}")
     # print(f"{np.shape(states_l0_1)=}")
     plot_evals_lambda(
@@ -854,7 +1181,7 @@ if __name__ == "__main__":
         states_l0_1[0, :],
         name="theta2_fix",
     )
-    plot_states_lambda(
+    plot_energy_lambda(
         plotdir,
         states_l_1,
         lambdas_1,
@@ -864,3 +1191,76 @@ if __name__ == "__main__":
     )
     print(f"{np.shape(states_l_1)=}")
     print(f"{np.shape(order3_evals_1)=}")
+
+    state1_lmb = order3_evecs_1[:, :, 0, evec_num] ** 2
+    state2_lmb = order3_evecs_1[:, :, 1, evec_num] ** 2
+
+    states1_lmb = np.array(
+        [
+            order3_evecs_0[:, :, 0, evec_num] ** 2,
+            order3_evecs_1[:, :, 0, evec_num] ** 2,
+            order3_evecs_2[:, :, 0, evec_num] ** 2,
+            order3_evecs_4[:, :, 0, evec_num] ** 2,
+            order3_evecs_5[:, :, 0, evec_num] ** 2,
+            order3_evecs_qmax[:, :, 0, evec_num] ** 2,
+        ]
+    )
+    states2_lmb = np.array(
+        [
+            order3_evecs_0[:, :, 1, evec_num] ** 2,
+            order3_evecs_1[:, :, 1, evec_num] ** 2,
+            order3_evecs_2[:, :, 1, evec_num] ** 2,
+            order3_evecs_4[:, :, 1, evec_num] ** 2,
+            order3_evecs_5[:, :, 1, evec_num] ** 2,
+            order3_evecs_qmax[:, :, 1, evec_num] ** 2,
+        ]
+    )
+
+    states1_lmb_2 = np.array(
+        [
+            order0_evecs_1[:, :, 0, evec_num] ** 2,
+            order1_evecs_1[:, :, 0, evec_num] ** 2,
+            order2_evecs_1[:, :, 0, evec_num] ** 2,
+            order3_evecs_1[:, :, 0, evec_num] ** 2,
+        ]
+    )
+    states2_lmb_2 = np.array(
+        [
+            order0_evecs_1[:, :, 1, evec_num] ** 2,
+            order1_evecs_1[:, :, 1, evec_num] ** 2,
+            order2_evecs_1[:, :, 1, evec_num] ** 2,
+            order3_evecs_1[:, :, 1, evec_num] ** 2,
+        ]
+    )
+
+    print(f"{lambdas_1=}")
+    print(f"{np.shape(state1_lmb)=}")
+    print(f"{np.average(state1_lmb,axis=1)=}")
+
+    plot_evecs_lambda(plotdir, state1_lmb, state2_lmb, lambdas_1, name="theta2_fix")
+    plot_all_evecs_lambda(plotdir, states1_lmb, states2_lmb, lambdas_1, name="all")
+    plot_orders_evecs_lambda(
+        plotdir, states1_lmb_2, states2_lmb_2, lambdas_1, name="orders"
+    )
+
+    state1 = np.array(
+        [
+            order3_evecs_0[lambda_index, :, 0, evec_num] ** 2,
+            order1_evecs_1[lambda_index, :, 0, evec_num] ** 2,
+            order3_evecs_2[lambda_index, :, 0, evec_num] ** 2,
+            order3_evecs_4[lambda_index, :, 0, evec_num] ** 2,
+            order3_evecs_5[lambda_index, :, 0, evec_num] ** 2,
+            order3_evecs_qmax[lambda_index, :, 0, evec_num] ** 2,
+        ]
+    )
+    state2 = np.array(
+        [
+            order3_evecs_0[lambda_index, :, 1, evec_num] ** 2,
+            order1_evecs_1[lambda_index, :, 1, evec_num] ** 2,
+            order3_evecs_2[lambda_index, :, 1, evec_num] ** 2,
+            order3_evecs_4[lambda_index, :, 1, evec_num] ** 2,
+            order3_evecs_5[lambda_index, :, 1, evec_num] ** 2,
+            order3_evecs_qmax[lambda_index, :, 1, evec_num] ** 2,
+        ]
+    )
+    plot_evecs_bs(plotdir, mod_p, state1, state2, lambda_index)
