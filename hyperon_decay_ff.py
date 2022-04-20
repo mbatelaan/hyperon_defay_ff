@@ -23,8 +23,7 @@ _colors = [
     "#e41a1c",
     "#dede00",
 ]
-
-_fmts = ["s", "^", "*", "o", ".", ","]
+_fmts = ["s", "^", "*", "o", ".", ",", "v", "p", "P"]
 
 
 def evffdata(evff_file):
@@ -389,15 +388,25 @@ if __name__ == "__main__":
     # --- directories ---
     evffdir = Path.home() / Path("Dropbox/PhD/lattice_results/eddie/sig2n/ff/")
     plotdir = Path.home() / Path("Documents/PhD/analysis_results/sig2n/")
-    datadir1 = Path.home() / Path(
+    datadir1 = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn4/data/")
+    datadir2 = Path.home() / Path(
         "Documents/PhD/analysis_results/six_point_fn_theta2_fix/data/"
     )
-    datadir2 = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn4/data/")
-    datadir3 = Path.home() / Path("Documents/PhD/analysis_results/twisted_gauge3/data/")
-    datadir4 = Path.home() / Path("Documents/PhD/analysis_results/twisted_gauge5/data/")
+    datadir3 = Path.home() / Path(
+        "Documents/PhD/analysis_results/six_point_fn_theta3/data/"
+    )
+    datadir4 = Path.home() / Path(
+        "Documents/PhD/analysis_results/six_point_fn_theta4/data/"
+    )
+    datadir5 = Path.home() / Path(
+        "Documents/PhD/analysis_results/six_point_fn_theta5/data/"
+    )
     datadir_qmax = Path.home() / Path(
         "Documents/PhD/analysis_results/six_point_fn_qmax/data/"
     )
+    # datadir6 = Path.home() / Path(
+    #     "Documents/PhD/analysis_results/six_point_fn_one_fourier/data/"
+    # )
     plotdir.mkdir(parents=True, exist_ok=True)
 
     # --- Lattice specs ---
@@ -469,42 +478,50 @@ if __name__ == "__main__":
     print(f"{FF_comb_err=}")
 
     # --- Read the sequential src data ---
-    with open(datadir1 / "matrix_element.pkl", "rb") as file_in:  # theta2
+    with open(datadir1 / "matrix_element.pkl", "rb") as file_in:  # fn4
         mat_elements1 = pickle.load(file_in)
-    mat_element_theta2 = np.array([mat_elements1["bootfit3"].T[1]])
+    mat_element_fn4 = np.array([mat_elements1["bootfit3"].T[1]])
 
-    with open(datadir2 / "matrix_element.pkl", "rb") as file_in:  # fn4
+    with open(datadir2 / "matrix_element.pkl", "rb") as file_in:  # theta2
         mat_elements2 = pickle.load(file_in)
-    mat_element_fn4 = np.array([mat_elements2["bootfit3"].T[1]])
+    mat_element_theta2 = np.array([mat_elements2["bootfit3"].T[1]])
 
     with open(datadir3 / "matrix_element.pkl", "rb") as file_in:  # twisted_gauge3
         mat_elements3 = pickle.load(file_in)
-    mat_element_twisted_gauge3 = np.array([mat_elements3["bootfit3"].T[1]])
+    mat_element_theta3 = np.array([mat_elements3["bootfit3"].T[1]])
 
     with open(datadir4 / "matrix_element.pkl", "rb") as file_in:  # twisted_gauge5
         mat_elements4 = pickle.load(file_in)
-    mat_element_twisted_gauge5 = np.array([mat_elements4["bootfit3"].T[1]])
+    mat_element_theta4 = np.array([mat_elements4["bootfit3"].T[1]])
+
+    with open(datadir5 / "matrix_element.pkl", "rb") as file_in:  # twisted_gauge5
+        mat_elements5 = pickle.load(file_in)
+    mat_element_theta5 = np.array([mat_elements5["bootfit3"].T[1]])
 
     with open(datadir_qmax / "matrix_element.pkl", "rb") as file_in:  # qmax
         mat_element_qmax_data = pickle.load(file_in)
     mat_element_qmax = np.array([mat_element_qmax_data["bootfit3"].T[1]])
 
     # --- Multiply energy factors for the form factors ---
-    pvec_list2 = np.array([[1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0], [0, 0, 0]])
+    pvec_list2 = np.array(
+        [[1, 0, 0], [1, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
+    )  # momentum values for each dataset
     twist_list = np.array(
         [
-            [0, 0.48325694, 0],
             [0, 0.96651388, 0],
             [0, 0.48325694, 0],
-            [0, 0.48325694, 0],
+            [0, 0.5, 0],
+            [0, 0.8, 0],
+            [0, 0.4476969635569866, 0],
             [0, 0, 0],
         ]
     )
     seq_src_points = [
         mat_element_fn4,
         mat_element_theta2,
-        mat_element_twisted_gauge3,
-        mat_element_twisted_gauge5,
+        mat_element_theta3,
+        mat_element_theta4,
+        mat_element_theta5,
         mat_element_qmax,
     ]
     FF_seq = []
@@ -520,7 +537,9 @@ if __name__ == "__main__":
     ydata = FF_comb
     errordata = FF_comb_err
     # extra_points_qsq = [0.29, 0.338, 0.29, 0.29, -0.015210838956772907]
-    extra_points_qsq = [0.338, 0.29 - 0.002, 0.29, 0.29 + 0.002, -0.015210838956772907]
+    # extra_points_qsq = [0.29, 0.338, 0.0598666, 0.1731701, 0, -0.015210838956772907]
+    # extra_points_qsq = [0.338, 0.29 - 0.002, 0.29, 0.29 + 0.002, -0.015210838956772907]
+    extra_points_qsq = [0.338, 0.29, 0.0598666, 0.1731701, 0, -0.015210838956772907]
 
     extra_points = {
         "xdata": extra_points_qsq,
@@ -528,11 +547,16 @@ if __name__ == "__main__":
         "labels": [
             r"$\theta_1$",
             r"$\theta_2$",
-            r"$\theta_2$",
-            r"$\theta_2$",
-            r"seq. src. at $q_{\textrm{max}}$",
+            r"$\theta_3$",
+            r"$\theta_4$",
+            r"$\theta_5$",
+            r"$q_{\textrm{max}}$",
+            # r"seq. src. at $q_{\textrm{max}}$",
         ],
     }
+
+    with open(plotdir / "data/formfactors_3.pkl", "wb") as file_out:
+        pickle.dump(extra_points, file_out)
 
     evffplot5(
         Q_squared,
@@ -543,7 +567,7 @@ if __name__ == "__main__":
         extra_points=extra_points,
         # extra_points=extra_points,
         # extra_points_qsq=extra_points_qsq,
-        show=True,
+        show=False,
     )
 
     evffplot6(
@@ -555,7 +579,7 @@ if __name__ == "__main__":
         extra_points=extra_points,
         # extra_points=extra_points,
         # extra_points_qsq=extra_points_qsq,
-        show=True,
+        show=False,
     )
     evffplot7(
         Q_squared,
@@ -566,5 +590,5 @@ if __name__ == "__main__":
         extra_points=extra_points,
         # extra_points=extra_points,
         # extra_points_qsq=extra_points_qsq,
-        show=True,
+        show=False,
     )

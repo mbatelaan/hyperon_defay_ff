@@ -338,51 +338,6 @@ def qsquared(m1, m2, theta1, theta2, n1, n2, L, a):
     )
 
 
-def FF_factors(m_N, m_S, pvec, twist, NX):
-    """Calculate the values of the factors that multiply the three form factors.
-    These will consist of  energies, masses and momenta, these values will all be kept in lattice units as the units will cancel out anyway, so there is no need to convert them.
-
-    Written for the case where \vec{p}_\Sigma = 0 and \vec{p}_N = \vec{q}
-    """
-    E_N = energy_full(m_N, twist, pvec, NX)
-
-    common_factor = np.sqrt(0.5 * (1 + m_N / E_N))
-    F1_factor = 1
-    F2_factor = (np.dot(2 * pvec + twist, 2 * pvec + twist) * (np.pi / NX) ** 2) / (
-        (E_N + m_N) * (m_S + m_N)
-    )
-    F3_factor = -1 * (E_N - m_S) / (m_N + m_S)
-    # print(f"{[F1_factor, F2_factor, F3_factor]=}")
-    return [F1_factor, F2_factor, F3_factor, common_factor]
-
-
-def FF_factors_evff(m_N, m_S, q_vec_squared, NX):
-    """Calculate the values of the factors that multiply the three form factors.
-    These will consist of  energies, masses and momenta, these values will all be kept in lattice units as the units will cancel out anyway, so there is no need to convert them.
-
-    Written for the case where \vec{p}_N = 0 and \vec{p}_\Sigma = \vec{q}
-    """
-    E_S = np.sqrt(m_S**2 + q_vec_squared)
-
-    common_factor = np.sqrt(0.5 * (1 + m_S / E_S))
-    F1_factor = 1
-    F2_factor = q_vec_squared / ((E_S + m_S) * (m_N + m_S))
-    F3_factor = -1 * (E_S - m_N) / (m_S + m_N)
-    return [F1_factor, F2_factor, F3_factor, common_factor]
-
-
-def FF_combination(F1, F2, F3, m_N, m_S, pvec, twist, NX):
-    FF_facs = FF_factors(m_N, m_S, pvec, twist, NX)
-    FF_comb = FF_facs[0] * F1 + FF_facs[1] * F2 + FF_facs[2] * F3
-    return FF_comb
-
-
-def FF_combination_evff(F1, F2, F3, m_N, m_S, q_vec_squared, NX):
-    FF_facs = FF_factors_evff(m_N, m_S, q_vec_squared, NX)
-    FF_comb = FF_facs[0] * F1 + FF_facs[1] * F2 + FF_facs[2] * F3
-    return FF_comb
-
-
 def plot_energy_mom(
     plotdir, mod_p, nucleon_l0, sigma_l0, state1_l, state2_l, lambda_index
 ):
@@ -982,7 +937,6 @@ if __name__ == "__main__":
     rcParams.update({"figure.autolayout": True})
 
     # --- directories ---
-    evffdir = Path.home() / Path("Dropbox/PhD/lattice_results/eddie/sig2n/ff/")
     plotdir = Path.home() / Path("Documents/PhD/analysis_results/sig2n/")
     datadir0 = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn4/data/")
     datadir1 = Path.home() / Path(
@@ -1097,7 +1051,7 @@ if __name__ == "__main__":
     psq_5 = 0.01373279121924232
     # print(f"{order3_evecs_5=}")
 
-    with open(datadir6 / "lambda_dep_t5_dt3_fit8-19.pkl", "rb") as file_in:  # qmax
+    with open(datadir6 / "lambda_dep_t5_dt3_fit8-19.pkl", "rb") as file_in:  # theta6
         data_set6 = pickle.load(file_in)
     lambdas_6 = data_set6["lambdas"]
     order3_evecs_6 = data_set6["order3_evecs"]
