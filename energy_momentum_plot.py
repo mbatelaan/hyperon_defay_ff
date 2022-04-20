@@ -474,6 +474,10 @@ if __name__ == "__main__":
     datadir_qmax = Path.home() / Path(
         "Documents/PhD/analysis_results/six_point_fn_qmax/data/"
     )
+    datadir6 = Path.home() / Path(
+        "Documents/PhD/analysis_results/six_point_fn_one_fourier/data/"
+    )
+
     plotdir.mkdir(parents=True, exist_ok=True)
 
     # --- Lattice specs ---
@@ -575,6 +579,20 @@ if __name__ == "__main__":
     qsq_5 = 0
     psq_5 = 0.01373279121924232
 
+    with open(datadir6 / "lambda_dep_t5_dt3_fit8-19.pkl", "rb") as file_in:  # qmax
+        data_set6 = pickle.load(file_in)
+    lambdas_6 = data_set6["lambdas"]
+    order3_fit_6 = data_set6["order3_states_fit"]
+    states_l0_6 = np.array(
+        [
+            data_set6["bootfit_unpert_sigma"][:, 1],
+            data_set6["bootfit_unpert_nucl"][:, 1],
+        ]
+    )
+    states_l0p4_6 = order3_fit_6[lambda_index, :, :, 1]
+    qsq_6 = 0.27402105651700137
+    psq_6 = 0.27406306546926495
+
     with open(datadir_qmax / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # qmax
         data_set_qmax = pickle.load(file_in)
     # print([key for key in data_set_qmax])
@@ -600,6 +618,7 @@ if __name__ == "__main__":
             np.sqrt(psq_2),
             np.sqrt(psq_4),
             np.sqrt(psq_5),
+            np.sqrt(psq_6),
             np.sqrt(psq_qmax),
         ]
     )
@@ -610,6 +629,7 @@ if __name__ == "__main__":
             states_l0_2[0, :],
             states_l0_4[0, :],
             states_l0_5[0, :],
+            states_l0_6[0, :],
             states_l0_qmax[0, :],
         ]
     )
@@ -620,6 +640,7 @@ if __name__ == "__main__":
             states_l0_2[1, :],
             states_l0_4[1, :],
             states_l0_5[1, :],
+            states_l0_6[1, :],
             states_l0_qmax[1, :],
         ]
     )
@@ -630,6 +651,7 @@ if __name__ == "__main__":
             states_l0p4_2[0, :],
             states_l0p4_4[0, :],
             states_l0p4_5[0, :],
+            states_l0p4_6[0, :],
             states_l0p4_qmax[0, :],
         ]
     )
@@ -640,6 +662,7 @@ if __name__ == "__main__":
             states_l0p4_2[1, :],
             states_l0p4_4[1, :],
             states_l0p4_5[1, :],
+            states_l0p4_6[1, :],
             states_l0p4_qmax[1, :],
         ]
     )

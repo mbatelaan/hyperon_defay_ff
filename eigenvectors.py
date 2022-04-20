@@ -26,7 +26,7 @@ _colors = [
     "#dede00",
 ]
 
-_fmts = ["s", "^", "*", "o", ".", ","]
+_fmts = ["s", "^", "*", "o", ".", ",", "v", "p", "P"]
 
 
 def evffdata(evff_file):
@@ -463,7 +463,8 @@ def plot_evecs(plotdir, mod_p, state1, state2, lambda_index):
         np.average(state1, axis=1),
         np.std(state1, axis=1),
         fmt="x",
-        label=rf"State 1 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+        # label=rf"State 1 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+        label=rf"$(v_0^0)^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
         color=_colors[3],
         capsize=4,
         elinewidth=1,
@@ -474,7 +475,7 @@ def plot_evecs(plotdir, mod_p, state1, state2, lambda_index):
         np.average(state2, axis=1),
         np.std(state2, axis=1),
         fmt="x",
-        label=rf"State 2 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+        label=rf"$(v_0^1)^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
         color=_colors[4],
         capsize=4,
         elinewidth=1,
@@ -491,7 +492,8 @@ def plot_evecs(plotdir, mod_p, state1, state2, lambda_index):
     # plt.axhline(y=m_N - dm_N, color="b", linestyle="--", alpha=0.3, linewidth=0.5)
 
     plt.xlabel(r"$|\vec{p}_N|$")
-    plt.ylabel(r"eigenvector values squared")
+    # plt.ylabel(r"eigenvector values squared")
+    plt.ylabel(r"$(v_0^i)^2$")
     # # plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
     plt.savefig(plotdir / ("eigenvectors.pdf"))
     # plt.show()
@@ -698,147 +700,177 @@ def plot_evecs_lambda(plotdir, state1, state2, lambdas, name=""):
     plt.savefig(plotdir / ("evecs_lambda_" + name + ".pdf"))
 
 
-def plot_all_evecs_lambda(plotdir, state1, state2, lambdas, name=""):
+def plot_all_evecs_lambda(plotdir, state1, state2, lambdas, mod_p, name=""):
     """Plot the eigenvalues against the lambda values"""
     print(f"{lambdas=}")
-
     plt.figure(figsize=(6, 6))
 
-    plt.errorbar(
-        lambdas,
-        np.average(state1, axis=2)[0],
-        np.std(state1, axis=2)[0],
-        fmt=_fmts[0],
-        label="fn4",
-        color=_colors[0],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
-    )
-    plt.errorbar(
-        lambdas,
-        np.average(state2, axis=2)[0],
-        np.std(state2, axis=2)[0],
-        fmt=_fmts[0],
-        color=_colors[0],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
-    )
+    for j in range(len(state1)):
+        plt.errorbar(
+            lambdas + j / 4000,
+            np.average(state1, axis=2)[j],
+            np.std(state1, axis=2)[j],
+            fmt=_fmts[j],
+            # label="fn4",
+            label=rf"$|\vec{{p}}|={mod_p[j]:0.2}$",
+            color=_colors[j],
+            capsize=4,
+            elinewidth=1,
+            markerfacecolor="none",
+        )
+        plt.errorbar(
+            lambdas + j / 4000,
+            np.average(state2, axis=2)[j],
+            np.std(state2, axis=2)[j],
+            fmt=_fmts[j],
+            color=_colors[j],
+            capsize=4,
+            elinewidth=1,
+            markerfacecolor="none",
+        )
 
-    plt.errorbar(
-        lambdas,
-        np.average(state1, axis=2)[1],
-        np.std(state1, axis=2)[1],
-        fmt=_fmts[1],
-        label="theta2_fix",
-        color=_colors[1],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
-    )
-    plt.errorbar(
-        lambdas,
-        np.average(state2, axis=2)[1],
-        np.std(state2, axis=2)[1],
-        fmt=_fmts[1],
-        color=_colors[1],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
-    )
+    # plt.errorbar(
+    #     lambdas,
+    #     np.average(state1, axis=2)[0],
+    #     np.std(state1, axis=2)[0],
+    #     fmt=_fmts[0],
+    #     # label="fn4",
+    #     label=rf"$|\vec{{p}}|={mod_p[0]:0.2}$",
+    #     color=_colors[0],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # plt.errorbar(
+    #     lambdas,
+    #     np.average(state2, axis=2)[0],
+    #     np.std(state2, axis=2)[0],
+    #     fmt=_fmts[0],
+    #     color=_colors[0],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
 
-    plt.errorbar(
-        lambdas,
-        np.average(state1, axis=2)[2],
-        np.std(state1, axis=2)[2],
-        fmt=_fmts[2],
-        label="theta3",
-        color=_colors[2],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
-    )
-    plt.errorbar(
-        lambdas,
-        np.average(state2, axis=2)[2],
-        np.std(state2, axis=2)[2],
-        fmt=_fmts[2],
-        color=_colors[2],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
-    )
+    # plt.errorbar(
+    #     lambdas,
+    #     np.average(state1, axis=2)[1],
+    #     np.std(state1, axis=2)[1],
+    #     fmt=_fmts[1],
+    #     label=rf"$|\vec{{p}}|={mod_p[1]:0.2}$",
+    #     # label="theta2_fix",
+    #     color=_colors[1],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # plt.errorbar(
+    #     lambdas,
+    #     np.average(state2, axis=2)[1],
+    #     np.std(state2, axis=2)[1],
+    #     fmt=_fmts[1],
+    #     color=_colors[1],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
 
-    plt.errorbar(
-        lambdas,
-        np.average(state1, axis=2)[3],
-        np.std(state1, axis=2)[3],
-        fmt=_fmts[3],
-        label="theta4",
-        color=_colors[3],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
-    )
-    plt.errorbar(
-        lambdas,
-        np.average(state2, axis=2)[3],
-        np.std(state2, axis=2)[3],
-        fmt=_fmts[3],
-        color=_colors[3],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
-    )
+    # plt.errorbar(
+    #     lambdas,
+    #     np.average(state1, axis=2)[3],
+    #     np.std(state1, axis=2)[3],
+    #     fmt=_fmts[3],
+    #     label=rf"$|\vec{{p}}|={mod_p[3]:0.2}$",
+    #     # label="theta4",
+    #     color=_colors[3],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # plt.errorbar(
+    #     lambdas,
+    #     np.average(state2, axis=2)[3],
+    #     np.std(state2, axis=2)[3],
+    #     fmt=_fmts[3],
+    #     color=_colors[3],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
 
-    plt.errorbar(
-        lambdas,
-        np.average(state1, axis=2)[4],
-        np.std(state1, axis=2)[4],
-        fmt=_fmts[4],
-        label="theta5",
-        color=_colors[4],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
-    )
-    plt.errorbar(
-        lambdas,
-        np.average(state2, axis=2)[4],
-        np.std(state2, axis=2)[4],
-        fmt=_fmts[4],
-        color=_colors[4],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
-    )
+    # plt.errorbar(
+    #     lambdas,
+    #     np.average(state1, axis=2)[2],
+    #     np.std(state1, axis=2)[2],
+    #     fmt=_fmts[2],
+    #     label=rf"$|\vec{{p}}|={mod_p[2]:0.2}$",
+    #     # label="theta3",
+    #     color=_colors[2],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # plt.errorbar(
+    #     lambdas,
+    #     np.average(state2, axis=2)[2],
+    #     np.std(state2, axis=2)[2],
+    #     fmt=_fmts[2],
+    #     color=_colors[2],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
 
-    plt.errorbar(
-        lambdas,
-        np.average(state1, axis=2)[5],
-        np.std(state1, axis=2)[5],
-        fmt=_fmts[5],
-        label="qmax",
-        color=_colors[5],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
-    )
-    plt.errorbar(
-        lambdas,
-        np.average(state2, axis=2)[5],
-        np.std(state2, axis=2)[5],
-        fmt=_fmts[5],
-        color=_colors[5],
-        capsize=4,
-        elinewidth=1,
-        markerfacecolor="none",
-    )
+    # plt.errorbar(
+    #     lambdas,
+    #     np.average(state1, axis=2)[4],
+    #     np.std(state1, axis=2)[4],
+    #     fmt=_fmts[4],
+    #     label=rf"$|\vec{{p}}|={mod_p[4]:0.2}$",
+    #     # label="theta5",
+    #     color=_colors[4],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # plt.errorbar(
+    #     lambdas,
+    #     np.average(state2, axis=2)[4],
+    #     np.std(state2, axis=2)[4],
+    #     fmt=_fmts[4],
+    #     color=_colors[4],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+
+    # plt.errorbar(
+    #     lambdas,
+    #     np.average(state1, axis=2)[5],
+    #     np.std(state1, axis=2)[5],
+    #     fmt=_fmts[5],
+    #     label=rf"$|\vec{{p}}|={mod_p[5]:0.2}$",
+    #     # label="qmax",
+    #     color=_colors[5],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # plt.errorbar(
+    #     lambdas,
+    #     np.average(state2, axis=2)[5],
+    #     np.std(state2, axis=2)[5],
+    #     fmt=_fmts[5],
+    #     color=_colors[5],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
 
     plt.legend(fontsize="x-small")
     # plt.ylabel(r"eigenvector values")
-    plt.ylabel(r"eigenvector values squared")
+    # plt.ylabel(r"eigenvector values squared")
+    plt.ylabel(r"$(v_0^i)^2$")
     plt.xlabel(r"$\lambda$")
     plt.savefig(plotdir / ("evecs_lambda_" + name + ".pdf"))
 
@@ -968,6 +1000,9 @@ if __name__ == "__main__":
     datadir_qmax = Path.home() / Path(
         "Documents/PhD/analysis_results/six_point_fn_qmax/data/"
     )
+    datadir6 = Path.home() / Path(
+        "Documents/PhD/analysis_results/six_point_fn_one_fourier/data/"
+    )
 
     plotdir.mkdir(parents=True, exist_ok=True)
 
@@ -981,10 +1016,9 @@ if __name__ == "__main__":
     dm_N = 0.0070
     dm_S = 0.0042
 
-    extra_points_qsq = [0.338, 0.29 - 0.002, 0.29, 0.29 + 0.002, -0.015210838956772907]
+    # extra_points_qsq = [0.338, 0.29 - 0.002, 0.29, 0.29 + 0.002, -0.015210838956772907]
 
     lambda_index = 5
-    # lambda_index = 8
     # lambda_index = 14
 
     # --- Read the sequential src data ---
@@ -1008,7 +1042,8 @@ if __name__ == "__main__":
     psq_0 = 0.3380670060434127
 
     # with open(datadir1 / "lambda_dep_t7_dt2_fit7-17.pkl", "rb") as file_in:  # theta2
-    with open(datadir1 / "lambda_dep_t9_dt4_fit8-23.pkl", "rb") as file_in:  # theta2
+    # with open(datadir1 / "lambda_dep_t9_dt4_fit8-23.pkl", "rb") as file_in:  # theta2
+    with open(datadir1 / "lambda_dep_t5_dt1_fit8-23.pkl", "rb") as file_in:  # theta2
         # with open(datadir1 / "lambda_dep_t7_dt2_fit8-23.pkl", "rb") as file_in:  # theta2
         data_set1 = pickle.load(file_in)
     order0_evecs_1 = data_set1["order0_evecs"]
@@ -1062,6 +1097,13 @@ if __name__ == "__main__":
     psq_5 = 0.01373279121924232
     # print(f"{order3_evecs_5=}")
 
+    with open(datadir6 / "lambda_dep_t5_dt3_fit8-19.pkl", "rb") as file_in:  # qmax
+        data_set6 = pickle.load(file_in)
+    lambdas_6 = data_set6["lambdas"]
+    order3_evecs_6 = data_set6["order3_evecs"]
+    qsq_6 = 0.27402105651700137
+    psq_6 = 0.27406306546926495
+
     with open(datadir_qmax / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # qmax
         data_set_qmax = pickle.load(file_in)
     lambdas_qmax = data_set_qmax["lambdas"]
@@ -1077,6 +1119,7 @@ if __name__ == "__main__":
             np.sqrt(psq_2),
             np.sqrt(psq_4),
             np.sqrt(psq_5),
+            np.sqrt(psq_6),
             np.sqrt(psq_qmax),
         ]
     )
@@ -1099,6 +1142,8 @@ if __name__ == "__main__":
     print("\n")
     print(np.average(order3_evecs_5[lambda_index, :, :, :], axis=0) ** 2)
     print("\n")
+    print(np.average(order3_evecs_6[lambda_index, :, :, :], axis=0) ** 2)
+    print("\n")
     print(np.average(order3_evecs_qmax[lambda_index, :, :, :], axis=0) ** 2)
     print("\n")
 
@@ -1114,6 +1159,8 @@ if __name__ == "__main__":
             + order3_evecs_4[lambda_index, 0, 1] ** 2,
             order3_evecs_5[lambda_index, 0, 0] ** 2
             + order3_evecs_5[lambda_index, 0, 1] ** 2,
+            order3_evecs_6[lambda_index, 0, 0] ** 2
+            + order3_evecs_6[lambda_index, 0, 1] ** 2,
             order3_evecs_qmax[lambda_index, 0, 0] ** 2
             + order3_evecs_qmax[lambda_index, 0, 1] ** 2,
         ]
@@ -1130,6 +1177,8 @@ if __name__ == "__main__":
             + order3_evecs_4[lambda_index, 1, 1] ** 2,
             order3_evecs_5[lambda_index, 1, 0] ** 2
             + order3_evecs_5[lambda_index, 1, 1] ** 2,
+            order3_evecs_6[lambda_index, 1, 0] ** 2
+            + order3_evecs_6[lambda_index, 1, 1] ** 2,
             order3_evecs_qmax[lambda_index, 1, 0] ** 2
             + order3_evecs_qmax[lambda_index, 1, 1] ** 2,
         ]
@@ -1187,6 +1236,7 @@ if __name__ == "__main__":
             order3_evecs_2[lambda_index, :, 0, evec_num] ** 2,
             order3_evecs_4[lambda_index, :, 0, evec_num] ** 2,
             order3_evecs_5[lambda_index, :, 0, evec_num] ** 2,
+            order3_evecs_6[lambda_index, :, 0, evec_num] ** 2,
             order3_evecs_qmax[lambda_index, :, 0, evec_num] ** 2,
         ]
     )
@@ -1197,6 +1247,7 @@ if __name__ == "__main__":
             order3_evecs_2[lambda_index, :, 1, evec_num] ** 2,
             order3_evecs_4[lambda_index, :, 1, evec_num] ** 2,
             order3_evecs_5[lambda_index, :, 1, evec_num] ** 2,
+            order3_evecs_6[lambda_index, :, 1, evec_num] ** 2,
             order3_evecs_qmax[lambda_index, :, 1, evec_num] ** 2,
         ]
     )
@@ -1230,8 +1281,9 @@ if __name__ == "__main__":
         [
             order3_evecs_0[:, :, 0, evec_num] ** 2,
             order3_evecs_1[:, :, 0, evec_num] ** 2,
-            order3_evecs_2[:, :, 0, evec_num] ** 2,
+            order3_evecs_6[:, :, 0, evec_num] ** 2,
             order3_evecs_4[:, :, 0, evec_num] ** 2,
+            order3_evecs_2[:, :, 0, evec_num] ** 2,
             order3_evecs_5[:, :, 0, evec_num] ** 2,
             order3_evecs_qmax[:, :, 0, evec_num] ** 2,
         ]
@@ -1240,8 +1292,9 @@ if __name__ == "__main__":
         [
             order3_evecs_0[:, :, 1, evec_num] ** 2,
             order3_evecs_1[:, :, 1, evec_num] ** 2,
-            order3_evecs_2[:, :, 1, evec_num] ** 2,
+            order3_evecs_6[:, :, 1, evec_num] ** 2,
             order3_evecs_4[:, :, 1, evec_num] ** 2,
+            order3_evecs_2[:, :, 1, evec_num] ** 2,
             order3_evecs_5[:, :, 1, evec_num] ** 2,
             order3_evecs_qmax[:, :, 1, evec_num] ** 2,
         ]
@@ -1269,7 +1322,37 @@ if __name__ == "__main__":
     print(f"{np.average(state1_lmb,axis=1)=}")
 
     plot_evecs_lambda(plotdir, state1_lmb, state2_lmb, lambdas_1, name="theta2_fix")
-    plot_all_evecs_lambda(plotdir, states1_lmb, states2_lmb, lambdas_1, name="all")
+    # lambdas_new_order = np.array(
+    #     [
+    #         lambdas_1[0],
+    #         lambdas_1[1],
+    #         lambdas_1[5],
+    #         lambdas_1[3],
+    #         lambdas_1[2],
+    #         lambdas_1[4],
+    #         lambdas_1[6],
+    #     ]
+    # )
+    mod_p_new_order = np.array(
+        [
+            np.sqrt(psq_0),
+            np.sqrt(psq_1),
+            np.sqrt(psq_6),
+            np.sqrt(psq_4),
+            np.sqrt(psq_2),
+            np.sqrt(psq_5),
+            np.sqrt(psq_qmax),
+        ]
+    )
+
+    plot_all_evecs_lambda(
+        plotdir,
+        states1_lmb,
+        states2_lmb,
+        lambdas_1,
+        mod_p_new_order,
+        name="all",
+    )
     plot_orders_evecs_lambda(
         plotdir, states1_lmb_2, states2_lmb_2, lambdas_1, name="orders"
     )
@@ -1281,6 +1364,7 @@ if __name__ == "__main__":
             order3_evecs_2[lambda_index, :, 0, evec_num] ** 2,
             order3_evecs_4[lambda_index, :, 0, evec_num] ** 2,
             order3_evecs_5[lambda_index, :, 0, evec_num] ** 2,
+            order3_evecs_6[lambda_index, :, 0, evec_num] ** 2,
             order3_evecs_qmax[lambda_index, :, 0, evec_num] ** 2,
         ]
     )
@@ -1291,6 +1375,7 @@ if __name__ == "__main__":
             order3_evecs_2[lambda_index, :, 1, evec_num] ** 2,
             order3_evecs_4[lambda_index, :, 1, evec_num] ** 2,
             order3_evecs_5[lambda_index, :, 1, evec_num] ** 2,
+            order3_evecs_6[lambda_index, :, 1, evec_num] ** 2,
             order3_evecs_qmax[lambda_index, :, 1, evec_num] ** 2,
         ]
     )
