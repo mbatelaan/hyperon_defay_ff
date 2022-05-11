@@ -4,12 +4,10 @@ from BootStrap3 import bootstrap
 import scipy.optimize as syopt
 from scipy.optimize import curve_fit
 import pickle
-
-
+import sys
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib import rcParams
-
 from formatting import err_brackets
 
 # _metadata = {"Author": "Mischa Batelaan", "Creator": __file__}
@@ -716,7 +714,8 @@ def plot_all_evecs_lambda_one(plotdir, state1, state2, lambdas, labels, name="")
             np.average(state2, axis=2)[j],
             np.std(state2, axis=2)[j],
             fmt=_fmts[j],
-            color=_colors[j],
+            color=_colors[j + 1],
+            label=labels[j + 1],
             capsize=4,
             elinewidth=1,
             markerfacecolor="none",
@@ -903,33 +902,10 @@ def plot_one_fourier():
     )
 
 
-if __name__ == "__main__":
-    plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
-    plt.rc("text", usetex=True)
-    rcParams.update({"figure.autolayout": True})
-
+def plot_datasets(dataset, filename):
     # --- directories ---
     plotdir = Path.home() / Path("Documents/PhD/analysis_results/sig2n/")
-    datadir0 = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn4/data/")
-    datadir1 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_theta2_fix/data/"
-    )
-    datadir2 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_theta3/data/"
-    )
-    datadir4 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_theta4/data/"
-    )
-    datadir5 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_theta5/data/"
-    )
-    datadir_qmax = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_qmax/data/"
-    )
-    datadir6 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_one_fourier/data/"
-    )
-
+    datadir = Path.home() / Path("Documents/PhD/analysis_results/" + dataset + "/data/")
     plotdir.mkdir(parents=True, exist_ok=True)
 
     # --- Lattice specs ---
@@ -948,130 +924,97 @@ if __name__ == "__main__":
     # lambda_index = 14
 
     # --- Read the sequential src data ---
-    with open(datadir0 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # fn4
+    with open(datadir / filename, "rb") as file_in:
+        data_set = pickle.load(file_in)
+    lambdas = data_set["lambdas"]
+    order3_evecs = data_set["order3_evecs"]
+
+    mod_p = np.array(
+        [
+            rf"state 1",
+            rf"state 2",
+        ]
+    )
+    evec_num = 0
+    states1_lmb = np.array(
+        [
+            order3_evecs[:, :, 0, evec_num] ** 2,
+        ]
+    )
+    states2_lmb = np.array(
+        [
+            order3_evecs[:, :, 1, evec_num] ** 2,
+        ]
+    )
+    plot_all_evecs_lambda_one(
+        plotdir,
+        states1_lmb,
+        states2_lmb,
+        lambdas,
+        mod_p,
+        name=dataset,
+    )
+
+
+if __name__ == "__main__":
+    plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
+    plt.rc("text", usetex=True)
+    rcParams.update({"figure.autolayout": True})
+
+    if len(sys.argv) == 3:
+        dataset = sys.argv[1]
+        filename = sys.argv[2]
+    elif len(sys.argv) == 2:
+        dataset = sys.argv[1]
+        filename = "lambda_dep_t5_dt3_fit8-19.pkl"
+    else:
+        dataset = "six_point_fn_theta2_fix"
+        filename = "lambda_dep_t5_dt3_fit8-19.pkl"
+
+    plot_datasets(dataset, filename)
+
+    exit()
+
+    # --- directories ---
+    plotdir = Path.home() / Path("Documents/PhD/analysis_results/sig2n/")
+    datadir = Path.home() / Path("Documents/PhD/analysis_results/" + dataset + "/data/")
+    plotdir.mkdir(parents=True, exist_ok=True)
+
+    # --- Lattice specs ---
+    NX = 32
+    NT = 64
+
+    # --- Masses from the theta tuning ---
+    m_N = 0.4179
+    m_S = 0.4642
+    dm_N = 0.0070
+    dm_S = 0.0042
+
+    # extra_points_qsq = [0.338, 0.29 - 0.002, 0.29, 0.29 + 0.002, -0.015210838956772907]
+
+    lambda_index = 5
+    # lambda_index = 14
+
+    # --- Read the sequential src data ---
+    with open(datadir / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:
         data_set0 = pickle.load(file_in)
-    # print([key for key in data_set0])
+    order0_evecs_1 = data_set0["order0_evecs"]
+    order1_evecs_1 = data_set0["order1_evecs"]
+    order2_evecs_1 = data_set0["order2_evecs"]
     order3_evecs_0 = data_set0["order3_evecs"]
     lambdas_0 = data_set0["lambdas"]
-    # print(f"{lambdas_0=}")
-    # print(f"{lambdas_0[lambda_index]=}")
-    # print(f"{np.shape(order3_evecs_0)=}")
-    # print(f"{order3_evecs_0=}")
-
-    # for evec in order3_evecs_0:
-    #     vec1 = evec[:, 0]
-    #     vec2 = evec[:, 1]
-    #     print(vec1 / sum(vec1))
-    #     print(vec2 / sum(vec2))
 
     qsq_0 = 0.3376966834768195
     psq_0 = 0.3380670060434127
 
-    # with open(datadir1 / "lambda_dep_t7_dt2_fit7-17.pkl", "rb") as file_in:  # theta2
-    # with open(datadir1 / "lambda_dep_t9_dt4_fit8-23.pkl", "rb") as file_in:  # theta2
-    with open(datadir1 / "lambda_dep_t5_dt1_fit8-23.pkl", "rb") as file_in:  # theta2
-        # with open(datadir1 / "lambda_dep_t7_dt2_fit8-23.pkl", "rb") as file_in:  # theta2
-        data_set1 = pickle.load(file_in)
-    order0_evecs_1 = data_set1["order0_evecs"]
-    order1_evecs_1 = data_set1["order1_evecs"]
-    order2_evecs_1 = data_set1["order2_evecs"]
-    order3_evecs_1 = data_set1["order3_evecs"]
-    if len(np.shape(order3_evecs_1)) == 4:
-        # estate1_ = order3_evecs_1[lambda_index, :, 0, 0] ** 2
-        # estate2_ = order3_evecs_1[lambda_index, :, 1, 0] ** 2
-        estate1_ = order3_evecs_1[lambda_index, :, :, :]
-        estate2_ = order3_evecs_1[lambda_index, :, :, :]
-        print(f"{np.average(estate1_, axis=0)=}")
-        print(f"{np.std(estate1_, axis=0)=}")
-        print(f"{np.average(estate2_, axis=0)=}")
-        print(f"{np.std(estate2_, axis=0)=}")
-    # print(f"{order3_evecs_1=}")
-    order3_evals_1 = data_set1["order3_evals"]
-    lambdas_1 = data_set1["lambdas"]
-    states_l0_1 = np.array(
-        [
-            data_set1["bootfit_unpert_sigma"][:, 1],
-            data_set1["bootfit_unpert_nucl"][:, 1],
-        ]
-    )
-    order3_fit_1 = data_set1["order3_states_fit"]
-    states_l_1 = order3_fit_1[:, :, :, 1]
-    qsq_1 = 0.2900640506128018
-    psq_1 = 0.2900640506128018
-
-    with open(datadir2 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # theta3
-        data_set2 = pickle.load(file_in)
-    lambdas_2 = data_set2["lambdas"]
-    order3_evecs_2 = data_set2["order3_evecs"]
-    # print(f"{order3_evecs_2=}")
-    qsq_2 = 0.05986664799785204
-    psq_2 = 0.06851576636731624
-
-    with open(datadir4 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # theta4
-        data_set4 = pickle.load(file_in)
-    lambdas_4 = data_set4["lambdas"]
-    order3_evecs_4 = data_set4["order3_evecs"]
-    # print(f"{order3_evecs_4=}")
-    qsq_4 = 0.17317010421581466
-    psq_4 = 0.1754003619003296
-
-    with open(datadir5 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # theta5
-        data_set5 = pickle.load(file_in)
-    lambdas_5 = data_set5["lambdas"]
-    order3_evecs_5 = data_set5["order3_evecs"]
-    qsq_5 = 0
-    psq_5 = 0.01373279121924232
-    # print(f"{order3_evecs_5=}")
-
-    with open(datadir6 / "lambda_dep_t5_dt3_fit8-19.pkl", "rb") as file_in:  # theta6
-        data_set6 = pickle.load(file_in)
-    lambdas_6 = data_set6["lambdas"]
-    order3_evecs_6 = data_set6["order3_evecs"]
-    qsq_6 = 0.27402105651700137
-    psq_6 = 0.27406306546926495
-
-    with open(datadir_qmax / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # qmax
-        data_set_qmax = pickle.load(file_in)
-    lambdas_qmax = data_set_qmax["lambdas"]
-    order3_evecs_qmax = data_set_qmax["order3_evecs"]
-    # print(f"{order3_evecs_qmax=}")
-    qsq_qmax = -0.015210838956772907
-    psq_qmax = 0
-
-    mod_p = np.array(
-        [
-            np.sqrt(psq_0),
-            np.sqrt(psq_1),
-            np.sqrt(psq_2),
-            np.sqrt(psq_4),
-            np.sqrt(psq_5),
-            np.sqrt(psq_6),
-            np.sqrt(psq_qmax),
-        ]
-    )
-
-    # print(f"{np.average(order3_evecs_0[lambda_index, :, :, :], axis=0)=}")
-    # print(f"{np.average(order3_evecs_1[lambda_index, :, :, :], axis=0)=}")
-    # print(f"{np.average(order3_evecs_2[lambda_index, :, :, :], axis=0)=}")
-    # print(f"{np.average(order3_evecs_4[lambda_index, :, :, :], axis=0)=}")
-    # print(f"{np.average(order3_evecs_5[lambda_index, :, :, :], axis=0)=}")
-    # print(f"{np.average(order3_evecs_qmax[lambda_index, :, :, :], axis=0)=}")
-
-    print("\n")
-    print(np.average(order3_evecs_0[lambda_index, :, :, :], axis=0) ** 2)
-    print("\n")
-    print(np.average(order3_evecs_1[lambda_index, :, :, :], axis=0) ** 2)
-    print("\n")
-    print(np.average(order3_evecs_2[lambda_index, :, :, :], axis=0) ** 2)
-    print("\n")
-    print(np.average(order3_evecs_4[lambda_index, :, :, :], axis=0) ** 2)
-    print("\n")
-    print(np.average(order3_evecs_5[lambda_index, :, :, :], axis=0) ** 2)
-    print("\n")
-    print(np.average(order3_evecs_6[lambda_index, :, :, :], axis=0) ** 2)
-    print("\n")
-    print(np.average(order3_evecs_qmax[lambda_index, :, :, :], axis=0) ** 2)
-    print("\n")
+    # states_l0_1 = np.array(
+    #     [
+    #         data_set1["bootfit_unpert_sigma"][:, 1],
+    #         data_set1["bootfit_unpert_nucl"][:, 1],
+    #     ]
+    # )
+    # order3_fit_1 = data_set1["order3_states_fit"]
+    # states_l_1 = order3_fit_1[:, :, :, 1]
 
     state1_ = np.array(
         [

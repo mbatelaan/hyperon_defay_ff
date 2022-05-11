@@ -401,6 +401,9 @@ if __name__ == "__main__":
     datadir5 = Path.home() / Path(
         "Documents/PhD/analysis_results/six_point_fn_theta5/data/"
     )
+    datadir7 = Path.home() / Path(
+        "Documents/PhD/analysis_results/six_point_fn_theta7/data/"
+    )
     datadir_qmax = Path.home() / Path(
         "Documents/PhD/analysis_results/six_point_fn_qmax/data/"
     )
@@ -498,21 +501,28 @@ if __name__ == "__main__":
         mat_elements5 = pickle.load(file_in)
     mat_element_theta5 = np.array([mat_elements5["bootfit3"].T[1]])
 
+    with open(datadir7 / "matrix_element.pkl", "rb") as file_in:  # twisted_gauge7
+        mat_elements7 = pickle.load(file_in)
+    mat_element_theta7 = np.array([mat_elements7["bootfit3"].T[1]])
+
     with open(datadir_qmax / "matrix_element.pkl", "rb") as file_in:  # qmax
         mat_element_qmax_data = pickle.load(file_in)
     mat_element_qmax = np.array([mat_element_qmax_data["bootfit3"].T[1]])
 
     # --- Multiply energy factors for the form factors ---
     pvec_list2 = np.array(
-        [[1, 0, 0], [1, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
+        [[1, 0, 0], [1, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
     )  # momentum values for each dataset
     twist_list = np.array(
         [
             [0, 0.96651388, 0],
             [0, 0.48325694, 0],
-            [0, 0.5, 0],
-            [0, 0.8, 0],
+            # [0, 0.5, 0],
+            # [0, 0.8, 0],
+            [0, 1, 0],
+            [0, 1.6, 0],
             [0, 0.4476969635569866, 0],
+            [0, 2.0575, 0],
             [0, 0, 0],
         ]
     )
@@ -522,8 +532,12 @@ if __name__ == "__main__":
         mat_element_theta3,
         mat_element_theta4,
         mat_element_theta5,
+        mat_element_theta7,
         mat_element_qmax,
     ]
+
+    # Divide out a common factor of all the form factors to get the FF combination
+    # in a slightly nicer form.
     FF_seq = []
     for i, pvec in enumerate(pvec_list2):
         FF_facs = FF_factors(m_N, m_S, pvec, twist_list[i], NX)
@@ -539,7 +553,15 @@ if __name__ == "__main__":
     # extra_points_qsq = [0.29, 0.338, 0.29, 0.29, -0.015210838956772907]
     # extra_points_qsq = [0.29, 0.338, 0.0598666, 0.1731701, 0, -0.015210838956772907]
     # extra_points_qsq = [0.338, 0.29 - 0.002, 0.29, 0.29 + 0.002, -0.015210838956772907]
-    extra_points_qsq = [0.338, 0.29, 0.0598666, 0.1731701, 0, -0.015210838956772907]
+    extra_points_qsq = [
+        0.338,
+        0.29,
+        0.0598666,
+        0.1731701,
+        0,
+        0.29,
+        -0.015210838956772907,
+    ]
 
     extra_points = {
         "xdata": extra_points_qsq,
@@ -550,6 +572,7 @@ if __name__ == "__main__":
             r"$\theta_3$",
             r"$\theta_4$",
             r"$\theta_5$",
+            r"$\theta_7$",
             r"$q_{\textrm{max}}$",
             # r"seq. src. at $q_{\textrm{max}}$",
         ],
