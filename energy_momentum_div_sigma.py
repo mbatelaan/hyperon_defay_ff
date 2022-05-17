@@ -458,7 +458,7 @@ if __name__ == "__main__":
     plotdir = Path.home() / Path("Documents/PhD/analysis_results/sig2n/")
     datadir0 = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn4/data/")
     datadir1 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_theta2_fix/data/"
+        "Documents/PhD/analysis_results/six_point_fn_theta7/data/"
     )
     datadir2 = Path.home() / Path(
         "Documents/PhD/analysis_results/six_point_fn_theta3/data/"
