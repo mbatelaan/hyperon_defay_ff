@@ -23,7 +23,7 @@ _colors = [
     "#e41a1c",
     "#dede00",
 ]
-_fmts = ["s", "^", "*", "o", ".", ",", "v", "p", "P"]
+_fmts = ["s", "^", "*", "o", ".", "p", "v", "P", ","]
 
 
 def evffdata(evff_file):
@@ -273,15 +273,52 @@ def evffplot7(
     pypl.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
     pypl.legend(fontsize="xx-small")
     # _metadata["Title"] = plotname
-    # pypl.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2}$")
     pypl.ylabel(
         r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2} + \frac{m_{\Sigma} - E_N}{m_N+m_{\Sigma}}F_3$",
         fontsize="x-small",
     )
     pypl.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
     pypl.ylim(0, 1.5)
-    # pypl.grid(True, alpha=0.4)
     pypl.savefig(plotdir / (plotname + "_all.pdf"))  # , metadata=_metadata)
+
+    pypl.figure(figsize=(5, 4))
+    pypl.errorbar(
+        xdata,
+        ydata,
+        errordata,
+        label="3-pt function",
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="s",
+        markerfacecolor="none",
+    )
+
+    if extra_points != None:
+        print(len(extra_points["xdata"]))
+        print(np.shape(extra_points["ydata"]))
+        print(np.shape(extra_points["ydata"]))
+        pypl.errorbar(
+            extra_points["xdata"],
+            np.average(extra_points["ydata"], axis=2)[:, 0],
+            np.std(extra_points["ydata"], axis=2)[:, 0],
+            capsize=4,
+            elinewidth=1,
+            color=_colors[1],
+            fmt=_fmts[1],
+            markerfacecolor="none",
+            label="sequential source",
+        )
+
+    pypl.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
+    pypl.legend(fontsize="xx-small")
+    pypl.ylabel(
+        r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2} + \frac{m_{\Sigma} - E_N}{m_N+m_{\Sigma}}F_3$",
+        fontsize="x-small",
+    )
+    pypl.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
+    pypl.ylim(0, 1.5)
+    pypl.savefig(plotdir / (plotname + "_all_together.pdf"))  # , metadata=_metadata)
     if show:
         pypl.show()
     pypl.close()
@@ -388,9 +425,12 @@ if __name__ == "__main__":
     # --- directories ---
     evffdir = Path.home() / Path("Dropbox/PhD/lattice_results/eddie/sig2n/ff/")
     plotdir = Path.home() / Path("Documents/PhD/analysis_results/sig2n/")
-    datadir1 = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn4/data/")
+    # datadir1 = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn4/data/")
+    datadir1 = Path.home() / Path(
+        "Documents/PhD/analysis_results/six_point_fn_theta8/data/"
+    )
     datadir2 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_theta2_fix/data/"
+        "Documents/PhD/analysis_results/six_point_fn_theta7/data/"
     )
     datadir3 = Path.home() / Path(
         "Documents/PhD/analysis_results/six_point_fn_theta3/data/"
@@ -485,23 +525,23 @@ if __name__ == "__main__":
         mat_elements1 = pickle.load(file_in)
     mat_element_fn4 = np.array([mat_elements1["bootfit3"].T[1]])
 
-    with open(datadir2 / "matrix_element.pkl", "rb") as file_in:  # theta2
-        mat_elements2 = pickle.load(file_in)
-    mat_element_theta2 = np.array([mat_elements2["bootfit3"].T[1]])
+    # with open(datadir2 / "matrix_element.pkl", "rb") as file_in:  # theta2
+    #     mat_elements2 = pickle.load(file_in)
+    # mat_element_theta2 = np.array([mat_elements2["bootfit3"].T[1]])
 
-    with open(datadir3 / "matrix_element.pkl", "rb") as file_in:  # twisted_gauge3
+    with open(datadir3 / "matrix_element.pkl", "rb") as file_in:
         mat_elements3 = pickle.load(file_in)
     mat_element_theta3 = np.array([mat_elements3["bootfit3"].T[1]])
 
-    with open(datadir4 / "matrix_element.pkl", "rb") as file_in:  # twisted_gauge5
+    with open(datadir4 / "matrix_element.pkl", "rb") as file_in:
         mat_elements4 = pickle.load(file_in)
     mat_element_theta4 = np.array([mat_elements4["bootfit3"].T[1]])
 
-    with open(datadir5 / "matrix_element.pkl", "rb") as file_in:  # twisted_gauge5
+    with open(datadir5 / "matrix_element.pkl", "rb") as file_in:
         mat_elements5 = pickle.load(file_in)
     mat_element_theta5 = np.array([mat_elements5["bootfit3"].T[1]])
 
-    with open(datadir7 / "matrix_element.pkl", "rb") as file_in:  # twisted_gauge7
+    with open(datadir7 / "matrix_element.pkl", "rb") as file_in:
         mat_elements7 = pickle.load(file_in)
     mat_element_theta7 = np.array([mat_elements7["bootfit3"].T[1]])
 
@@ -510,13 +550,16 @@ if __name__ == "__main__":
     mat_element_qmax = np.array([mat_element_qmax_data["bootfit3"].T[1]])
 
     # --- Multiply energy factors for the form factors ---
+    # pvec_list2 = np.array(
+    #     [[1, 0, 0], [1, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
+    # )  # momentum values for each dataset
     pvec_list2 = np.array(
-        [[1, 0, 0], [1, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
+        [[1, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
     )  # momentum values for each dataset
     twist_list = np.array(
         [
             [0, 0.96651388, 0],
-            [0, 0.48325694, 0],
+            # [0, 0.48325694, 0],
             # [0, 0.5, 0],
             # [0, 0.8, 0],
             [0, 1, 0],
@@ -528,7 +571,7 @@ if __name__ == "__main__":
     )
     seq_src_points = [
         mat_element_fn4,
-        mat_element_theta2,
+        # mat_element_theta2,
         mat_element_theta3,
         mat_element_theta4,
         mat_element_theta5,
@@ -555,7 +598,7 @@ if __name__ == "__main__":
     # extra_points_qsq = [0.338, 0.29 - 0.002, 0.29, 0.29 + 0.002, -0.015210838956772907]
     extra_points_qsq = [
         0.338,
-        0.29,
+        # 0.29,
         0.0598666,
         0.1731701,
         0,
@@ -568,7 +611,7 @@ if __name__ == "__main__":
         "ydata": seq_src_points,
         "labels": [
             r"$\theta_1$",
-            r"$\theta_2$",
+            # r"$\theta_2$",
             r"$\theta_3$",
             r"$\theta_4$",
             r"$\theta_5$",

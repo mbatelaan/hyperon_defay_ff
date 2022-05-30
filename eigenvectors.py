@@ -454,7 +454,7 @@ def plot_evecs(plotdir, mod_p, state1, state2, lambda_index):
     # plt.show()
 
 
-def plot_evecs_bs(plotdir, mod_p, state1, state2, lambda_index):
+def plot_evecs_bs(plotdir, mod_p, state1, state2, lambda_index, name=""):
     """Plot the overlaps from the eigenvectors against the momentum values, plot the values as violin plots"""
     print(f"{mod_p=}")
     print(f"{np.average(state1,axis=1)=}")
@@ -521,7 +521,98 @@ def plot_evecs_bs(plotdir, mod_p, state1, state2, lambda_index):
     # plt.legend(fontsize="x-small")
     plt.xlabel(r"$|\vec{p}_N|$")
     plt.ylabel(r"eigenvector values squared")
-    plt.savefig(plotdir / ("eigenvectors_bs.pdf"))
+    plt.savefig(plotdir / ("eigenvectors_bs" + name + ".pdf"))
+
+
+def plot_evecs_bs_both(plotdir, mod_p, state1, state2, state3, state4, lambda_index):
+    """Plot the overlaps from the eigenvectors against the momentum values, plot the values as violin plots"""
+    print(f"{mod_p=}")
+    print(f"{np.average(state1,axis=1)=}")
+    print(f"{np.average(state2,axis=1)=}")
+    print(np.shape(mod_p))
+    print(np.shape(state1))
+
+    labels = []
+
+    def add_label(violin, label):
+        color = violin["bodies"][0].get_facecolor().flatten()
+        labels.append((mpatches.Patch(color=color), label))
+
+    plt.figure(figsize=(6, 6))
+    # for iboot in range(np.shape(state1)[1]):
+    # plt.violinplot(
+    #     state1.T,
+    #     mod_p,
+    #     widths=0.05,
+    #     showmeans=True,
+    #     showmedians=True,
+    #     # label=rf"State 1 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+    #     # color=_colors[3],
+    #     # marker=",",
+    # )
+    # plt.violinplot(
+    #     state2.T,
+    #     mod_p,
+    #     widths=0.05,
+    #     showmeans=True,
+    #     showmedians=True,
+    #     # label=rf"State 2 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+    #     # color=_colors[3],
+    #     # marker=",",
+    # )
+    add_label(
+        plt.violinplot(
+            state1.T,
+            mod_p,
+            widths=0.05,
+            showmeans=True,
+            showmedians=True,
+        ),
+        rf"State 1 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+    )
+    add_label(
+        plt.violinplot(
+            state2.T,
+            mod_p,
+            widths=0.05,
+            showmeans=True,
+            showmedians=True,
+        ),
+        rf"State 2 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+    )
+    add_label(
+        plt.violinplot(
+            state3.T,
+            mod_p,
+            widths=0.05,
+            showmeans=True,
+            showmedians=True,
+        ),
+        rf"State 3 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+    )
+    add_label(
+        plt.violinplot(
+            state4.T,
+            mod_p,
+            widths=0.05,
+            showmeans=True,
+            showmedians=True,
+        ),
+        rf"State 4 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+    )
+
+    # plt.scatter(
+    #     mod_p,
+    #     state2[:, iboot],
+    #     color=_colors[4],
+    #     marker=",",
+    # )
+
+    plt.legend(*zip(*labels), loc="center left", fontsize="x-small")
+    # plt.legend(fontsize="x-small")
+    plt.xlabel(r"$|\vec{p}_N|$")
+    plt.ylabel(r"eigenvector values squared")
+    plt.savefig(plotdir / ("eigenvectors_bs_both.pdf"))
 
 
 def plot_evals_lambda(plotdir, evals, lambdas, nucleon, sigma, name=""):
@@ -910,9 +1001,12 @@ if __name__ == "__main__":
 
     # --- directories ---
     plotdir = Path.home() / Path("Documents/PhD/analysis_results/sig2n/")
-    datadir0 = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn4/data/")
+    # datadir0 = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn4/data/")
+    datadir0 = Path.home() / Path(
+        "Documents/PhD/analysis_results/six_point_fn_theta8/data/"
+    )
     datadir1 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_theta2_fix/data/"
+        "Documents/PhD/analysis_results/six_point_fn_theta7/data/"
     )
     datadir2 = Path.home() / Path(
         "Documents/PhD/analysis_results/six_point_fn_theta3/data/"
@@ -944,11 +1038,11 @@ if __name__ == "__main__":
 
     # extra_points_qsq = [0.338, 0.29 - 0.002, 0.29, 0.29 + 0.002, -0.015210838956772907]
 
-    lambda_index = 5
+    lambda_index = 9
     # lambda_index = 14
 
     # --- Read the sequential src data ---
-    with open(datadir0 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # fn4
+    with open(datadir0 / "lambda_dep_t4_dt2.pkl", "rb") as file_in:  # theta8
         data_set0 = pickle.load(file_in)
     # print([key for key in data_set0])
     order3_evecs_0 = data_set0["order3_evecs"]
@@ -969,7 +1063,8 @@ if __name__ == "__main__":
 
     # with open(datadir1 / "lambda_dep_t7_dt2_fit7-17.pkl", "rb") as file_in:  # theta2
     # with open(datadir1 / "lambda_dep_t9_dt4_fit8-23.pkl", "rb") as file_in:  # theta2
-    with open(datadir1 / "lambda_dep_t5_dt1_fit8-23.pkl", "rb") as file_in:  # theta2
+    # with open(datadir1 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # theta2
+    with open(datadir1 / "lambda_dep_t4_dt2.pkl", "rb") as file_in:  # theta2
         # with open(datadir1 / "lambda_dep_t7_dt2_fit8-23.pkl", "rb") as file_in:  # theta2
         data_set1 = pickle.load(file_in)
     order0_evecs_1 = data_set1["order0_evecs"]
@@ -999,7 +1094,8 @@ if __name__ == "__main__":
     qsq_1 = 0.2900640506128018
     psq_1 = 0.2900640506128018
 
-    with open(datadir2 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # theta3
+    # with open(datadir2 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # theta3
+    with open(datadir2 / "lambda_dep_t4_dt2.pkl", "rb") as file_in:  # theta3
         data_set2 = pickle.load(file_in)
     lambdas_2 = data_set2["lambdas"]
     order3_evecs_2 = data_set2["order3_evecs"]
@@ -1007,7 +1103,8 @@ if __name__ == "__main__":
     qsq_2 = 0.05986664799785204
     psq_2 = 0.06851576636731624
 
-    with open(datadir4 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # theta4
+    # with open(datadir4 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # theta4
+    with open(datadir4 / "lambda_dep_t4_dt2.pkl", "rb") as file_in:  # theta4
         data_set4 = pickle.load(file_in)
     lambdas_4 = data_set4["lambdas"]
     order3_evecs_4 = data_set4["order3_evecs"]
@@ -1015,7 +1112,8 @@ if __name__ == "__main__":
     qsq_4 = 0.17317010421581466
     psq_4 = 0.1754003619003296
 
-    with open(datadir5 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # theta5
+    # with open(datadir5 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # theta5
+    with open(datadir5 / "lambda_dep_t4_dt2.pkl", "rb") as file_in:  # theta5
         data_set5 = pickle.load(file_in)
     lambdas_5 = data_set5["lambdas"]
     order3_evecs_5 = data_set5["order3_evecs"]
@@ -1023,14 +1121,15 @@ if __name__ == "__main__":
     psq_5 = 0.01373279121924232
     # print(f"{order3_evecs_5=}")
 
-    with open(datadir6 / "lambda_dep_t5_dt3_fit8-19.pkl", "rb") as file_in:  # theta6
-        data_set6 = pickle.load(file_in)
-    lambdas_6 = data_set6["lambdas"]
-    order3_evecs_6 = data_set6["order3_evecs"]
-    qsq_6 = 0.27402105651700137
-    psq_6 = 0.27406306546926495
+    # # with open(datadir6 / "lambda_dep_t5_dt3_fit8-19.pkl", "rb") as file_in:  # theta6
+    # with open(datadir6 / "lambda_dep_t4_dt2.pkl", "rb") as file_in:  # theta6
+    #     data_set6 = pickle.load(file_in)
+    # lambdas_6 = data_set6["lambdas"]
+    # order3_evecs_6 = data_set6["order3_evecs"]
+    # qsq_6 = 0.27402105651700137
+    # psq_6 = 0.27406306546926495
 
-    with open(datadir_qmax / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # qmax
+    with open(datadir_qmax / "lambda_dep_t4_dt2.pkl", "rb") as file_in:  # qmax
         data_set_qmax = pickle.load(file_in)
     lambdas_qmax = data_set_qmax["lambdas"]
     order3_evecs_qmax = data_set_qmax["order3_evecs"]
@@ -1045,7 +1144,7 @@ if __name__ == "__main__":
             np.sqrt(psq_2),
             np.sqrt(psq_4),
             np.sqrt(psq_5),
-            np.sqrt(psq_6),
+            # np.sqrt(psq_6),
             np.sqrt(psq_qmax),
         ]
     )
@@ -1068,8 +1167,8 @@ if __name__ == "__main__":
     print("\n")
     print(np.average(order3_evecs_5[lambda_index, :, :, :], axis=0) ** 2)
     print("\n")
-    print(np.average(order3_evecs_6[lambda_index, :, :, :], axis=0) ** 2)
-    print("\n")
+    # print(np.average(order3_evecs_6[lambda_index, :, :, :], axis=0) ** 2)
+    # print("\n")
     print(np.average(order3_evecs_qmax[lambda_index, :, :, :], axis=0) ** 2)
     print("\n")
 
@@ -1085,8 +1184,8 @@ if __name__ == "__main__":
             + order3_evecs_4[lambda_index, 0, 1] ** 2,
             order3_evecs_5[lambda_index, 0, 0] ** 2
             + order3_evecs_5[lambda_index, 0, 1] ** 2,
-            order3_evecs_6[lambda_index, 0, 0] ** 2
-            + order3_evecs_6[lambda_index, 0, 1] ** 2,
+            # order3_evecs_6[lambda_index, 0, 0] ** 2
+            # + order3_evecs_6[lambda_index, 0, 1] ** 2,
             order3_evecs_qmax[lambda_index, 0, 0] ** 2
             + order3_evecs_qmax[lambda_index, 0, 1] ** 2,
         ]
@@ -1103,8 +1202,8 @@ if __name__ == "__main__":
             + order3_evecs_4[lambda_index, 1, 1] ** 2,
             order3_evecs_5[lambda_index, 1, 0] ** 2
             + order3_evecs_5[lambda_index, 1, 1] ** 2,
-            order3_evecs_6[lambda_index, 1, 0] ** 2
-            + order3_evecs_6[lambda_index, 1, 1] ** 2,
+            # order3_evecs_6[lambda_index, 1, 0] ** 2
+            # + order3_evecs_6[lambda_index, 1, 1] ** 2,
             order3_evecs_qmax[lambda_index, 1, 0] ** 2
             + order3_evecs_qmax[lambda_index, 1, 1] ** 2,
         ]
@@ -1162,7 +1261,7 @@ if __name__ == "__main__":
             order3_evecs_2[lambda_index, :, 0, evec_num] ** 2,
             order3_evecs_4[lambda_index, :, 0, evec_num] ** 2,
             order3_evecs_5[lambda_index, :, 0, evec_num] ** 2,
-            order3_evecs_6[lambda_index, :, 0, evec_num] ** 2,
+            # order3_evecs_6[lambda_index, :, 0, evec_num] ** 2,
             order3_evecs_qmax[lambda_index, :, 0, evec_num] ** 2,
         ]
     )
@@ -1173,7 +1272,7 @@ if __name__ == "__main__":
             order3_evecs_2[lambda_index, :, 1, evec_num] ** 2,
             order3_evecs_4[lambda_index, :, 1, evec_num] ** 2,
             order3_evecs_5[lambda_index, :, 1, evec_num] ** 2,
-            order3_evecs_6[lambda_index, :, 1, evec_num] ** 2,
+            # order3_evecs_6[lambda_index, :, 1, evec_num] ** 2,
             order3_evecs_qmax[lambda_index, :, 1, evec_num] ** 2,
         ]
     )
@@ -1207,7 +1306,7 @@ if __name__ == "__main__":
         [
             order3_evecs_0[:, :, 0, evec_num] ** 2,
             order3_evecs_1[:, :, 0, evec_num] ** 2,
-            order3_evecs_6[:, :, 0, evec_num] ** 2,
+            # order3_evecs_6[:, :, 0, evec_num] ** 2,
             order3_evecs_4[:, :, 0, evec_num] ** 2,
             order3_evecs_2[:, :, 0, evec_num] ** 2,
             order3_evecs_5[:, :, 0, evec_num] ** 2,
@@ -1218,7 +1317,7 @@ if __name__ == "__main__":
         [
             order3_evecs_0[:, :, 1, evec_num] ** 2,
             order3_evecs_1[:, :, 1, evec_num] ** 2,
-            order3_evecs_6[:, :, 1, evec_num] ** 2,
+            # order3_evecs_6[:, :, 1, evec_num] ** 2,
             order3_evecs_4[:, :, 1, evec_num] ** 2,
             order3_evecs_2[:, :, 1, evec_num] ** 2,
             order3_evecs_5[:, :, 1, evec_num] ** 2,
@@ -1263,7 +1362,7 @@ if __name__ == "__main__":
         [
             np.sqrt(psq_0),
             np.sqrt(psq_1),
-            np.sqrt(psq_6),
+            # np.sqrt(psq_6),
             np.sqrt(psq_4),
             np.sqrt(psq_2),
             np.sqrt(psq_5),
@@ -1283,6 +1382,7 @@ if __name__ == "__main__":
         plotdir, states1_lmb_2, states2_lmb_2, lambdas_1, name="orders"
     )
 
+    evec_num = 0
     state1 = np.array(
         [
             order3_evecs_0[lambda_index, :, 0, evec_num] ** 2,
@@ -1290,7 +1390,7 @@ if __name__ == "__main__":
             order3_evecs_2[lambda_index, :, 0, evec_num] ** 2,
             order3_evecs_4[lambda_index, :, 0, evec_num] ** 2,
             order3_evecs_5[lambda_index, :, 0, evec_num] ** 2,
-            order3_evecs_6[lambda_index, :, 0, evec_num] ** 2,
+            # order3_evecs_6[lambda_index, :, 0, evec_num] ** 2,
             order3_evecs_qmax[lambda_index, :, 0, evec_num] ** 2,
         ]
     )
@@ -1301,10 +1401,59 @@ if __name__ == "__main__":
             order3_evecs_2[lambda_index, :, 1, evec_num] ** 2,
             order3_evecs_4[lambda_index, :, 1, evec_num] ** 2,
             order3_evecs_5[lambda_index, :, 1, evec_num] ** 2,
-            order3_evecs_6[lambda_index, :, 1, evec_num] ** 2,
+            # order3_evecs_6[lambda_index, :, 1, evec_num] ** 2,
             order3_evecs_qmax[lambda_index, :, 1, evec_num] ** 2,
         ]
     )
-    plot_evecs_bs(plotdir, mod_p, state1, state2, lambda_index)
+    evec_num = 1
+    state3 = np.array(
+        [
+            order3_evecs_0[lambda_index, :, 0, evec_num] ** 2,
+            order1_evecs_1[lambda_index, :, 0, evec_num] ** 2,
+            order3_evecs_2[lambda_index, :, 0, evec_num] ** 2,
+            order3_evecs_4[lambda_index, :, 0, evec_num] ** 2,
+            order3_evecs_5[lambda_index, :, 0, evec_num] ** 2,
+            # order3_evecs_6[lambda_index, :, 0, evec_num] ** 2,
+            order3_evecs_qmax[lambda_index, :, 0, evec_num] ** 2,
+        ]
+    )
+    state4 = np.array(
+        [
+            order3_evecs_0[lambda_index, :, 1, evec_num] ** 2,
+            order1_evecs_1[lambda_index, :, 1, evec_num] ** 2,
+            order3_evecs_2[lambda_index, :, 1, evec_num] ** 2,
+            order3_evecs_4[lambda_index, :, 1, evec_num] ** 2,
+            order3_evecs_5[lambda_index, :, 1, evec_num] ** 2,
+            # order3_evecs_6[lambda_index, :, 1, evec_num] ** 2,
+            order3_evecs_qmax[lambda_index, :, 1, evec_num] ** 2,
+        ]
+    )
+    plot_evecs_bs(plotdir, mod_p, state1, state2, lambda_index, name="_evec1")
+    plot_evecs_bs_both(plotdir, mod_p, state1, state2, state3, state4, lambda_index)
+
+    evec_num = 1
+    state1 = np.array(
+        [
+            order3_evecs_0[lambda_index, :, 0, evec_num] ** 2,
+            order1_evecs_1[lambda_index, :, 0, evec_num] ** 2,
+            order3_evecs_2[lambda_index, :, 0, evec_num] ** 2,
+            order3_evecs_4[lambda_index, :, 0, evec_num] ** 2,
+            order3_evecs_5[lambda_index, :, 0, evec_num] ** 2,
+            # order3_evecs_6[lambda_index, :, 0, evec_num] ** 2,
+            order3_evecs_qmax[lambda_index, :, 0, evec_num] ** 2,
+        ]
+    )
+    state2 = np.array(
+        [
+            order3_evecs_0[lambda_index, :, 1, evec_num] ** 2,
+            order1_evecs_1[lambda_index, :, 1, evec_num] ** 2,
+            order3_evecs_2[lambda_index, :, 1, evec_num] ** 2,
+            order3_evecs_4[lambda_index, :, 1, evec_num] ** 2,
+            order3_evecs_5[lambda_index, :, 1, evec_num] ** 2,
+            # order3_evecs_6[lambda_index, :, 1, evec_num] ** 2,
+            order3_evecs_qmax[lambda_index, :, 1, evec_num] ** 2,
+        ]
+    )
+    plot_evecs_bs(plotdir, mod_p, state1, state2, lambda_index, name="_evec2")
 
     plot_one_fourier()
