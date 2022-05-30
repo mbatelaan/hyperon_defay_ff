@@ -463,6 +463,7 @@ def plot_evecs_bs(plotdir, mod_p, state1, state2, lambda_index, name=""):
     print(np.shape(state1))
 
     labels = []
+    violin_width = 0.02
 
     def add_label(violin, label):
         color = violin["bodies"][0].get_facecolor().flatten()
@@ -473,7 +474,7 @@ def plot_evecs_bs(plotdir, mod_p, state1, state2, lambda_index, name=""):
     # plt.violinplot(
     #     state1.T,
     #     mod_p,
-    #     widths=0.05,
+    #     widths=violin_width,
     #     showmeans=True,
     #     showmedians=True,
     #     # label=rf"State 1 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
@@ -483,7 +484,7 @@ def plot_evecs_bs(plotdir, mod_p, state1, state2, lambda_index, name=""):
     # plt.violinplot(
     #     state2.T,
     #     mod_p,
-    #     widths=0.05,
+    #     widths=violin_width,
     #     showmeans=True,
     #     showmedians=True,
     #     # label=rf"State 2 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
@@ -494,7 +495,7 @@ def plot_evecs_bs(plotdir, mod_p, state1, state2, lambda_index, name=""):
         plt.violinplot(
             state1.T,
             mod_p,
-            widths=0.05,
+            widths=violin_width,
             showmeans=True,
             showmedians=True,
         ),
@@ -504,7 +505,7 @@ def plot_evecs_bs(plotdir, mod_p, state1, state2, lambda_index, name=""):
         plt.violinplot(
             state2.T,
             mod_p,
-            widths=0.05,
+            widths=violin_width,
             showmeans=True,
             showmedians=True,
         ),
@@ -533,6 +534,7 @@ def plot_evecs_bs_both(plotdir, mod_p, state1, state2, state3, state4, lambda_in
     print(np.shape(state1))
 
     labels = []
+    violin_width = 0.02
 
     def add_label(violin, label):
         color = violin["bodies"][0].get_facecolor().flatten()
@@ -543,7 +545,7 @@ def plot_evecs_bs_both(plotdir, mod_p, state1, state2, state3, state4, lambda_in
     # plt.violinplot(
     #     state1.T,
     #     mod_p,
-    #     widths=0.05,
+    #     widths=violin_width,
     #     showmeans=True,
     #     showmedians=True,
     #     # label=rf"State 1 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
@@ -553,7 +555,7 @@ def plot_evecs_bs_both(plotdir, mod_p, state1, state2, state3, state4, lambda_in
     # plt.violinplot(
     #     state2.T,
     #     mod_p,
-    #     widths=0.05,
+    #     widths=violin_width,
     #     showmeans=True,
     #     showmedians=True,
     #     # label=rf"State 2 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
@@ -564,7 +566,7 @@ def plot_evecs_bs_both(plotdir, mod_p, state1, state2, state3, state4, lambda_in
         plt.violinplot(
             state1.T,
             mod_p,
-            widths=0.05,
+            widths=violin_width,
             showmeans=True,
             showmedians=True,
         ),
@@ -574,7 +576,7 @@ def plot_evecs_bs_both(plotdir, mod_p, state1, state2, state3, state4, lambda_in
         plt.violinplot(
             state2.T,
             mod_p,
-            widths=0.05,
+            widths=violin_width,
             showmeans=True,
             showmedians=True,
         ),
@@ -584,7 +586,7 @@ def plot_evecs_bs_both(plotdir, mod_p, state1, state2, state3, state4, lambda_in
         plt.violinplot(
             state3.T,
             mod_p,
-            widths=0.05,
+            widths=violin_width,
             showmeans=True,
             showmedians=True,
         ),
@@ -594,7 +596,7 @@ def plot_evecs_bs_both(plotdir, mod_p, state1, state2, state3, state4, lambda_in
         plt.violinplot(
             state4.T,
             mod_p,
-            widths=0.05,
+            widths=violin_width,
             showmeans=True,
             showmedians=True,
         ),
@@ -994,6 +996,75 @@ def plot_one_fourier():
     )
 
 
+def Q_squared(m1, m2, theta1, theta2, n1, n2, L, a):
+    """Returns Q^2 between two particles with momentum and twisted BC's
+    m1, m2 are the masses of the states, where m2 is the mass corresponding to the state with TBC
+    n1, n2 are arrays which contain the fourier momenta for the first and second particle.
+    theta1, theta2 are arrays which contain the twisted BC's parameters in units of 2pi.
+    L is the spatial lattice extent
+    a is the lattice spacing
+    """
+    energydiff = np.sqrt(
+        m2**2 + np.sum(((2 * n2 + theta2) * (np.pi / L)) ** 2)
+    ) - np.sqrt(m1**2 + np.sum(((2 * n1 + theta1) * (np.pi / L)) ** 2))
+
+    qvector_diff = ((2 * n2 + theta2) - (2 * n1 + theta1)) * (np.pi / L)
+    Qsquared = (
+        -1
+        * (energydiff**2 - np.dot(qvector_diff, qvector_diff))
+        * (0.1973**2)
+        / (a**2)
+    )
+    return Qsquared
+
+
+def q_small_squared(theta1, theta2, n1, n2, L, a):
+    """Returns \vec{q}^2 between two particles with momentum and twisted BC's
+    n1, n2 are arrays which contain the fourier momenta for the first and second particle.
+    theta1, theta2 are arrays which contain the twisted BC's parameters in units of 2pi.
+    L is the spatial lattice extent
+    a is the lattice spacing
+    """
+    qvector_diff = ((2 * n2 + theta2) - (2 * n1 + theta1)) * (np.pi / L)
+    # qsquared = np.dot(qvector_diff, qvector_diff) * (0.1973**2) / (a**2)
+    qsquared = np.dot(qvector_diff, qvector_diff)
+    return qsquared
+
+
+def get_data(datadir, theta, m_N, m_S, NX):
+    """Read the dataset from the file and then return the required eigenvectors and lambda values"""
+    with open(datadir / "lambda_dep_t4_dt2.pkl", "rb") as file_in:  # theta
+        data_set = pickle.load(file_in)
+    lambdas = np.array([d["lambdas"] for d in data_set])
+    order3_evec_left_ = np.array([d["order3_evec_left"] for d in data_set])
+    order3_evec_right_ = np.array([d["order3_evec_right"] for d in data_set])
+    qsq = 0
+    psq = 0.01373279121924232
+    theta = 0.448
+    Qsq = Q_squared(
+        m_N,
+        m_S,
+        np.array([0, theta, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        NX,
+        0.074,
+    )
+    qsq_small = q_small_squared(
+        np.array([0, theta, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        NX,
+        0.074,
+    )
+    print(f"\n{psq=}")
+    print(f"{Qsq=}")
+    print(f"{qsq_small=}")
+    return lambdas, order3_evec_left_, order3_evec_right_, qsq_small
+
+
 if __name__ == "__main__":
     plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
     plt.rc("text", usetex=True)
@@ -1001,29 +1072,16 @@ if __name__ == "__main__":
 
     # --- directories ---
     plotdir = Path.home() / Path("Documents/PhD/analysis_results/sig2n/")
-    # datadir0 = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn4/data/")
-    datadir0 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_theta8/data/"
-    )
-    datadir1 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_theta7/data/"
-    )
-    datadir2 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_theta3/data/"
-    )
-    datadir4 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_theta4/data/"
-    )
-    datadir5 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_theta5/data/"
-    )
-    datadir_qmax = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_qmax/data/"
-    )
-    datadir6 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_one_fourier/data/"
-    )
-
+    resultsdir = Path.home() / Path("Documents/PhD/analysis_results")
+    datadir0 = resultsdir / Path("six_point_fn_theta8/data/")
+    datadir1 = resultsdir / Path("six_point_fn_theta7/data/")
+    datadir2 = resultsdir / Path("six_point_fn_theta3/data/")
+    datadir4 = resultsdir / Path("six_point_fn_theta4/data/")
+    datadir5 = resultsdir / Path("six_point_fn_theta5/data/")
+    datadir_qmax = resultsdir / Path("six_point_fn_qmax/data/")
+    # datadir6 = Path.home() / Path(
+    #     "Documents/PhD/analysis_results/six_point_fn_one_fourier/data/"
+    # )
     plotdir.mkdir(parents=True, exist_ok=True)
 
     # --- Lattice specs ---
@@ -1036,193 +1094,271 @@ if __name__ == "__main__":
     dm_N = 0.0070
     dm_S = 0.0042
 
-    # extra_points_qsq = [0.338, 0.29 - 0.002, 0.29, 0.29 + 0.002, -0.015210838956772907]
-
     lambda_index = 9
     # lambda_index = 14
 
-    # --- Read the sequential src data ---
+    # ==================================================
+    # q_max
+    with open(datadir_qmax / "lambda_dep_t4_dt2.pkl", "rb") as file_in:  # qmax
+        data_set_qmax = pickle.load(file_in)
+    lambdas_qmax = np.array([d["lambdas"] for d in data_set_qmax])
+    order3_evec_left_qmax = np.array([d["order3_evec_left"] for d in data_set_qmax])
+    order3_evec_right_qmax = np.array([d["order3_evec_right"] for d in data_set_qmax])
+    # lambdas_qmax = data_set_qmax["lambdas"]
+    # order3_evecs_qmax = data_set_qmax["order3_evecs"]
+    # print(f"{order3_evecs_qmax=}")
+    # qsq_qmax = -0.015210838956772907
+    psq_qmax = 0
+    theta_qmax = 0
+    qsq_qmax_small = q_small_squared(
+        np.array([0, theta_qmax, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        NX,
+        0.074,
+    )
+    print(f"\n{psq_qmax=}")
+    print(f"{qsq_qmax_small=}")
+
+    # ==================================================
+    # Theta_8
     with open(datadir0 / "lambda_dep_t4_dt2.pkl", "rb") as file_in:  # theta8
         data_set0 = pickle.load(file_in)
-    # print([key for key in data_set0])
-    order3_evecs_0 = data_set0["order3_evecs"]
-    lambdas_0 = data_set0["lambdas"]
-    # print(f"{lambdas_0=}")
-    # print(f"{lambdas_0[lambda_index]=}")
-    # print(f"{np.shape(order3_evecs_0)=}")
-    # print(f"{order3_evecs_0=}")
-
-    # for evec in order3_evecs_0:
-    #     vec1 = evec[:, 0]
-    #     vec2 = evec[:, 1]
-    #     print(vec1 / sum(vec1))
-    #     print(vec2 / sum(vec2))
-
+    lambdas_0 = np.array([d["lambdas"] for d in data_set0])
+    order3_evec_left_0 = np.array([d["order3_evec_left"] for d in data_set0])
+    order3_evec_right_0 = np.array([d["order3_evec_right"] for d in data_set0])
+    # order3_evecs_0 = data_set0["order3_evecs"]
+    # lambdas_0 = data_set0["lambdas"]
     qsq_0 = 0.3376966834768195
     psq_0 = 0.3380670060434127
+    theta_0 = 2.25
+    qsq_0_small = q_small_squared(
+        np.array([0, theta_0, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        NX,
+        0.074,
+    )
+    print(f"\n{psq_0=}")
+    print(f"{qsq_0_small=}")
 
-    # with open(datadir1 / "lambda_dep_t7_dt2_fit7-17.pkl", "rb") as file_in:  # theta2
-    # with open(datadir1 / "lambda_dep_t9_dt4_fit8-23.pkl", "rb") as file_in:  # theta2
-    # with open(datadir1 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # theta2
+    # ==================================================
+    # Theta_2
     with open(datadir1 / "lambda_dep_t4_dt2.pkl", "rb") as file_in:  # theta2
-        # with open(datadir1 / "lambda_dep_t7_dt2_fit8-23.pkl", "rb") as file_in:  # theta2
         data_set1 = pickle.load(file_in)
-    order0_evecs_1 = data_set1["order0_evecs"]
-    order1_evecs_1 = data_set1["order1_evecs"]
-    order2_evecs_1 = data_set1["order2_evecs"]
-    order3_evecs_1 = data_set1["order3_evecs"]
-    if len(np.shape(order3_evecs_1)) == 4:
-        # estate1_ = order3_evecs_1[lambda_index, :, 0, 0] ** 2
-        # estate2_ = order3_evecs_1[lambda_index, :, 1, 0] ** 2
-        estate1_ = order3_evecs_1[lambda_index, :, :, :]
-        estate2_ = order3_evecs_1[lambda_index, :, :, :]
-        print(f"{np.average(estate1_, axis=0)=}")
-        print(f"{np.std(estate1_, axis=0)=}")
-        print(f"{np.average(estate2_, axis=0)=}")
-        print(f"{np.std(estate2_, axis=0)=}")
+    lambdas_1 = np.array([d["lambdas"] for d in data_set1])
+    order0_evec_left_1 = np.array([d["order0_evec_left"] for d in data_set1])
+    order0_evec_right_1 = np.array([d["order0_evec_right"] for d in data_set1])
+    order1_evec_left_1 = np.array([d["order1_evec_left"] for d in data_set1])
+    order1_evec_right_1 = np.array([d["order1_evec_right"] for d in data_set1])
+    order2_evec_left_1 = np.array([d["order2_evec_left"] for d in data_set1])
+    order2_evec_right_1 = np.array([d["order2_evec_right"] for d in data_set1])
+    order3_evec_left_1 = np.array([d["order3_evec_left"] for d in data_set1])
+    order3_evec_right_1 = np.array([d["order3_evec_right"] for d in data_set1])
+    # order0_evecs_1 = data_set1["order0_evecs"]
+    # order1_evecs_1 = data_set1["order1_evecs"]
+    # order2_evecs_1 = data_set1["order2_evecs"]
+    # order3_evecs_1 = data_set1["order3_evecs"]
+    # if len(np.shape(order3_evecs_1)) == 4:
+    #     # estate1_ = order3_evecs_1[lambda_index, :, 0, 0] ** 2
+    #     # estate2_ = order3_evecs_1[lambda_index, :, 1, 0] ** 2
+    #     estate1_ = order3_evecs_1[lambda_index, :, :, :]
+    #     estate2_ = order3_evecs_1[lambda_index, :, :, :]
+    #     print(f"{np.average(estate1_, axis=0)=}")
+    #     print(f"{np.std(estate1_, axis=0)=}")
+    #     print(f"{np.average(estate2_, axis=0)=}")
+    #     print(f"{np.std(estate2_, axis=0)=}")
     # print(f"{order3_evecs_1=}")
-    order3_evals_1 = data_set1["order3_evals"]
-    lambdas_1 = data_set1["lambdas"]
+    # order3_evals_1 = data_set1["order3_evals"]
+    order3_eval_left_1 = np.array([d["order3_eval_left"] for d in data_set1])
+    order3_eval_right_1 = np.array([d["order3_eval_right"] for d in data_set1])
     states_l0_1 = np.array(
         [
-            data_set1["bootfit_unpert_sigma"][:, 1],
-            data_set1["bootfit_unpert_nucl"][:, 1],
+            data_set1[0]["weighted_energy_sigma"],
+            data_set1[0]["weighted_energy_nucl"],
         ]
     )
-    order3_fit_1 = data_set1["order3_states_fit"]
+    # states_l0_1 = np.array(
+    #     [
+    #         data_set1["bootfit_unpert_sigma"][:, 1],
+    #         data_set1["bootfit_unpert_nucl"][:, 1],
+    #     ]
+    # )
+    order3_fit_1 = np.array([d["order3_states_fit"] for d in data_set1])
+    # order3_fit_1 = data_set1["order3_states_fit"]
     states_l_1 = order3_fit_1[:, :, :, 1]
     qsq_1 = 0.2900640506128018
     psq_1 = 0.2900640506128018
+    theta_7 = 2.05755614
+    qsq_1_small = q_small_squared(
+        np.array([0, theta_7, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        NX,
+        0.074,
+    )
+    print(f"\n{psq_1=}")
+    print(f"{qsq_1_small=}")
 
-    # with open(datadir2 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # theta3
+    # ==================================================
+    # Theta_3
     with open(datadir2 / "lambda_dep_t4_dt2.pkl", "rb") as file_in:  # theta3
         data_set2 = pickle.load(file_in)
-    lambdas_2 = data_set2["lambdas"]
-    order3_evecs_2 = data_set2["order3_evecs"]
-    # print(f"{order3_evecs_2=}")
+    lambdas_2 = np.array([d["lambdas"] for d in data_set2])
+    order3_evec_left_2 = np.array([d["order3_evec_left"] for d in data_set2])
+    order3_evec_right_2 = np.array([d["order3_evec_right"] for d in data_set2])
     qsq_2 = 0.05986664799785204
     psq_2 = 0.06851576636731624
+    theta_2 = 1.0
+    Qsq_2 = Q_squared(
+        m_N,
+        m_S,
+        np.array([0, theta_2, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        NX,
+        0.074,
+    )
+    qsq_2_small = q_small_squared(
+        np.array([0, theta_2, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        NX,
+        0.074,
+    )
+    print(f"\n{psq_2=}")
+    print(f"{Qsq_2=}")
+    print(f"{qsq_2_small=}")
 
-    # with open(datadir4 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # theta4
+    # ==================================================
+    # Theta_4
     with open(datadir4 / "lambda_dep_t4_dt2.pkl", "rb") as file_in:  # theta4
         data_set4 = pickle.load(file_in)
-    lambdas_4 = data_set4["lambdas"]
-    order3_evecs_4 = data_set4["order3_evecs"]
+    lambdas_4 = np.array([d["lambdas"] for d in data_set4])
+    order3_evec_left_4 = np.array([d["order3_evec_left"] for d in data_set4])
+    order3_evec_right_4 = np.array([d["order3_evec_right"] for d in data_set4])
+    # lambdas_4 = data_set4["lambdas"]
+    # order3_evecs_4 = data_set4["order3_evecs"]
     # print(f"{order3_evecs_4=}")
     qsq_4 = 0.17317010421581466
     psq_4 = 0.1754003619003296
+    theta_4 = 1.6
+    Qsq_4 = Q_squared(
+        m_N,
+        m_S,
+        np.array([0, theta_4, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        NX,
+        0.074,
+    )
+    qsq_4_small = q_small_squared(
+        np.array([0, theta_4, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        NX,
+        0.074,
+    )
+    print(f"\n{psq_4=}")
+    print(f"{Qsq_4=}")
+    print(f"{qsq_4_small=}")
 
-    # with open(datadir5 / "lambda_dep_t4_dt2_fit8-23.pkl", "rb") as file_in:  # theta5
+    # ==================================================
+    # Theta_5
     with open(datadir5 / "lambda_dep_t4_dt2.pkl", "rb") as file_in:  # theta5
         data_set5 = pickle.load(file_in)
-    lambdas_5 = data_set5["lambdas"]
-    order3_evecs_5 = data_set5["order3_evecs"]
+    lambdas_5 = np.array([d["lambdas"] for d in data_set5])
+    order3_evec_left_5 = np.array([d["order3_evec_left"] for d in data_set5])
+    order3_evec_right_5 = np.array([d["order3_evec_right"] for d in data_set5])
     qsq_5 = 0
     psq_5 = 0.01373279121924232
-    # print(f"{order3_evecs_5=}")
+    theta_5 = 0.448
+    Qsq_5 = Q_squared(
+        m_N,
+        m_S,
+        np.array([0, theta_5, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        NX,
+        0.074,
+    )
+    qsq_5_small = q_small_squared(
+        np.array([0, theta_5, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        NX,
+        0.074,
+    )
+    print(f"\n{psq_5=}")
+    print(f"{Qsq_5=}")
+    print(f"{qsq_5_small=}")
 
-    # # with open(datadir6 / "lambda_dep_t5_dt3_fit8-19.pkl", "rb") as file_in:  # theta6
-    # with open(datadir6 / "lambda_dep_t4_dt2.pkl", "rb") as file_in:  # theta6
-    #     data_set6 = pickle.load(file_in)
-    # lambdas_6 = data_set6["lambdas"]
-    # order3_evecs_6 = data_set6["order3_evecs"]
-    # qsq_6 = 0.27402105651700137
-    # psq_6 = 0.27406306546926495
-
-    with open(datadir_qmax / "lambda_dep_t4_dt2.pkl", "rb") as file_in:  # qmax
-        data_set_qmax = pickle.load(file_in)
-    lambdas_qmax = data_set_qmax["lambdas"]
-    order3_evecs_qmax = data_set_qmax["order3_evecs"]
-    # print(f"{order3_evecs_qmax=}")
-    qsq_qmax = -0.015210838956772907
-    psq_qmax = 0
-
+    # ==================================================
     mod_p = np.array(
         [
-            np.sqrt(psq_0),
-            np.sqrt(psq_1),
-            np.sqrt(psq_2),
-            np.sqrt(psq_4),
-            np.sqrt(psq_5),
-            # np.sqrt(psq_6),
-            np.sqrt(psq_qmax),
+            np.sqrt(qsq_0_small),
+            np.sqrt(qsq_1_small),
+            np.sqrt(qsq_2_small),
+            np.sqrt(qsq_4_small),
+            np.sqrt(qsq_5_small),
+            np.sqrt(qsq_qmax_small),
         ]
     )
 
-    # print(f"{np.average(order3_evecs_0[lambda_index, :, :, :], axis=0)=}")
-    # print(f"{np.average(order3_evecs_1[lambda_index, :, :, :], axis=0)=}")
-    # print(f"{np.average(order3_evecs_2[lambda_index, :, :, :], axis=0)=}")
-    # print(f"{np.average(order3_evecs_4[lambda_index, :, :, :], axis=0)=}")
-    # print(f"{np.average(order3_evecs_5[lambda_index, :, :, :], axis=0)=}")
-    # print(f"{np.average(order3_evecs_qmax[lambda_index, :, :, :], axis=0)=}")
+    print("\n")
+    print(np.shape(order3_evec_left_0))
+    print(np.average(order3_evec_left_0[lambda_index, :, :, :], axis=0) ** 2)
+    print(np.average(order3_evec_right_0[lambda_index, :, :, :], axis=0) ** 2)
 
-    print("\n")
-    print(np.average(order3_evecs_0[lambda_index, :, :, :], axis=0) ** 2)
-    print("\n")
-    print(np.average(order3_evecs_1[lambda_index, :, :, :], axis=0) ** 2)
-    print("\n")
-    print(np.average(order3_evecs_2[lambda_index, :, :, :], axis=0) ** 2)
-    print("\n")
-    print(np.average(order3_evecs_4[lambda_index, :, :, :], axis=0) ** 2)
-    print("\n")
-    print(np.average(order3_evecs_5[lambda_index, :, :, :], axis=0) ** 2)
-    print("\n")
-    # print(np.average(order3_evecs_6[lambda_index, :, :, :], axis=0) ** 2)
-    # print("\n")
-    print(np.average(order3_evecs_qmax[lambda_index, :, :, :], axis=0) ** 2)
-    print("\n")
-
-    state1_ = np.array(
-        [
-            order3_evecs_0[lambda_index, 0, 0] ** 2
-            + order3_evecs_0[lambda_index, 0, 1] ** 2,
-            order3_evecs_1[lambda_index, 0, 0] ** 2
-            + order3_evecs_1[lambda_index, 0, 1] ** 2,
-            order3_evecs_2[lambda_index, 0, 0] ** 2
-            + order3_evecs_2[lambda_index, 0, 1] ** 2,
-            order3_evecs_4[lambda_index, 0, 0] ** 2
-            + order3_evecs_4[lambda_index, 0, 1] ** 2,
-            order3_evecs_5[lambda_index, 0, 0] ** 2
-            + order3_evecs_5[lambda_index, 0, 1] ** 2,
-            # order3_evecs_6[lambda_index, 0, 0] ** 2
-            # + order3_evecs_6[lambda_index, 0, 1] ** 2,
-            order3_evecs_qmax[lambda_index, 0, 0] ** 2
-            + order3_evecs_qmax[lambda_index, 0, 1] ** 2,
-        ]
-    )
-    state2_ = np.array(
-        [
-            order3_evecs_0[lambda_index, 1, 0] ** 2
-            + order3_evecs_0[lambda_index, 1, 1] ** 2,
-            order3_evecs_1[lambda_index, 1, 0] ** 2
-            + order3_evecs_1[lambda_index, 1, 1] ** 2,
-            order3_evecs_2[lambda_index, 1, 0] ** 2
-            + order3_evecs_2[lambda_index, 1, 1] ** 2,
-            order3_evecs_4[lambda_index, 1, 0] ** 2
-            + order3_evecs_4[lambda_index, 1, 1] ** 2,
-            order3_evecs_5[lambda_index, 1, 0] ** 2
-            + order3_evecs_5[lambda_index, 1, 1] ** 2,
-            # order3_evecs_6[lambda_index, 1, 0] ** 2
-            # + order3_evecs_6[lambda_index, 1, 1] ** 2,
-            order3_evecs_qmax[lambda_index, 1, 0] ** 2
-            + order3_evecs_qmax[lambda_index, 1, 1] ** 2,
-        ]
-    )
-    # print("\n\n", state1_, state2_, "\n\n")
-
-    # eigenvector_matrices = np.array(
+    # state1_ = np.array(
     #     [
-    #         order3_evecs_0[lambda_index],
-    #         order3_evecs_1[lambda_index],
-    #         order3_evecs_2[lambda_index],
-    #         order3_evecs_4[lambda_index],
-    #         order3_evecs_5[lambda_index],
-    #         order3_evecs_qmax[lambda_index],
+    #         order3_evecs_0[lambda_index, 0, 0] ** 2
+    #         + order3_evecs_0[lambda_index, 0, 1] ** 2,
+    #         order3_evecs_1[lambda_index, 0, 0] ** 2
+    #         + order3_evecs_1[lambda_index, 0, 1] ** 2,
+    #         order3_evecs_2[lambda_index, 0, 0] ** 2
+    #         + order3_evecs_2[lambda_index, 0, 1] ** 2,
+    #         order3_evecs_4[lambda_index, 0, 0] ** 2
+    #         + order3_evecs_4[lambda_index, 0, 1] ** 2,
+    #         order3_evecs_5[lambda_index, 0, 0] ** 2
+    #         + order3_evecs_5[lambda_index, 0, 1] ** 2,
+    #         # order3_evecs_6[lambda_index, 0, 0] ** 2
+    #         # + order3_evecs_6[lambda_index, 0, 1] ** 2,
+    #         order3_evecs_qmax[lambda_index, 0, 0] ** 2
+    #         + order3_evecs_qmax[lambda_index, 0, 1] ** 2,
     #     ]
     # )
+    # state2_ = np.array(
+    #     [
+    #         order3_evecs_0[lambda_index, 1, 0] ** 2
+    #         + order3_evecs_0[lambda_index, 1, 1] ** 2,
+    #         order3_evecs_1[lambda_index, 1, 0] ** 2
+    #         + order3_evecs_1[lambda_index, 1, 1] ** 2,
+    #         order3_evecs_2[lambda_index, 1, 0] ** 2
+    #         + order3_evecs_2[lambda_index, 1, 1] ** 2,
+    #         order3_evecs_4[lambda_index, 1, 0] ** 2
+    #         + order3_evecs_4[lambda_index, 1, 1] ** 2,
+    #         order3_evecs_5[lambda_index, 1, 0] ** 2
+    #         + order3_evecs_5[lambda_index, 1, 1] ** 2,
+    #         # order3_evecs_6[lambda_index, 1, 0] ** 2
+    #         # + order3_evecs_6[lambda_index, 1, 1] ** 2,
+    #         order3_evecs_qmax[lambda_index, 1, 0] ** 2
+    #         + order3_evecs_qmax[lambda_index, 1, 1] ** 2,
+    #     ]
+    # )
+    # print("\n\n", state1_, state2_, "\n\n")
 
-    mod_p_inds = mod_p.argsort()
-    print(f"{mod_p_inds=}")
+    # mod_p_inds = mod_p.argsort()
+    # print(f"{mod_p_inds=}")
     # sorted_mod_p = mod_p[mod_p_inds]
     # sorted_matrices = eigenvector_matrices[mod_p_inds]
 
@@ -1232,144 +1368,85 @@ if __name__ == "__main__":
     # print(f"{sorted_matrices=}")
     # print(f"{sorted_mod_p=}")
 
-    # state1 = np.array(
-    #     [
-    #         order3_evecs_0[lambda_index, 0, 0] ** 2,
-    #         order3_evecs_1[lambda_index, 0, 0] ** 2,
-    #         order3_evecs_2[lambda_index, 0, 0] ** 2,
-    #         order3_evecs_4[lambda_index, 0, 0] ** 2,
-    #         order3_evecs_5[lambda_index, 0, 0] ** 2,
-    #         order3_evecs_qmax[lambda_index, 0, 0] ** 2,
-    #     ]
-    # )
-    # state2 = np.array(
-    #     [
-    #         order3_evecs_0[lambda_index, 1, 0] ** 2,
-    #         order3_evecs_1[lambda_index, 1, 0] ** 2,
-    #         order3_evecs_2[lambda_index, 1, 0] ** 2,
-    #         order3_evecs_4[lambda_index, 1, 0] ** 2,
-    #         order3_evecs_5[lambda_index, 1, 0] ** 2,
-    #         order3_evecs_qmax[lambda_index, 1, 0] ** 2,
-    #     ]
-    # )
-
     evec_num = 0
-    state1 = np.array(
+    state1_left = np.array(
         [
-            order3_evecs_0[lambda_index, :, 0, evec_num] ** 2,
-            order3_evecs_1[lambda_index, :, 0, evec_num] ** 2,
-            order3_evecs_2[lambda_index, :, 0, evec_num] ** 2,
-            order3_evecs_4[lambda_index, :, 0, evec_num] ** 2,
-            order3_evecs_5[lambda_index, :, 0, evec_num] ** 2,
-            # order3_evecs_6[lambda_index, :, 0, evec_num] ** 2,
-            order3_evecs_qmax[lambda_index, :, 0, evec_num] ** 2,
+            order3_evec_left_0[lambda_index, :, 0, evec_num] ** 2,
+            order3_evec_left_1[lambda_index, :, 0, evec_num] ** 2,
+            order3_evec_left_2[lambda_index, :, 0, evec_num] ** 2,
+            order3_evec_left_4[lambda_index, :, 0, evec_num] ** 2,
+            order3_evec_left_5[lambda_index, :, 0, evec_num] ** 2,
+            order3_evec_left_qmax[lambda_index, :, 0, evec_num] ** 2,
         ]
     )
     state2 = np.array(
         [
-            order3_evecs_0[lambda_index, :, 1, evec_num] ** 2,
-            order3_evecs_1[lambda_index, :, 1, evec_num] ** 2,
-            order3_evecs_2[lambda_index, :, 1, evec_num] ** 2,
-            order3_evecs_4[lambda_index, :, 1, evec_num] ** 2,
-            order3_evecs_5[lambda_index, :, 1, evec_num] ** 2,
-            # order3_evecs_6[lambda_index, :, 1, evec_num] ** 2,
-            order3_evecs_qmax[lambda_index, :, 1, evec_num] ** 2,
+            order3_evec_left_0[lambda_index, :, 1, evec_num] ** 2,
+            order3_evec_left_1[lambda_index, :, 1, evec_num] ** 2,
+            order3_evec_left_2[lambda_index, :, 1, evec_num] ** 2,
+            order3_evec_left_4[lambda_index, :, 1, evec_num] ** 2,
+            order3_evec_left_5[lambda_index, :, 1, evec_num] ** 2,
+            order3_evec_left_qmax[lambda_index, :, 1, evec_num] ** 2,
         ]
     )
 
-    plot_evecs(plotdir, mod_p, state1, state2, lambda_index)
-    # print(f"{states_l0_1=}")
-    # print(f"{np.shape(states_l0_1)=}")
-    plot_evals_lambda(
-        plotdir,
-        np.average(order3_evals_1, axis=1),
-        lambdas_1,
-        states_l0_1[1, :],
-        states_l0_1[0, :],
-        name="theta2_fix",
-    )
-    plot_energy_lambda(
-        plotdir,
-        states_l_1,
-        lambdas_1,
-        states_l0_1[1, :],
-        states_l0_1[0, :],
-        name="theta2_fix",
-    )
-    print(f"{np.shape(states_l_1)=}")
-    print(f"{np.shape(order3_evals_1)=}")
+    plot_evecs(plotdir, mod_p, state1_left, state2, lambda_index)
 
-    state1_lmb = order3_evecs_1[:, :, 0, evec_num] ** 2
-    state2_lmb = order3_evecs_1[:, :, 1, evec_num] ** 2
+    # plot_evals_lambda(
+    #     plotdir,
+    #     np.average(order3_eval_left_1, axis=1),
+    #     lambdas_1,
+    #     states_l0_1[1, :],
+    #     states_l0_1[0, :],
+    #     name="theta2_fix",
+    # )
+    # plot_energy_lambda(
+    #     plotdir,
+    #     states_l_1,
+    #     lambdas_1,
+    #     states_l0_1[1, :],
+    #     states_l0_1[0, :],
+    #     name="theta2_fix",
+    # )
+    # print(f"{np.shape(states_l_1)=}")
+    # print(f"{np.shape(order3_eval_left_1)=}")
 
+    # ==================================================
+    state1_lmb = order3_evec_left_1[:, :, 0, evec_num] ** 2
+    state2_lmb = order3_evec_left_1[:, :, 1, evec_num] ** 2
+    plot_evecs_lambda(plotdir, state1_lmb, state2_lmb, lambdas_1, name="theta2_fix")
+
+    # ==================================================
     states1_lmb = np.array(
         [
-            order3_evecs_0[:, :, 0, evec_num] ** 2,
-            order3_evecs_1[:, :, 0, evec_num] ** 2,
-            # order3_evecs_6[:, :, 0, evec_num] ** 2,
-            order3_evecs_4[:, :, 0, evec_num] ** 2,
-            order3_evecs_2[:, :, 0, evec_num] ** 2,
-            order3_evecs_5[:, :, 0, evec_num] ** 2,
-            order3_evecs_qmax[:, :, 0, evec_num] ** 2,
+            order3_evec_left_0[:, :, 0, evec_num] ** 2,
+            order3_evec_left_1[:, :, 0, evec_num] ** 2,
+            order3_evec_left_4[:, :, 0, evec_num] ** 2,
+            order3_evec_left_2[:, :, 0, evec_num] ** 2,
+            order3_evec_left_5[:, :, 0, evec_num] ** 2,
+            order3_evec_left_qmax[:, :, 0, evec_num] ** 2,
         ]
     )
     states2_lmb = np.array(
         [
-            order3_evecs_0[:, :, 1, evec_num] ** 2,
-            order3_evecs_1[:, :, 1, evec_num] ** 2,
-            # order3_evecs_6[:, :, 1, evec_num] ** 2,
-            order3_evecs_4[:, :, 1, evec_num] ** 2,
-            order3_evecs_2[:, :, 1, evec_num] ** 2,
-            order3_evecs_5[:, :, 1, evec_num] ** 2,
-            order3_evecs_qmax[:, :, 1, evec_num] ** 2,
+            order3_evec_left_0[:, :, 1, evec_num] ** 2,
+            order3_evec_left_1[:, :, 1, evec_num] ** 2,
+            order3_evec_left_4[:, :, 1, evec_num] ** 2,
+            order3_evec_left_2[:, :, 1, evec_num] ** 2,
+            order3_evec_left_5[:, :, 1, evec_num] ** 2,
+            order3_evec_left_qmax[:, :, 1, evec_num] ** 2,
         ]
     )
-
-    states1_lmb_2 = np.array(
-        [
-            order0_evecs_1[:, :, 0, evec_num] ** 2,
-            order1_evecs_1[:, :, 0, evec_num] ** 2,
-            order2_evecs_1[:, :, 0, evec_num] ** 2,
-            order3_evecs_1[:, :, 0, evec_num] ** 2,
-        ]
-    )
-    states2_lmb_2 = np.array(
-        [
-            order0_evecs_1[:, :, 1, evec_num] ** 2,
-            order1_evecs_1[:, :, 1, evec_num] ** 2,
-            order2_evecs_1[:, :, 1, evec_num] ** 2,
-            order3_evecs_1[:, :, 1, evec_num] ** 2,
-        ]
-    )
-
-    print(f"{lambdas_1=}")
-    print(f"{np.shape(state1_lmb)=}")
-    print(f"{np.average(state1_lmb,axis=1)=}")
-
-    plot_evecs_lambda(plotdir, state1_lmb, state2_lmb, lambdas_1, name="theta2_fix")
-    # lambdas_new_order = np.array(
-    #     [
-    #         lambdas_1[0],
-    #         lambdas_1[1],
-    #         lambdas_1[5],
-    #         lambdas_1[3],
-    #         lambdas_1[2],
-    #         lambdas_1[4],
-    #         lambdas_1[6],
-    #     ]
-    # )
     mod_p_new_order = np.array(
         [
-            np.sqrt(psq_0),
-            np.sqrt(psq_1),
-            # np.sqrt(psq_6),
-            np.sqrt(psq_4),
-            np.sqrt(psq_2),
-            np.sqrt(psq_5),
-            np.sqrt(psq_qmax),
+            np.sqrt(qsq_0_small),
+            np.sqrt(qsq_1_small),
+            np.sqrt(qsq_4_small),
+            np.sqrt(qsq_2_small),
+            np.sqrt(qsq_5_small),
+            np.sqrt(qsq_qmax_small),
         ]
     )
-
     plot_all_evecs_lambda(
         plotdir,
         states1_lmb,
@@ -1378,82 +1455,87 @@ if __name__ == "__main__":
         mod_p_new_order,
         name="all",
     )
+
+    # ==================================================
+    states1_lmb_2 = np.array(
+        [
+            order0_evec_left_1[:, :, 0, evec_num] ** 2,
+            order1_evec_left_1[:, :, 0, evec_num] ** 2,
+            order2_evec_left_1[:, :, 0, evec_num] ** 2,
+            order3_evec_left_1[:, :, 0, evec_num] ** 2,
+        ]
+    )
+    states2_lmb_2 = np.array(
+        [
+            order0_evec_left_1[:, :, 1, evec_num] ** 2,
+            order1_evec_left_1[:, :, 1, evec_num] ** 2,
+            order2_evec_left_1[:, :, 1, evec_num] ** 2,
+            order3_evec_left_1[:, :, 1, evec_num] ** 2,
+        ]
+    )
     plot_orders_evecs_lambda(
         plotdir, states1_lmb_2, states2_lmb_2, lambdas_1, name="orders"
     )
+    print(f"{lambdas_1=}")
+    print(f"{np.shape(state1_lmb)=}")
+    print(f"{np.average(state1_lmb,axis=1)=}")
 
+    # ==================================================
+    # First eigenvector
     evec_num = 0
-    state1 = np.array(
+    state1_left = np.array(
         [
-            order3_evecs_0[lambda_index, :, 0, evec_num] ** 2,
-            order1_evecs_1[lambda_index, :, 0, evec_num] ** 2,
-            order3_evecs_2[lambda_index, :, 0, evec_num] ** 2,
-            order3_evecs_4[lambda_index, :, 0, evec_num] ** 2,
-            order3_evecs_5[lambda_index, :, 0, evec_num] ** 2,
-            # order3_evecs_6[lambda_index, :, 0, evec_num] ** 2,
-            order3_evecs_qmax[lambda_index, :, 0, evec_num] ** 2,
+            order3_evec_left_0[lambda_index, :, 0, evec_num] ** 2,
+            order1_evec_left_1[lambda_index, :, 0, evec_num] ** 2,
+            order3_evec_left_2[lambda_index, :, 0, evec_num] ** 2,
+            order3_evec_left_4[lambda_index, :, 0, evec_num] ** 2,
+            order3_evec_left_5[lambda_index, :, 0, evec_num] ** 2,
+            order3_evec_left_qmax[lambda_index, :, 0, evec_num] ** 2,
         ]
     )
     state2 = np.array(
         [
-            order3_evecs_0[lambda_index, :, 1, evec_num] ** 2,
-            order1_evecs_1[lambda_index, :, 1, evec_num] ** 2,
-            order3_evecs_2[lambda_index, :, 1, evec_num] ** 2,
-            order3_evecs_4[lambda_index, :, 1, evec_num] ** 2,
-            order3_evecs_5[lambda_index, :, 1, evec_num] ** 2,
-            # order3_evecs_6[lambda_index, :, 1, evec_num] ** 2,
-            order3_evecs_qmax[lambda_index, :, 1, evec_num] ** 2,
+            order3_evec_left_0[lambda_index, :, 1, evec_num] ** 2,
+            order1_evec_left_1[lambda_index, :, 1, evec_num] ** 2,
+            order3_evec_left_2[lambda_index, :, 1, evec_num] ** 2,
+            order3_evec_left_4[lambda_index, :, 1, evec_num] ** 2,
+            order3_evec_left_5[lambda_index, :, 1, evec_num] ** 2,
+            order3_evec_left_qmax[lambda_index, :, 1, evec_num] ** 2,
         ]
     )
+    plot_evecs_bs(plotdir, mod_p, state1_left, state2, lambda_index, name="_evec1")
+
+    # ==================================================
+    # Second eigenvector
     evec_num = 1
     state3 = np.array(
         [
-            order3_evecs_0[lambda_index, :, 0, evec_num] ** 2,
-            order1_evecs_1[lambda_index, :, 0, evec_num] ** 2,
-            order3_evecs_2[lambda_index, :, 0, evec_num] ** 2,
-            order3_evecs_4[lambda_index, :, 0, evec_num] ** 2,
-            order3_evecs_5[lambda_index, :, 0, evec_num] ** 2,
-            # order3_evecs_6[lambda_index, :, 0, evec_num] ** 2,
-            order3_evecs_qmax[lambda_index, :, 0, evec_num] ** 2,
+            order3_evec_left_0[lambda_index, :, 0, evec_num] ** 2,
+            order1_evec_left_1[lambda_index, :, 0, evec_num] ** 2,
+            order3_evec_left_2[lambda_index, :, 0, evec_num] ** 2,
+            order3_evec_left_4[lambda_index, :, 0, evec_num] ** 2,
+            order3_evec_left_5[lambda_index, :, 0, evec_num] ** 2,
+            # order3_evec_left_6[lambda_index, :, 0, evec_num] ** 2,
+            order3_evec_left_qmax[lambda_index, :, 0, evec_num] ** 2,
         ]
     )
     state4 = np.array(
         [
-            order3_evecs_0[lambda_index, :, 1, evec_num] ** 2,
-            order1_evecs_1[lambda_index, :, 1, evec_num] ** 2,
-            order3_evecs_2[lambda_index, :, 1, evec_num] ** 2,
-            order3_evecs_4[lambda_index, :, 1, evec_num] ** 2,
-            order3_evecs_5[lambda_index, :, 1, evec_num] ** 2,
-            # order3_evecs_6[lambda_index, :, 1, evec_num] ** 2,
-            order3_evecs_qmax[lambda_index, :, 1, evec_num] ** 2,
+            order3_evec_left_0[lambda_index, :, 1, evec_num] ** 2,
+            order1_evec_left_1[lambda_index, :, 1, evec_num] ** 2,
+            order3_evec_left_2[lambda_index, :, 1, evec_num] ** 2,
+            order3_evec_left_4[lambda_index, :, 1, evec_num] ** 2,
+            order3_evec_left_5[lambda_index, :, 1, evec_num] ** 2,
+            # order3_evec_left_6[lambda_index, :, 1, evec_num] ** 2,
+            order3_evec_left_qmax[lambda_index, :, 1, evec_num] ** 2,
         ]
     )
-    plot_evecs_bs(plotdir, mod_p, state1, state2, lambda_index, name="_evec1")
-    plot_evecs_bs_both(plotdir, mod_p, state1, state2, state3, state4, lambda_index)
+    plot_evecs_bs(plotdir, mod_p, state3, state4, lambda_index, name="_evec2")
 
-    evec_num = 1
-    state1 = np.array(
-        [
-            order3_evecs_0[lambda_index, :, 0, evec_num] ** 2,
-            order1_evecs_1[lambda_index, :, 0, evec_num] ** 2,
-            order3_evecs_2[lambda_index, :, 0, evec_num] ** 2,
-            order3_evecs_4[lambda_index, :, 0, evec_num] ** 2,
-            order3_evecs_5[lambda_index, :, 0, evec_num] ** 2,
-            # order3_evecs_6[lambda_index, :, 0, evec_num] ** 2,
-            order3_evecs_qmax[lambda_index, :, 0, evec_num] ** 2,
-        ]
+    # ==================================================
+    # Plot both eigenvectors
+    plot_evecs_bs_both(
+        plotdir, mod_p, state1_left, state2, state3, state4, lambda_index
     )
-    state2 = np.array(
-        [
-            order3_evecs_0[lambda_index, :, 1, evec_num] ** 2,
-            order1_evecs_1[lambda_index, :, 1, evec_num] ** 2,
-            order3_evecs_2[lambda_index, :, 1, evec_num] ** 2,
-            order3_evecs_4[lambda_index, :, 1, evec_num] ** 2,
-            order3_evecs_5[lambda_index, :, 1, evec_num] ** 2,
-            # order3_evecs_6[lambda_index, :, 1, evec_num] ** 2,
-            order3_evecs_qmax[lambda_index, :, 1, evec_num] ** 2,
-        ]
-    )
-    plot_evecs_bs(plotdir, mod_p, state1, state2, lambda_index, name="_evec2")
 
-    plot_one_fourier()
+    # plot_one_fourier()
