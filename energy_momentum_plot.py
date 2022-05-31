@@ -536,19 +536,6 @@ def plot_energy_mom(
     plt.fill_between(
         xdata, dispersion_m, dispersion_p, color=_colors[1], alpha=0.2, linewidth=0
     )
-    # plt.plot(
-    #     mod_p, dispersion_p, color=_colors[1], linestyle="--", alpha=0.3, linewidth=0.5
-    # )
-    # plt.plot(
-    #     mod_p, dispersion_m, color=_colors[1], linestyle="--", alpha=0.3, linewidth=0.5
-    # )
-    # plt.axhline(y=m_N, color="b", alpha=0.3, linewidth=0.5)
-    # plt.axhline(
-    #     y=m_N + dm_N, color=_colors[1], linestyle="--", alpha=0.3, linewidth=0.5
-    # )
-    # plt.axhline(
-    #     y=m_N - dm_N, color=_colors[1], linestyle="--", alpha=0.3, linewidth=0.5
-    # )
 
     plt.xlabel(r"$|\vec{p}_N|$")
     plt.xlim(-0.01, 0.23)

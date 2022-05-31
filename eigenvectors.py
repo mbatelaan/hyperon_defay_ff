@@ -71,6 +71,134 @@ def plot_evecs(plotdir, mod_p, state1, state2, lambda_index):
     return
 
 
+def plot_evecs_all(plotdir, mod_p, evecs, lambda_index):
+    """Plot the overlaps from the eigenvectors against the momentum values
+
+    plotdir: directory to save the plots
+    mod_p: absolute value of the momentum for the x-axis
+    evecs: a numpy array containing all the eigenvectors with indices: [chirality, momentum value, lambda index, bootstraps, eigenvector element, first or second eigenvector]
+    lambda_values: an array of the values for lambda
+    lambda_index: an integer index to set the value of lambda
+    """
+
+    chirality = ["left", "right"]
+    evec_numbers = [1, 2]
+
+    for ichi, chi in enumerate(chirality):
+        a = np.average(evecs[ichi, 2, lambda_index, :, :, 0], axis=0)
+        b = np.average(evecs[ichi, 2, lambda_index, :, :, 1], axis=0)
+        product = np.dot(
+            np.average(evecs[ichi, 2, lambda_index, :, :, 0], axis=0),
+            np.average(evecs[ichi, 2, lambda_index, :, :, 1], axis=0),
+        )
+        print(f"\n{product=}")
+        for inum, evec_num in enumerate(evec_numbers):
+            labels = []
+            state1 = evecs[ichi, :, lambda_index, :, 0, inum] ** 2
+            state2 = evecs[ichi, :, lambda_index, :, 1, inum] ** 2
+
+            fig = plt.figure(figsize=(5, 5))
+            plt.errorbar(
+                mod_p,
+                np.average(state1, axis=1),
+                np.std(state1, axis=1),
+                fmt="x",
+                # label=rf"State 1 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+                label=rf"$(v_0^0)^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+                color=_colors[3],
+                capsize=4,
+                elinewidth=1,
+                markerfacecolor="none",
+            )
+            plt.errorbar(
+                mod_p,
+                np.average(state2, axis=1),
+                np.std(state2, axis=1),
+                fmt="x",
+                label=rf"$(v_0^1)^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+                color=_colors[4],
+                capsize=4,
+                elinewidth=1,
+                markerfacecolor="none",
+            )
+            plt.legend(fontsize="x-small")
+            # plt.xlabel(r"$|\vec{p}_N|$")
+            plt.xlabel(r"$\vec{q}^{\,2}$")
+            # plt.ylabel(r"eigenvector values squared")
+            plt.ylabel(r"$(v_0^i)^2$")
+            plt.ylim(0, 1)
+            plt.savefig(
+                plotdir / ("eigenvectors_" + chi + "_evec" + str(evec_num) + ".pdf")
+            )
+            # plt.savefig(plotdir / ("eigenvectors_both.pdf"))
+            plt.close()
+
+    # chirality = 0  # 0: left, 1: right
+    # evec_num = 0
+    # state1 = evecs[chirality, :, lambda_index, :, 0, evec_num] ** 2
+    # state2 = evecs[chirality, :, lambda_index, :, 1, evec_num] ** 2
+    # evec_num = 1
+    # state3 = evecs[chirality, :, lambda_index, :, 0, evec_num] ** 2
+    # state4 = evecs[chirality, :, lambda_index, :, 1, evec_num] ** 2
+
+    # fig = plt.figure(figsize=(6, 6))
+    # plt.errorbar(
+    #     mod_p,
+    #     np.average(state1, axis=1),
+    #     np.std(state1, axis=1),
+    #     fmt="x",
+    #     # label=rf"State 1 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+    #     label=rf"$(v_0^0)^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+    #     color=_colors[3],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # plt.errorbar(
+    #     mod_p,
+    #     np.average(state2, axis=1),
+    #     np.std(state2, axis=1),
+    #     fmt="x",
+    #     label=rf"$(v_0^1)^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+    #     color=_colors[4],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+
+    # plt.errorbar(
+    #     mod_p + 0.002,
+    #     np.average(state3, axis=1),
+    #     np.std(state3, axis=1),
+    #     fmt="s",
+    #     label=rf"$(v_1^0)^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+    #     color=_colors[3],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # plt.errorbar(
+    #     mod_p + 0.002,
+    #     np.average(state4, axis=1),
+    #     np.std(state4, axis=1),
+    #     fmt="s",
+    #     label=rf"$(v_1^1)^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+    #     color=_colors[4],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+
+    # plt.legend(fontsize="x-small")
+    # plt.xlabel(r"$|\vec{p}_N|$")
+    # # plt.ylabel(r"eigenvector values squared")
+    # plt.ylabel(r"$(v_0^i)^2$")
+    # plt.savefig(plotdir / ("eigenvectors_both.pdf"))
+    # plt.close()
+    # # plt.show()
+    # return
+
+
 def add_label(violin, label, labels):
     color = violin["bodies"][0].get_facecolor().flatten()
     labels.append((mpatches.Patch(color=color), label))
@@ -105,7 +233,8 @@ def plot_evecs_violin_all(plotdir, mod_p, evecs, lambda_values, lambda_index):
                     showmeans=True,
                     showmedians=True,
                 ),
-                rf"State 1 ($\lambda = {lambda_values[lambda_index]:0.2}$)",
+                rf"$(v_0^0)^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+                # rf"State 1 ($\lambda = {lambda_values[lambda_index]:0.2}$)",
                 labels,
             )
             labels = add_label(
@@ -116,7 +245,8 @@ def plot_evecs_violin_all(plotdir, mod_p, evecs, lambda_values, lambda_index):
                     showmeans=True,
                     showmedians=True,
                 ),
-                rf"State 2 ($\lambda = {lambda_values[lambda_index]:0.2}$)",
+                rf"$(v_0^1)^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+                # rf"State 2 ($\lambda = {lambda_values[lambda_index]:0.2}$)",
                 labels,
             )
             plt.legend(*zip(*labels), loc="center left", fontsize="x-small")
@@ -518,6 +648,16 @@ def get_data(datadir, theta, m_N, m_S, NX):
         NX,
         0.074,
     )
+    Qsq_lat = Q_squared_lat(
+        m_N,
+        m_S,
+        np.array([0, theta, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        np.array([0, 0, 0]),
+        NX,
+        0.074,
+    )
     qsq_small = q_small_squared(
         np.array([0, theta, 0]),
         np.array([0, 0, 0]),
@@ -527,6 +667,7 @@ def get_data(datadir, theta, m_N, m_S, NX):
     )
     print(f"\n{qsq_small=}")
     print(f"{Qsq=}")
+    print(f"{Qsq_lat=}")
     return data_set, lambdas, order3_evec_left, order3_evec_right, qsq_small
 
 
@@ -556,11 +697,13 @@ if __name__ == "__main__":
     dm_N = 0.0070
     dm_S = 0.0042
 
+    # lambda_index = 8
     lambda_index = 5
 
     # ==================================================
     # Theta_8
     theta_8 = 2.25
+    print(f"{theta_8=}")
     (
         dataset_0,
         lambdas_0,
@@ -572,6 +715,7 @@ if __name__ == "__main__":
     # ==================================================
     # Theta_2
     theta_7 = 2.05755614
+    print(f"{theta_7=}")
     (
         dataset_1,
         lambdas_1,
@@ -610,6 +754,7 @@ if __name__ == "__main__":
     # ==================================================
     # Theta_4
     theta_4 = 1.6
+    print(f"{theta_4=}")
     (
         dataset_4,
         lambdas_4,
@@ -621,6 +766,7 @@ if __name__ == "__main__":
     # ==================================================
     # Theta_3
     theta_3 = 1.0
+    print(f"{theta_3=}")
     (
         dataset_2,
         lambdas_2,
@@ -632,6 +778,7 @@ if __name__ == "__main__":
     # ==================================================
     # Theta_5
     theta_5 = 0.448
+    print(f"{theta_5=}")
     (
         dataset_5,
         lambdas_5,
@@ -643,6 +790,7 @@ if __name__ == "__main__":
     # ==================================================
     # q_max
     theta_qmax = 0
+    print(f"{theta_qmax=}")
     (
         dataset_qmax,
         lambdas_qmax,
@@ -662,59 +810,20 @@ if __name__ == "__main__":
             np.sqrt(qsq_small_qmax),
         ]
     )
+    p_sq = np.array(
+        [
+            qsq_small_0,
+            qsq_small_1,
+            qsq_small_4,
+            qsq_small_2,
+            qsq_small_5,
+            qsq_small_qmax,
+        ]
+    )
     print("\n")
     print(np.shape(order3_evec_left_0))
     print(np.average(order3_evec_left_0[lambda_index, :, :, :], axis=0) ** 2)
     print(np.average(order3_evec_right_0[lambda_index, :, :, :], axis=0) ** 2)
-
-    # state1_ = np.array(
-    #     [
-    #         order3_evecs_0[lambda_index, 0, 0] ** 2
-    #         + order3_evecs_0[lambda_index, 0, 1] ** 2,
-    #         order3_evecs_1[lambda_index, 0, 0] ** 2
-    #         + order3_evecs_1[lambda_index, 0, 1] ** 2,
-    #         order3_evecs_2[lambda_index, 0, 0] ** 2
-    #         + order3_evecs_2[lambda_index, 0, 1] ** 2,
-    #         order3_evecs_4[lambda_index, 0, 0] ** 2
-    #         + order3_evecs_4[lambda_index, 0, 1] ** 2,
-    #         order3_evecs_5[lambda_index, 0, 0] ** 2
-    #         + order3_evecs_5[lambda_index, 0, 1] ** 2,
-    #         # order3_evecs_6[lambda_index, 0, 0] ** 2
-    #         # + order3_evecs_6[lambda_index, 0, 1] ** 2,
-    #         order3_evecs_qmax[lambda_index, 0, 0] ** 2
-    #         + order3_evecs_qmax[lambda_index, 0, 1] ** 2,
-    #     ]
-    # )
-    # state2_ = np.array(
-    #     [
-    #         order3_evecs_0[lambda_index, 1, 0] ** 2
-    #         + order3_evecs_0[lambda_index, 1, 1] ** 2,
-    #         order3_evecs_1[lambda_index, 1, 0] ** 2
-    #         + order3_evecs_1[lambda_index, 1, 1] ** 2,
-    #         order3_evecs_2[lambda_index, 1, 0] ** 2
-    #         + order3_evecs_2[lambda_index, 1, 1] ** 2,
-    #         order3_evecs_4[lambda_index, 1, 0] ** 2
-    #         + order3_evecs_4[lambda_index, 1, 1] ** 2,
-    #         order3_evecs_5[lambda_index, 1, 0] ** 2
-    #         + order3_evecs_5[lambda_index, 1, 1] ** 2,
-    #         # order3_evecs_6[lambda_index, 1, 0] ** 2
-    #         # + order3_evecs_6[lambda_index, 1, 1] ** 2,
-    #         order3_evecs_qmax[lambda_index, 1, 0] ** 2
-    #         + order3_evecs_qmax[lambda_index, 1, 1] ** 2,
-    #     ]
-    # )
-    # print("\n\n", state1_, state2_, "\n\n")
-
-    # mod_p_inds = mod_p.argsort()
-    # print(f"{mod_p_inds=}")
-    # sorted_mod_p = mod_p[mod_p_inds]
-    # sorted_matrices = eigenvector_matrices[mod_p_inds]
-
-    # print(f"{eigenvector_matrices=}")
-    # print(f"{mod_p=}")
-
-    # print(f"{sorted_matrices=}")
-    # print(f"{sorted_mod_p=}")
 
     evec_num = 0
     state1_left = np.array(
@@ -727,7 +836,7 @@ if __name__ == "__main__":
             order3_evec_left_qmax[lambda_index, :, 0, evec_num] ** 2,
         ]
     )
-    state2 = np.array(
+    state2_left = np.array(
         [
             order3_evec_left_0[lambda_index, :, 1, evec_num] ** 2,
             order3_evec_left_1[lambda_index, :, 1, evec_num] ** 2,
@@ -737,7 +846,31 @@ if __name__ == "__main__":
             order3_evec_left_qmax[lambda_index, :, 1, evec_num] ** 2,
         ]
     )
-    plot_evecs(plotdir, mod_p, state1_left, state2, lambda_index)
+
+    plot_evecs(plotdir, mod_p, state1_left, state2_left, lambda_index)
+
+    # ==================================================
+    evecs = np.array(
+        [
+            [
+                order3_evec_left_0,
+                order1_evec_left_1,
+                order3_evec_left_4,
+                order3_evec_left_2,
+                order3_evec_left_5,
+                order3_evec_left_qmax,
+            ],
+            [
+                order3_evec_right_0,
+                order1_evec_right_1,
+                order3_evec_right_4,
+                order3_evec_right_2,
+                order3_evec_right_5,
+                order3_evec_right_qmax,
+            ],
+        ]
+    )
+    plot_evecs_all(plotdir, p_sq, evecs, lambda_index)
 
     # ==================================================
     state1_lmb = order3_evec_left_1[:, :, 0, evec_num] ** 2
