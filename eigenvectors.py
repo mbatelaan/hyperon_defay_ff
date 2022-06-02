@@ -82,7 +82,8 @@ def plot_evecs_all(plotdir, mod_p, evecs, lambda_index):
     """
 
     chirality = ["left", "right"]
-    evec_numbers = [1, 2]
+    # evec_numbers = [1, 2]
+    evec_numbers = ["-", "+"]
 
     for ichi, chi in enumerate(chirality):
         a = np.average(evecs[ichi, 2, lambda_index, :, :, 0], axis=0)
@@ -94,17 +95,17 @@ def plot_evecs_all(plotdir, mod_p, evecs, lambda_index):
         print(f"\n{product=}")
         for inum, evec_num in enumerate(evec_numbers):
             labels = []
-            state1 = evecs[ichi, :, lambda_index, :, 0, inum] ** 2
-            state2 = evecs[ichi, :, lambda_index, :, 1, inum] ** 2
+            state1 = np.abs(evecs[ichi, :, lambda_index, :, 0, inum]) ** 2
+            state2 = np.abs(evecs[ichi, :, lambda_index, :, 1, inum]) ** 2
 
             fig = plt.figure(figsize=(5, 5))
             plt.errorbar(
                 mod_p,
                 np.average(state1, axis=1),
                 np.std(state1, axis=1),
-                fmt="x",
+                fmt=_fmts[0],
                 # label=rf"State 1 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
-                label=rf"$(v_0^0)^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+                label=rf"$(v_1^{{{evec_num}}})^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
                 color=_colors[3],
                 capsize=4,
                 elinewidth=1,
@@ -114,21 +115,19 @@ def plot_evecs_all(plotdir, mod_p, evecs, lambda_index):
                 mod_p,
                 np.average(state2, axis=1),
                 np.std(state2, axis=1),
-                fmt="x",
-                label=rf"$(v_0^1)^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+                fmt=_fmts[1],
+                label=rf"$(v_2^{{{evec_num}}})^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
                 color=_colors[4],
                 capsize=4,
                 elinewidth=1,
                 markerfacecolor="none",
             )
             plt.legend(fontsize="x-small")
-            # plt.xlabel(r"$|\vec{p}_N|$")
             plt.xlabel(r"$\vec{q}^{\,2}$")
-            # plt.ylabel(r"eigenvector values squared")
-            plt.ylabel(r"$(v_0^i)^2$")
+            plt.ylabel(rf"$(v_i^{{{evec_num}}})^2$")
             plt.ylim(0, 1)
             plt.savefig(
-                plotdir / ("eigenvectors_" + chi + "_evec" + str(evec_num) + ".pdf")
+                plotdir / ("eigenvectors_" + chi + "_evec" + str(inum + 1) + ".pdf")
             )
             # plt.savefig(plotdir / ("eigenvectors_both.pdf"))
             plt.close()
@@ -221,8 +220,8 @@ def plot_evecs_violin_all(plotdir, mod_p, evecs, lambda_values, lambda_index):
     for ichi, chi in enumerate(chirality):
         for inum, evec_num in enumerate(evec_numbers):
             labels = []
-            state1 = evecs[ichi, :, lambda_index, :, 0, inum] ** 2
-            state2 = evecs[ichi, :, lambda_index, :, 1, inum] ** 2
+            state1 = np.abs(evecs[ichi, :, lambda_index, :, 0, inum]) ** 2
+            state2 = np.abs(evecs[ichi, :, lambda_index, :, 1, inum]) ** 2
 
             fig = plt.figure(figsize=(6, 6))
             labels = add_label(
@@ -828,22 +827,22 @@ if __name__ == "__main__":
     evec_num = 0
     state1_left = np.array(
         [
-            order3_evec_left_0[lambda_index, :, 0, evec_num] ** 2,
-            order3_evec_left_1[lambda_index, :, 0, evec_num] ** 2,
-            order3_evec_left_4[lambda_index, :, 0, evec_num] ** 2,
-            order3_evec_left_2[lambda_index, :, 0, evec_num] ** 2,
-            order3_evec_left_5[lambda_index, :, 0, evec_num] ** 2,
-            order3_evec_left_qmax[lambda_index, :, 0, evec_num] ** 2,
+            np.abs(order3_evec_left_0[lambda_index, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_1[lambda_index, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_4[lambda_index, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_2[lambda_index, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_5[lambda_index, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_qmax[lambda_index, :, 0, evec_num]) ** 2,
         ]
     )
     state2_left = np.array(
         [
-            order3_evec_left_0[lambda_index, :, 1, evec_num] ** 2,
-            order3_evec_left_1[lambda_index, :, 1, evec_num] ** 2,
-            order3_evec_left_4[lambda_index, :, 1, evec_num] ** 2,
-            order3_evec_left_2[lambda_index, :, 1, evec_num] ** 2,
-            order3_evec_left_5[lambda_index, :, 1, evec_num] ** 2,
-            order3_evec_left_qmax[lambda_index, :, 1, evec_num] ** 2,
+            np.abs(order3_evec_left_0[lambda_index, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_1[lambda_index, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_4[lambda_index, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_2[lambda_index, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_5[lambda_index, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_qmax[lambda_index, :, 1, evec_num]) ** 2,
         ]
     )
 
@@ -873,29 +872,29 @@ if __name__ == "__main__":
     plot_evecs_all(plotdir, p_sq, evecs, lambda_index)
 
     # ==================================================
-    state1_lmb = order3_evec_left_1[:, :, 0, evec_num] ** 2
-    state2_lmb = order3_evec_left_1[:, :, 1, evec_num] ** 2
+    state1_lmb = np.abs(order3_evec_left_1[:, :, 0, evec_num]) ** 2
+    state2_lmb = np.abs(order3_evec_left_1[:, :, 1, evec_num]) ** 2
     plot_evecs_lambda(plotdir, state1_lmb, state2_lmb, lambdas_1, name="theta2_fix")
 
     # ==================================================
     states1_lmb = np.array(
         [
-            order3_evec_left_0[:, :, 0, evec_num] ** 2,
-            order3_evec_left_1[:, :, 0, evec_num] ** 2,
-            order3_evec_left_4[:, :, 0, evec_num] ** 2,
-            order3_evec_left_2[:, :, 0, evec_num] ** 2,
-            order3_evec_left_5[:, :, 0, evec_num] ** 2,
-            order3_evec_left_qmax[:, :, 0, evec_num] ** 2,
+            np.abs(order3_evec_left_0[:, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_1[:, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_4[:, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_2[:, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_5[:, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_qmax[:, :, 0, evec_num]) ** 2,
         ]
     )
     states2_lmb = np.array(
         [
-            order3_evec_left_0[:, :, 1, evec_num] ** 2,
-            order3_evec_left_1[:, :, 1, evec_num] ** 2,
-            order3_evec_left_4[:, :, 1, evec_num] ** 2,
-            order3_evec_left_2[:, :, 1, evec_num] ** 2,
-            order3_evec_left_5[:, :, 1, evec_num] ** 2,
-            order3_evec_left_qmax[:, :, 1, evec_num] ** 2,
+            np.abs(order3_evec_left_0[:, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_1[:, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_4[:, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_2[:, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_5[:, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_qmax[:, :, 1, evec_num]) ** 2,
         ]
     )
     plot_all_evecs_lambda(
@@ -910,18 +909,18 @@ if __name__ == "__main__":
     # ==================================================
     states1_lmb_2 = np.array(
         [
-            order0_evec_left_1[:, :, 0, evec_num] ** 2,
-            order1_evec_left_1[:, :, 0, evec_num] ** 2,
-            order2_evec_left_1[:, :, 0, evec_num] ** 2,
-            order3_evec_left_1[:, :, 0, evec_num] ** 2,
+            np.abs(order0_evec_left_1[:, :, 0, evec_num]) ** 2,
+            np.abs(order1_evec_left_1[:, :, 0, evec_num]) ** 2,
+            np.abs(order2_evec_left_1[:, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_1[:, :, 0, evec_num]) ** 2,
         ]
     )
     states2_lmb_2 = np.array(
         [
-            order0_evec_left_1[:, :, 1, evec_num] ** 2,
-            order1_evec_left_1[:, :, 1, evec_num] ** 2,
-            order2_evec_left_1[:, :, 1, evec_num] ** 2,
-            order3_evec_left_1[:, :, 1, evec_num] ** 2,
+            np.abs(order0_evec_left_1[:, :, 1, evec_num]) ** 2,
+            np.abs(order1_evec_left_1[:, :, 1, evec_num]) ** 2,
+            np.abs(order2_evec_left_1[:, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_1[:, :, 1, evec_num]) ** 2,
         ]
     )
     plot_orders_evecs_lambda(
