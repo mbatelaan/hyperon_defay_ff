@@ -42,7 +42,7 @@ def plot_evecs(plotdir, mod_p, state1, state2, lambda_index):
         np.std(state1, axis=1),
         fmt="x",
         # label=rf"State 1 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
-        label=rf"$(v_0^0)^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+        label=rf"$|v_0^0|^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
         color=_colors[3],
         capsize=4,
         elinewidth=1,
@@ -53,7 +53,7 @@ def plot_evecs(plotdir, mod_p, state1, state2, lambda_index):
         np.average(state2, axis=1),
         np.std(state2, axis=1),
         fmt="x",
-        label=rf"$(v_0^1)^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+        label=rf"$|v_0^1|^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
         color=_colors[4],
         capsize=4,
         elinewidth=1,
@@ -63,7 +63,7 @@ def plot_evecs(plotdir, mod_p, state1, state2, lambda_index):
     plt.legend(fontsize="x-small")
     plt.xlabel(r"$|\vec{p}_N|$")
     # plt.ylabel(r"eigenvector values squared")
-    plt.ylabel(r"$(v_0^i)^2$")
+    plt.ylabel(r"$|v_0^i|^2$")
     # # plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
     plt.savefig(plotdir / ("eigenvectors.pdf"))
     plt.close()
@@ -105,7 +105,7 @@ def plot_evecs_all(plotdir, mod_p, evecs, lambda_index):
                 np.std(state1, axis=1),
                 fmt=_fmts[0],
                 # label=rf"State 1 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
-                label=rf"$(v_1^{{{evec_num}}})^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+                label=rf"$|v_1^{{{evec_num}}}|^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
                 color=_colors[3],
                 capsize=4,
                 elinewidth=1,
@@ -116,7 +116,7 @@ def plot_evecs_all(plotdir, mod_p, evecs, lambda_index):
                 np.average(state2, axis=1),
                 np.std(state2, axis=1),
                 fmt=_fmts[1],
-                label=rf"$(v_2^{{{evec_num}}})^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+                label=rf"$|v_2^{{{evec_num}}}|^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
                 color=_colors[4],
                 capsize=4,
                 elinewidth=1,
@@ -124,7 +124,7 @@ def plot_evecs_all(plotdir, mod_p, evecs, lambda_index):
             )
             plt.legend(fontsize="x-small")
             plt.xlabel(r"$\vec{q}^{\,2}$")
-            plt.ylabel(rf"$(v_i^{{{evec_num}}})^2$")
+            plt.ylabel(rf"$|v_i^{{{evec_num}}}|^2$")
             plt.ylim(0, 1)
             plt.savefig(
                 plotdir / ("eigenvectors_" + chi + "_evec" + str(inum + 1) + ".pdf")
@@ -232,7 +232,7 @@ def plot_evecs_violin_all(plotdir, mod_p, evecs, lambda_values, lambda_index):
                     showmeans=True,
                     showmedians=True,
                 ),
-                rf"$(v_0^0)^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+                rf"$|v_0^0|^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
                 # rf"State 1 ($\lambda = {lambda_values[lambda_index]:0.2}$)",
                 labels,
             )
@@ -244,7 +244,7 @@ def plot_evecs_violin_all(plotdir, mod_p, evecs, lambda_values, lambda_index):
                     showmeans=True,
                     showmedians=True,
                 ),
-                rf"$(v_0^1)^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+                rf"$|v_0^1|^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
                 # rf"State 2 ($\lambda = {lambda_values[lambda_index]:0.2}$)",
                 labels,
             )
@@ -429,7 +429,7 @@ def plot_all_evecs_lambda(plotdir, state1, state2, lambdas, mod_p, name=""):
     plt.legend(fontsize="x-small")
     # plt.ylabel(r"eigenvector values")
     # plt.ylabel(r"eigenvector values squared")
-    plt.ylabel(r"$(v_0^i)^2$")
+    plt.ylabel(r"$|v_0^i|^2$")
     plt.xlabel(r"$\lambda$")
     plt.savefig(plotdir / ("evecs_lambda_" + name + ".pdf"))
     plt.close()
@@ -469,7 +469,7 @@ def plot_all_evecs_lambda_one(plotdir, state1, state2, lambdas, labels, name="")
     plt.legend(fontsize="x-small")
     # plt.ylabel(r"eigenvector values")
     # plt.ylabel(r"eigenvector values squared")
-    plt.ylabel(r"$(v_0^i)^2$")
+    plt.ylabel(r"$|v_0^i|^2$")
     plt.xlabel(r"$\lambda$")
     plt.savefig(plotdir / ("evecs_lambda_" + name + ".pdf"))
     plt.close()
@@ -671,9 +671,10 @@ def get_data(datadir, theta, m_N, m_S, NX):
 
 
 if __name__ == "__main__":
-    plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
-    plt.rc("text", usetex=True)
-    rcParams.update({"figure.autolayout": True})
+    # plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
+    # plt.rc("text", usetex=True)
+    # rcParams.update({"figure.autolayout": True})
+    plt.style.use("./mystyle.txt")
 
     # --- directories ---
     plotdir = Path.home() / Path("Documents/PhD/analysis_results/sig2n/")
@@ -697,7 +698,7 @@ if __name__ == "__main__":
     dm_S = 0.0042
 
     # lambda_index = 8
-    lambda_index = 5
+    lambda_index = 14
 
     # ==================================================
     # Theta_8

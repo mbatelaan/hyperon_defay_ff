@@ -478,7 +478,7 @@ def plot_energy_mom(
     )
 
     plt.errorbar(
-        mod_p + 0.002,
+        mod_p + 0.0004,
         np.average(state1_l, axis=1),
         np.std(state1_l, axis=1),
         fmt="x",
@@ -489,7 +489,7 @@ def plot_energy_mom(
         markerfacecolor="none",
     )
     plt.errorbar(
-        mod_p + 0.002,
+        mod_p + 0.0004,
         np.average(state2_l, axis=1),
         np.std(state2_l, axis=1),
         fmt="x",
@@ -529,17 +529,19 @@ def plot_energy_mom(
         linewidth=0,
     )
 
-    dispersion = np.sqrt(m_N**2 + xdata**2)
-    dispersion_p = np.sqrt((m_N + dm_N) ** 2 + xdata**2)
-    dispersion_m = np.sqrt((m_N - dm_N) ** 2 + xdata**2)
+    dispersion = np.sqrt(m_N**2 + xdata)
+    dispersion_p = np.sqrt((m_N + dm_N) ** 2 + xdata)
+    dispersion_m = np.sqrt((m_N - dm_N) ** 2 + xdata)
 
     plt.fill_between(
         xdata, dispersion_m, dispersion_p, color=_colors[1], alpha=0.2, linewidth=0
     )
 
-    plt.xlabel(r"$|\vec{p}_N|$")
-    plt.xlim(-0.01, 0.23)
-    plt.ylabel(r"Energy")
+    # plt.xlabel(r"$|\vec{p}_N|$")
+    plt.xlabel(r"$\vec{q}^{\,2}$")
+    plt.ylabel(r"$E$")
+    plt.xlim(-0.002, 0.052)
+    plt.ylim(0.42, 0.53)
     # # plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
     plt.savefig(plotdir / ("energy_momentum.pdf"))
     # plt.show()
@@ -588,7 +590,7 @@ def plot_energy_mom_div_sigma(
     )
 
     plt.errorbar(
-        mod_p + 0.002,
+        mod_p + 0.0004,
         np.average(state1_l, axis=1),
         np.std(state1_l, axis=1),
         fmt="x",
@@ -599,7 +601,7 @@ def plot_energy_mom_div_sigma(
         markerfacecolor="none",
     )
     plt.errorbar(
-        mod_p + 0.002,
+        mod_p + 0.0004,
         np.average(state2_l, axis=1),
         np.std(state2_l, axis=1),
         fmt="x",
@@ -613,9 +615,9 @@ def plot_energy_mom_div_sigma(
     # Plot the prediction of the dispersion relation
     xdata = np.linspace(-0.01, 0.3, 100)
     print(xdata)
-    dispersion = np.sqrt((m_N + m_S) ** 2 + xdata**2) - m_S
-    dispersion_p = np.sqrt((m_N + dm_N + m_S) ** 2 + xdata**2) - m_S
-    dispersion_m = np.sqrt((m_N - dm_N + m_S) ** 2 + xdata**2) - m_S
+    dispersion = np.sqrt((m_N + m_S) ** 2 + xdata) - m_S
+    dispersion_p = np.sqrt((m_N + dm_N + m_S) ** 2 + xdata) - m_S
+    dispersion_m = np.sqrt((m_N - dm_N + m_S) ** 2 + xdata) - m_S
     plt.fill_between(
         xdata, dispersion_m, dispersion_p, color=_colors[1], alpha=0.2, linewidth=0
     )
@@ -629,9 +631,11 @@ def plot_energy_mom_div_sigma(
     # )
 
     plt.legend(fontsize="x-small")
-    plt.xlabel(r"$|\vec{p}_N|$")
+    plt.xlabel(r"$\vec{q}^{\,2}$")
     plt.ylabel(r"$\Delta E$")
-    plt.xlim(-0.01, 0.23)
+    # plt.xlim(-0.01, 0.23)
+    plt.xlim(-0.002, 0.052)
+    plt.ylim(-0.051, 0.05)
     # # plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
     plt.savefig(plotdir / ("energy_momentum_div_sigma.pdf"))
     # plt.show()
@@ -639,9 +643,10 @@ def plot_energy_mom_div_sigma(
 
 
 if __name__ == "__main__":
-    plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
-    plt.rc("text", usetex=True)
-    rcParams.update({"figure.autolayout": True})
+    # plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
+    # plt.rc("text", usetex=True)
+    # rcParams.update({"figure.autolayout": True})
+    plt.style.use("./mystyle.txt")
 
     # --- directories ---
     evffdir = Path.home() / Path("Dropbox/PhD/lattice_results/eddie/sig2n/ff/")
@@ -1017,6 +1022,17 @@ if __name__ == "__main__":
             np.sqrt(qsq_qmax_small),
         ]
     )
+    p_sq = np.array(
+        [
+            qsq_0_small,
+            qsq_1_small,
+            qsq_4_small,
+            qsq_2_small,
+            qsq_5_small,
+            qsq_qmax_small,
+        ]
+    )
+
     sigma_l0 = np.array(
         [
             states_l0_0[0, :],
@@ -1068,7 +1084,8 @@ if __name__ == "__main__":
 
     plot_energy_mom(
         plotdir,
-        mod_p,
+        # mod_p,
+        p_sq,
         nucleon_l0,
         sigma_l0,
         state1_l,
@@ -1125,7 +1142,8 @@ if __name__ == "__main__":
     )
     plot_energy_mom_div_sigma(
         plotdir,
-        mod_p,
+        # mod_p,
+        p_sq,
         nucleon_l0_div,
         sigma_l0_div,
         state1_l_div,

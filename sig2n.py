@@ -101,7 +101,7 @@ def evffplot(filename, plotdir, plotname, fnum, extra_point=[None], show=False):
     """read the evff file and plot the data"""
     threept_file = evffdir / Path(filename)
     threept_data = evffdata(threept_file)
-    qsq = -1 * threept_data["par0"] * (0.1973 ** 2) / (0.074 ** 2)
+    qsq = -1 * threept_data["par0"] * (0.1973**2) / (0.074**2)
 
     pypl.figure(figsize=(9, 6))
     pypl.errorbar(
@@ -150,7 +150,7 @@ def evffplot2(
     """read the evff file and plot the data"""
     threept_file = evffdir / Path(filename)
     threept_data = evffdata(threept_file)
-    qsq = -1 * threept_data["par0"] * (0.1973 ** 2) / (0.074 ** 2)
+    qsq = -1 * threept_data["par0"] * (0.1973**2) / (0.074**2)
 
     # pypl.figure(figsize=(9, 6))
     pypl.figure(figsize=(5, 4))
@@ -217,7 +217,7 @@ def evffplot3(
     """read the evff file and plot the data"""
     threept_file = evffdir / Path(filename)
     threept_data = evffdata(threept_file)
-    qsq = -1 * threept_data["par0"] * (0.1973 ** 2) / (0.074 ** 2)
+    qsq = -1 * threept_data["par0"] * (0.1973**2) / (0.074**2)
 
     # pypl.figure(figsize=(9, 6))
     pypl.figure(figsize=(5, 4))
@@ -304,7 +304,7 @@ def evffplot4(
     """read the evff file and plot the data"""
     threept_file = evffdir / Path(filename)
     threept_data = evffdata(threept_file)
-    qsq = -1 * threept_data["par0"] * (0.1973 ** 2) / (0.074 ** 2)
+    qsq = -1 * threept_data["par0"] * (0.1973**2) / (0.074**2)
 
     # pypl.figure(figsize=(9, 6))
     print(f"{threept_data['val'][-1, 3]=}")
@@ -409,13 +409,14 @@ def evffplot4(
 
 def energy(m, L, n):
     """return the energy of the state"""
-    return np.sqrt(m ** 2 + (n * 2 * np.pi / L) ** 2)
+    return np.sqrt(m**2 + (n * 2 * np.pi / L) ** 2)
 
 
 if __name__ == "__main__":
-    pypl.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
-    pypl.rc("text", usetex=True)
-    rcParams.update({"figure.autolayout": True})
+    # pypl.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
+    # pypl.rc("text", usetex=True)
+    # rcParams.update({"figure.autolayout": True})
+    plt.style.use("./mystyle.txt")
 
     NX = 32
     NT = 64
@@ -428,7 +429,7 @@ if __name__ == "__main__":
     F1_factor = np.sqrt(0.5 * (1 + m_N / E_N))
     print(F1_factor)
     pvec = np.array([1, 0, 0])
-    pvec_sq = np.dot(pvec, pvec) * (np.pi / NX) ** 2 * (0.1973 ** 2) / (0.074 ** 2)
+    pvec_sq = np.dot(pvec, pvec) * (np.pi / NX) ** 2 * (0.1973**2) / (0.074**2)
     print(f"{pvec_sq=}")
     F2_factor = np.sqrt(0.5 * (1 + m_N / E_N)) * (
         (np.dot(pvec, pvec) * (np.pi / NX) ** 2) / ((E_N + m_N) * (m_N + m_S))

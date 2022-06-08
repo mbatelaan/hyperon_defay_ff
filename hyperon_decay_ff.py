@@ -418,9 +418,10 @@ def FF_combination_evff(F1, F2, F3, m_N, m_S, q_vec_squared, NX):
 
 
 if __name__ == "__main__":
-    pypl.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
-    pypl.rc("text", usetex=True)
-    rcParams.update({"figure.autolayout": True})
+    # pypl.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
+    # pypl.rc("text", usetex=True)
+    # rcParams.update({"figure.autolayout": True})
+    plt.style.use("./mystyle.txt")
 
     # --- directories ---
     evffdir = Path.home() / Path("Dropbox/PhD/lattice_results/eddie/sig2n/ff/")
