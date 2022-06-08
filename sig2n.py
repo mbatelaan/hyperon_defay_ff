@@ -5,7 +5,7 @@ import scipy.optimize as syopt
 from scipy.optimize import curve_fit
 import pickle
 
-import matplotlib.pyplot as pypl
+import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
 from formatting import err_brackets
@@ -103,8 +103,8 @@ def evffplot(filename, plotdir, plotname, fnum, extra_point=[None], show=False):
     threept_data = evffdata(threept_file)
     qsq = -1 * threept_data["par0"] * (0.1973**2) / (0.074**2)
 
-    pypl.figure(figsize=(9, 6))
-    pypl.errorbar(
+    plt.figure(figsize=(9, 6))
+    plt.errorbar(
         qsq,
         threept_data["val"][:, fnum],
         threept_data["val_err"][:, fnum],
@@ -117,7 +117,7 @@ def evffplot(filename, plotdir, plotname, fnum, extra_point=[None], show=False):
 
     if any(extra_point):
         print(np.average(extra_point), np.std(extra_point))
-        pypl.errorbar(
+        plt.errorbar(
             0.29,
             np.average(extra_point),
             np.std(extra_point),
@@ -128,14 +128,14 @@ def evffplot(filename, plotdir, plotname, fnum, extra_point=[None], show=False):
         )
 
     _metadata["Title"] = plotname
-    # pypl.ylabel("matrix element")
-    # pypl.xlabel("ratio denominator")
-    pypl.ylim(0, 2)
-    pypl.grid(True, alpha=0.4)
-    pypl.savefig(plotdir / (plotname + ".pdf"), metadata=_metadata)
+    # plt.ylabel("matrix element")
+    # plt.xlabel("ratio denominator")
+    plt.ylim(0, 2)
+    plt.grid(True, alpha=0.4)
+    plt.savefig(plotdir / (plotname + ".pdf"), metadata=_metadata)
     if show:
-        pypl.show()
-    pypl.close()
+        plt.show()
+    plt.close()
 
 
 def evffplot2(
@@ -152,9 +152,9 @@ def evffplot2(
     threept_data = evffdata(threept_file)
     qsq = -1 * threept_data["par0"] * (0.1973**2) / (0.074**2)
 
-    # pypl.figure(figsize=(9, 6))
-    pypl.figure(figsize=(5, 4))
-    pypl.errorbar(
+    # plt.figure(figsize=(9, 6))
+    plt.figure(figsize=(5, 4))
+    plt.errorbar(
         qsq,
         threept_data["val"][:, 0] - 0.05 * threept_data["val"][:, 1],
         threept_data["val_err"][:, 0] - 0.05 * threept_data["val_err"][:, 1],
@@ -167,7 +167,7 @@ def evffplot2(
 
     if any(extra_point):
         print(np.average(extra_point), np.std(extra_point))
-        pypl.errorbar(
+        plt.errorbar(
             0.29,
             np.average(extra_point),
             np.std(extra_point),
@@ -179,7 +179,7 @@ def evffplot2(
         )
     if any(extra_point2):
         print(np.average(extra_point2), np.std(extra_point2))
-        pypl.errorbar(
+        plt.errorbar(
             0.29 + 0.01,
             np.average(extra_point2),
             np.std(extra_point2),
@@ -190,16 +190,16 @@ def evffplot2(
             label=r"$\theta_2$",
         )
 
-    pypl.legend(fontsize="x-small")
+    plt.legend(fontsize="x-small")
     _metadata["Title"] = plotname
-    pypl.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(m_{N}+m_{\Sigma})^{2}} F_{2}$")
-    pypl.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
-    pypl.ylim(0, 1.5)
-    # pypl.grid(True, alpha=0.4)
-    pypl.savefig(plotdir / (plotname + ".pdf"), metadata=_metadata)
+    plt.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(m_{N}+m_{\Sigma})^{2}} F_{2}$")
+    plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
+    plt.ylim(0, 1.5)
+    # plt.grid(True, alpha=0.4)
+    plt.savefig(plotdir / (plotname + ".pdf"), metadata=_metadata)
     if show:
-        pypl.show()
-    pypl.close()
+        plt.show()
+    plt.close()
     return
 
 
@@ -219,9 +219,9 @@ def evffplot3(
     threept_data = evffdata(threept_file)
     qsq = -1 * threept_data["par0"] * (0.1973**2) / (0.074**2)
 
-    # pypl.figure(figsize=(9, 6))
-    pypl.figure(figsize=(5, 4))
-    pypl.errorbar(
+    # plt.figure(figsize=(9, 6))
+    plt.figure(figsize=(5, 4))
+    plt.errorbar(
         qsq,
         threept_data["val"][:, 0] - 0.05 * threept_data["val"][:, 1],
         threept_data["val_err"][:, 0] - 0.05 * threept_data["val_err"][:, 1],
@@ -233,7 +233,7 @@ def evffplot3(
     )
 
     if any(extra_point2):
-        pypl.errorbar(
+        plt.errorbar(
             0.338,
             extra_point2[0],
             extra_point2[1],
@@ -244,7 +244,7 @@ def evffplot3(
             label=r"$\theta_1$",
         )
     if any(extra_point):
-        pypl.errorbar(
+        plt.errorbar(
             0.29,
             extra_point[0],
             extra_point[1],
@@ -255,7 +255,7 @@ def evffplot3(
             label=r"$\theta_2$",
         )
     if any(extra_point3):
-        pypl.errorbar(
+        plt.errorbar(
             0.29 - 0.005,
             extra_point3[0],
             extra_point3[1],
@@ -266,7 +266,7 @@ def evffplot3(
             label=r"$\theta_2$, twisted gauge3",
         )
     if any(extra_point4):
-        pypl.errorbar(
+        plt.errorbar(
             0.29 + 0.005,
             extra_point4[0],
             extra_point4[1],
@@ -277,16 +277,16 @@ def evffplot3(
             label=r"$\theta_2$, twisted gauge5",
         )
 
-    pypl.legend(fontsize="x-small")
+    plt.legend(fontsize="x-small")
     _metadata["Title"] = plotname
-    pypl.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(m_{N}+m_{\Sigma})^{2}} F_{2}$")
-    pypl.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
-    pypl.ylim(0, 1.5)
-    # pypl.grid(True, alpha=0.4)
-    pypl.savefig(plotdir / (plotname + "_2.pdf"), metadata=_metadata)
+    plt.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(m_{N}+m_{\Sigma})^{2}} F_{2}$")
+    plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
+    plt.ylim(0, 1.5)
+    # plt.grid(True, alpha=0.4)
+    plt.savefig(plotdir / (plotname + "_2.pdf"), metadata=_metadata)
     if show:
-        pypl.show()
-    pypl.close()
+        plt.show()
+    plt.close()
 
 
 def evffplot4(
@@ -306,12 +306,12 @@ def evffplot4(
     threept_data = evffdata(threept_file)
     qsq = -1 * threept_data["par0"] * (0.1973**2) / (0.074**2)
 
-    # pypl.figure(figsize=(9, 6))
+    # plt.figure(figsize=(9, 6))
     print(f"{threept_data['val'][-1, 3]=}")
     F_0_manual = threept_data["val"][-1, 0] + threept_data["val"][-1, 2]
     print(f"{F_0_manual=}")
-    pypl.figure(figsize=(5, 4))
-    pypl.errorbar(
+    plt.figure(figsize=(5, 4))
+    plt.errorbar(
         qsq[-1],
         threept_data["val"][-1, 3],
         threept_data["val_err"][-1, 3],
@@ -324,7 +324,7 @@ def evffplot4(
         fmt="s",
         markerfacecolor="none",
     )
-    pypl.errorbar(
+    plt.errorbar(
         qsq,
         threept_data["val"][:, 0] - 0.05 * threept_data["val"][:, 1],
         threept_data["val_err"][:, 0] - 0.05 * threept_data["val_err"][:, 1],
@@ -339,7 +339,7 @@ def evffplot4(
     )
 
     if any(extra_point2):
-        pypl.errorbar(
+        plt.errorbar(
             0.338,
             extra_point2[0],
             extra_point2[1],
@@ -350,7 +350,7 @@ def evffplot4(
             label=r"$\theta_1$",
         )
     if any(extra_point):
-        pypl.errorbar(
+        plt.errorbar(
             0.29,
             extra_point[0],
             extra_point[1],
@@ -361,7 +361,7 @@ def evffplot4(
             label=r"$\theta_2$",
         )
     if any(extra_point3):
-        pypl.errorbar(
+        plt.errorbar(
             0.29 - 0.005,
             extra_point3[0],
             extra_point3[1],
@@ -372,7 +372,7 @@ def evffplot4(
             label=r"$\theta_2$, twisted gauge3",
         )
     if any(extra_point4):
-        pypl.errorbar(
+        plt.errorbar(
             0.29 + 0.005,
             extra_point4[0],
             extra_point4[1],
@@ -383,7 +383,7 @@ def evffplot4(
             label=r"$\theta_2$, twisted gauge5",
         )
     if any(extra_point5):
-        pypl.errorbar(
+        plt.errorbar(
             extra_point5[2],
             extra_point5[0],
             extra_point5[1],
@@ -394,17 +394,17 @@ def evffplot4(
             label=r"$\theta_2$, twisted gauge5",
         )
 
-    pypl.legend(fontsize="xx-small")
+    plt.legend(fontsize="xx-small")
     _metadata["Title"] = plotname
-    # pypl.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(m_{N}+m_{\Sigma})^{2}} F_{2}$")
-    pypl.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2}$")
-    pypl.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
-    pypl.ylim(0, 1.5)
-    # pypl.grid(True, alpha=0.4)
-    pypl.savefig(plotdir / (plotname + "_3.pdf"), metadata=_metadata)
+    # plt.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(m_{N}+m_{\Sigma})^{2}} F_{2}$")
+    plt.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2}$")
+    plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
+    plt.ylim(0, 1.5)
+    # plt.grid(True, alpha=0.4)
+    plt.savefig(plotdir / (plotname + "_3.pdf"), metadata=_metadata)
     if show:
-        pypl.show()
-    pypl.close()
+        plt.show()
+    plt.close()
 
 
 def energy(m, L, n):
@@ -413,8 +413,8 @@ def energy(m, L, n):
 
 
 if __name__ == "__main__":
-    # pypl.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
-    # pypl.rc("text", usetex=True)
+    # plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
+    # plt.rc("text", usetex=True)
     # rcParams.update({"figure.autolayout": True})
     plt.style.use("./mystyle.txt")
 
@@ -536,8 +536,8 @@ if __name__ == "__main__":
     # threept_file = evffdir / Path("evff.res_slvec-notwist")
     # threept_data = evffdata(threept_file)
     # qsq = -1 * threept_data["par0"] * (0.1973 ** 2) / (0.074 ** 2)
-    # pypl.figure(figsize=(9, 6))
-    # pypl.errorbar(
+    # plt.figure(figsize=(9, 6))
+    # plt.errorbar(
     #     qsq,
     #     threept_data["val"][:, 0],
     #     threept_data["val_err"][:, 0],
@@ -549,19 +549,19 @@ if __name__ == "__main__":
     # )
     # plotname = "notwist_evff"
     # _metadata["Title"] = plotname
-    # # pypl.ylabel("matrix element")
-    # # pypl.xlabel("ratio denominator")
-    # pypl.ylim(0, 1.2)
-    # pypl.grid(True, alpha=0.4)
-    # pypl.savefig(plotdir / (plotname + ".pdf"), metadata=_metadata)
-    # pypl.show()
-    # pypl.close()
+    # # plt.ylabel("matrix element")
+    # # plt.xlabel("ratio denominator")
+    # plt.ylim(0, 1.2)
+    # plt.grid(True, alpha=0.4)
+    # plt.savefig(plotdir / (plotname + ".pdf"), metadata=_metadata)
+    # plt.show()
+    # plt.close()
 
     # threept_file = evffdir / Path("evff.res_slvec-q+twist")
     # threept_data = evffdata(threept_file)
     # qsq = -1 * threept_data["par0"] * (0.1973 ** 2) / (0.074 ** 2)
-    # pypl.figure(figsize=(9, 6))
-    # pypl.errorbar(
+    # plt.figure(figsize=(9, 6))
+    # plt.errorbar(
     #     qsq,
     #     threept_data["val"][:, 0],
     #     threept_data["val_err"][:, 0],
@@ -573,19 +573,19 @@ if __name__ == "__main__":
     # )
     # plotname = "q_plus_twist_evff"
     # _metadata["Title"] = plotname
-    # # pypl.ylabel("matrix element")
-    # # pypl.xlabel("ratio denominator")
-    # pypl.ylim(0, 1.2)
-    # pypl.grid(True, alpha=0.4)
-    # pypl.savefig(plotdir / (plotname + ".pdf"), metadata=_metadata)
-    # pypl.show()
-    # pypl.close()
+    # # plt.ylabel("matrix element")
+    # # plt.xlabel("ratio denominator")
+    # plt.ylim(0, 1.2)
+    # plt.grid(True, alpha=0.4)
+    # plt.savefig(plotdir / (plotname + ".pdf"), metadata=_metadata)
+    # plt.show()
+    # plt.close()
 
     # threept_file = evffdir / Path("evff.res_slvec_q-twist")
     # threept_data = evffdata(threept_file)
     # qsq = -1 * threept_data["par0"] * (0.1973 ** 2) / (0.074 ** 2)
-    # pypl.figure(figsize=(9, 6))
-    # pypl.errorbar(
+    # plt.figure(figsize=(9, 6))
+    # plt.errorbar(
     #     qsq,
     #     threept_data["val"][:, 0],
     #     threept_data["val_err"][:, 0],
@@ -597,13 +597,13 @@ if __name__ == "__main__":
     # )
     # plotname = "q_minus_twist_evff"
     # _metadata["Title"] = plotname
-    # # pypl.ylabel("matrix element")
-    # # pypl.xlabel("ratio denominator")
-    # pypl.ylim(0, 1.2)
-    # pypl.grid(True, alpha=0.4)
-    # pypl.savefig(plotdir / (plotname + ".pdf"), metadata=_metadata)
-    # pypl.show()
-    # pypl.close()
+    # # plt.ylabel("matrix element")
+    # # plt.xlabel("ratio denominator")
+    # plt.ylim(0, 1.2)
+    # plt.grid(True, alpha=0.4)
+    # plt.savefig(plotdir / (plotname + ".pdf"), metadata=_metadata)
+    # plt.show()
+    # plt.close()
 
     # unpertfile_nucleon_neg = (
     #     evffdir

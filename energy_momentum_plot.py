@@ -5,9 +5,9 @@ import scipy.optimize as syopt
 from scipy.optimize import curve_fit
 import pickle
 
-
 import matplotlib.pyplot as plt
-from matplotlib import rcParams
+
+# from matplotlib import rcParams
 
 from formatting import err_brackets
 

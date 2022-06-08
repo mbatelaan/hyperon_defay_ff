@@ -5,8 +5,9 @@ import scipy.optimize as syopt
 from scipy.optimize import curve_fit
 import pickle
 
-import matplotlib.pyplot as pypl
-from matplotlib import rcParams
+import matplotlib.pyplot as plt
+
+# from matplotlib import rcParams
 
 from formatting import err_brackets
 
@@ -108,9 +109,9 @@ def evffplot5(
     show=False,
 ):
     """plot the form factor data against Q^2"""
-    # pypl.figure(figsize=(9, 6))
-    pypl.figure(figsize=(5, 4))
-    pypl.errorbar(
+    # plt.figure(figsize=(9, 6))
+    plt.figure(figsize=(5, 4))
+    plt.errorbar(
         xdata,
         ydata,
         errordata,
@@ -125,7 +126,7 @@ def evffplot5(
     # if any(extra_points):
     if extra_points != None:
         for i, point in enumerate(extra_points["xdata"][:-1]):
-            pypl.errorbar(
+            plt.errorbar(
                 extra_points["xdata"][i],
                 np.average(extra_points["ydata"][i]),
                 np.std(extra_points["ydata"][i]),
@@ -137,21 +138,21 @@ def evffplot5(
                 # label=r"$\theta_" + str(i) + "$",
                 label=extra_points["labels"][i],
             )
-    pypl.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
-    pypl.legend(fontsize="xx-small")
+    plt.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
+    plt.legend(fontsize="xx-small")
     # _metadata["Title"] = plotname
-    # pypl.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2}$")
-    pypl.ylabel(
+    # plt.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2}$")
+    plt.ylabel(
         r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2} + \frac{m_{\Sigma} - E_N}{m_N+m_{\Sigma}}F_3$",
         fontsize="x-small",
     )
-    pypl.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
-    pypl.ylim(0, 1.5)
-    # pypl.grid(True, alpha=0.4)
-    pypl.savefig(plotdir / (plotname + "_4.pdf"))  # , metadata=_metadata)
+    plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
+    plt.ylim(0, 1.5)
+    # plt.grid(True, alpha=0.4)
+    plt.savefig(plotdir / (plotname + "_4.pdf"))  # , metadata=_metadata)
     if show:
-        pypl.show()
-    pypl.close()
+        plt.show()
+    plt.close()
 
 
 def evffplot6(
@@ -165,9 +166,9 @@ def evffplot6(
     show=False,
 ):
     """plot the form factor data against Q^2"""
-    # pypl.figure(figsize=(9, 6))
-    pypl.figure(figsize=(5, 4))
-    pypl.errorbar(
+    # plt.figure(figsize=(9, 6))
+    plt.figure(figsize=(5, 4))
+    plt.errorbar(
         xdata,
         ydata,
         errordata,
@@ -180,7 +181,7 @@ def evffplot6(
     )
 
     if extra_points != None:
-        pypl.errorbar(
+        plt.errorbar(
             extra_points["xdata"][-1],
             np.average(extra_points["ydata"][-1]),
             np.std(extra_points["ydata"][-1]),
@@ -193,7 +194,7 @@ def evffplot6(
         )
 
     # extra_point5 = [1.179, 0.022, -0.015210838956772907]  # twisted_gauge5
-    # pypl.errorbar(
+    # plt.errorbar(
     #     extra_point5[2] + 0.001,
     #     extra_point5[0],
     #     extra_point5[1],
@@ -205,26 +206,26 @@ def evffplot6(
     #     # label=r"$\theta_" + str(i) + "$",
     #     label=r"$\theta_2$",
     # )
-    pypl.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
+    plt.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
 
-    pypl.legend(fontsize="xx-small")
+    plt.legend(fontsize="xx-small")
     # _metadata["Title"] = plotname
-    # pypl.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2}$")
-    # pypl.ylabel(
+    # plt.ylabel(r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2}$")
+    # plt.ylabel(
     #     r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2} + \frac{m_{\Sigma} - E_N}{m_N+m_{\Sigma}}F_3$",
     #     fontsize="x-small",
     # )
-    pypl.ylabel(
+    plt.ylabel(
         r"$F_{0}(Q^2)$",
         fontsize="small",
     )
-    pypl.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
-    pypl.ylim(0, 1.5)
-    # pypl.grid(True, alpha=0.4)
-    pypl.savefig(plotdir / (plotname + "_qmax.pdf"))  # , metadata=_metadata)
+    plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
+    plt.ylim(0, 1.5)
+    # plt.grid(True, alpha=0.4)
+    plt.savefig(plotdir / (plotname + "_qmax.pdf"))  # , metadata=_metadata)
     if show:
-        pypl.show()
-    pypl.close()
+        plt.show()
+    plt.close()
 
 
 def evffplot7(
@@ -241,9 +242,9 @@ def evffplot7(
 
     Plot all of the points
     """
-    # pypl.figure(figsize=(9, 6))
-    pypl.figure(figsize=(5, 4))
-    pypl.errorbar(
+    # plt.figure(figsize=(9, 6))
+    plt.figure(figsize=(5, 4))
+    plt.errorbar(
         xdata,
         ydata,
         errordata,
@@ -258,7 +259,7 @@ def evffplot7(
     # if any(extra_points):
     if extra_points != None:
         for i, point in enumerate(extra_points["xdata"]):
-            pypl.errorbar(
+            plt.errorbar(
                 extra_points["xdata"][i],
                 np.average(extra_points["ydata"][i]),
                 np.std(extra_points["ydata"][i]),
@@ -270,19 +271,19 @@ def evffplot7(
                 # label=r"$\theta_" + str(i) + "$",
                 label=extra_points["labels"][i],
             )
-    pypl.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
-    pypl.legend(fontsize="xx-small")
+    plt.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
+    plt.legend(fontsize="xx-small")
     # _metadata["Title"] = plotname
-    pypl.ylabel(
+    plt.ylabel(
         r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2} + \frac{m_{\Sigma} - E_N}{m_N+m_{\Sigma}}F_3$",
         fontsize="x-small",
     )
-    pypl.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
-    pypl.ylim(0, 1.5)
-    pypl.savefig(plotdir / (plotname + "_all.pdf"))  # , metadata=_metadata)
+    plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
+    plt.ylim(0, 1.5)
+    plt.savefig(plotdir / (plotname + "_all.pdf"))  # , metadata=_metadata)
 
-    pypl.figure(figsize=(5, 4))
-    pypl.errorbar(
+    plt.figure(figsize=(5, 4))
+    plt.errorbar(
         xdata,
         ydata,
         errordata,
@@ -298,7 +299,7 @@ def evffplot7(
         print(len(extra_points["xdata"]))
         print(np.shape(extra_points["ydata"]))
         print(np.shape(extra_points["ydata"]))
-        pypl.errorbar(
+        plt.errorbar(
             extra_points["xdata"],
             np.average(extra_points["ydata"], axis=2)[:, 0],
             np.std(extra_points["ydata"], axis=2)[:, 0],
@@ -310,18 +311,18 @@ def evffplot7(
             label="sequential source",
         )
 
-    pypl.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
-    pypl.legend(fontsize="xx-small")
-    pypl.ylabel(
+    plt.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
+    plt.legend(fontsize="xx-small")
+    plt.ylabel(
         r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2} + \frac{m_{\Sigma} - E_N}{m_N+m_{\Sigma}}F_3$",
         fontsize="x-small",
     )
-    pypl.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
-    pypl.ylim(0, 1.5)
-    pypl.savefig(plotdir / (plotname + "_all_together.pdf"))  # , metadata=_metadata)
+    plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
+    plt.ylim(0, 1.5)
+    plt.savefig(plotdir / (plotname + "_all_together.pdf"))  # , metadata=_metadata)
     if show:
-        pypl.show()
-    pypl.close()
+        plt.show()
+    plt.close()
 
 
 def energy(m, L, n):
@@ -418,8 +419,8 @@ def FF_combination_evff(F1, F2, F3, m_N, m_S, q_vec_squared, NX):
 
 
 if __name__ == "__main__":
-    # pypl.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
-    # pypl.rc("text", usetex=True)
+    # plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
+    # plt.rc("text", usetex=True)
     # rcParams.update({"figure.autolayout": True})
     plt.style.use("./mystyle.txt")
 
