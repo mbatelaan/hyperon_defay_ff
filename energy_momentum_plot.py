@@ -13,16 +13,38 @@ from formatting import err_brackets
 
 # _metadata = {"Author": "Mischa Batelaan", "Creator": __file__}
 
+# _colors = [
+#     "#377eb8",
+#     "#ff7f00",
+#     "#4daf4a",
+#     "#f781bf",
+#     "#a65628",
+#     "#984ea3",
+#     "#999999",
+#     "#e41a1c",
+#     "#dede00",
+# ]
+
+# _colors = [
+#     (0, 0, 0),
+#     (230, 159, 0),
+#     (86, 180, 233),
+#     (0, 158, 115),
+#     (240, 228, 66),
+#     (0, 114, 178),
+#     (213, 94, 0),
+#     (204, 121, 167),
+# ]
+
 _colors = [
-    "#377eb8",
-    "#ff7f00",
-    "#4daf4a",
-    "#f781bf",
-    "#a65628",
-    "#984ea3",
-    "#999999",
-    "#e41a1c",
-    "#dede00",
+    (0, 0, 0),
+    (0.9, 0.6, 0),
+    (0.35, 0.7, 0.9),
+    (0, 0.6, 0.5),
+    (0.95, 0.9, 0.25),
+    (0, 0.45, 0.7),
+    (0.8, 0.4, 0),
+    (0.8, 0.6, 0.7),
 ]
 
 _fmts = ["s", "^", "*", "o", ".", ","]
@@ -518,8 +540,6 @@ def plot_energy_mom(
     print(m_S)
     print(dm_S)
     xdata = np.linspace(-0.01, 0.3, 100)
-    print(mod_p)
-    print(xdata)
     plt.fill_between(
         xdata,
         m_S - dm_S,
@@ -614,7 +634,6 @@ def plot_energy_mom_div_sigma(
 
     # Plot the prediction of the dispersion relation
     xdata = np.linspace(-0.01, 0.3, 100)
-    print(xdata)
     dispersion = np.sqrt((m_N + m_S) ** 2 + xdata) - m_S
     dispersion_p = np.sqrt((m_N + dm_N + m_S) ** 2 + xdata) - m_S
     dispersion_m = np.sqrt((m_N - dm_N + m_S) ** 2 + xdata) - m_S
@@ -685,7 +704,8 @@ if __name__ == "__main__":
 
     # ==================================================
     # q_max
-    with open(datadir_qmax / "lambda_dep_t4_dt2.pkl", "rb") as file_in:  # qmax
+    with open(datadir_qmax / "lambda_dep_t4_dt2.pkl", "rb") as file_in:
+        # with open(datadir_qmax / "lambda_dep_t6_dt4.pkl", "rb") as file_in:  # qmax
         data_set_qmax = pickle.load(file_in)
     lambdas_qmax = np.array([d["lambdas"] for d in data_set_qmax])
     order3_fit_qmax = np.array([d["order3_states_fit"] for d in data_set_qmax])
@@ -751,7 +771,7 @@ if __name__ == "__main__":
 
     # ==================================================
     # Theta_8
-    with open(datadir0 / "lambda_dep_t4_dt2.pkl", "rb") as file_in:
+    with open(datadir0 / "lambda_dep_t6_dt4.pkl", "rb") as file_in:
         data_set0 = pickle.load(file_in)
     lambdas_0 = np.array([d["lambdas"] for d in data_set0])
     order3_fit_0 = np.array([d["order3_states_fit"] for d in data_set0])
@@ -805,7 +825,7 @@ if __name__ == "__main__":
 
     # ==================================================
     # Theta_2
-    with open(datadir1 / "lambda_dep_t4_dt2.pkl", "rb") as file_in:  # theta2
+    with open(datadir1 / "lambda_dep_t6_dt4.pkl", "rb") as file_in:  # theta2
         data_set1 = pickle.load(file_in)
     lambdas_1 = np.array([d["lambdas"] for d in data_set1])
     order3_fit_1 = np.array([d["order3_states_fit"] for d in data_set1])
@@ -859,6 +879,7 @@ if __name__ == "__main__":
     # ==================================================
     # Theta_3
     with open(datadir2 / "lambda_dep_t4_dt2.pkl", "rb") as file_in:
+        # with open(datadir2 / "lambda_dep_t6_dt4.pkl", "rb") as file_in:
         data_set2 = pickle.load(file_in)
     lambdas_2 = np.array([d["lambdas"] for d in data_set2])
     order3_fit_2 = np.array([d["order3_states_fit"] for d in data_set2])
@@ -909,7 +930,7 @@ if __name__ == "__main__":
 
     # ==================================================
     # Theta_4
-    with open(datadir4 / "lambda_dep_t4_dt2.pkl", "rb") as file_in:  # theta4
+    with open(datadir4 / "lambda_dep_t6_dt4.pkl", "rb") as file_in:  # theta4
         data_set4 = pickle.load(file_in)
     lambdas_4 = np.array([d["lambdas"] for d in data_set4])
     order3_fit_4 = np.array([d["order3_states_fit"] for d in data_set4])
