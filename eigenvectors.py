@@ -12,7 +12,7 @@ from matplotlib import rcParams
 
 from formatting import err_brackets
 
-# _metadata = {"Author": "Mischa Batelaan", "Creator": __file__}
+_metadata = {"Author": "Mischa Batelaan", "Creator": __file__}
 
 _colors = [
     "#377eb8",
@@ -65,7 +65,7 @@ def plot_evecs(plotdir, mod_p, state1, state2, lambda_index):
     # plt.ylabel(r"eigenvector values squared")
     plt.ylabel(r"$|v_0^i|^2$")
     # # plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
-    plt.savefig(plotdir / ("eigenvectors.pdf"))
+    plt.savefig(plotdir / ("eigenvectors.pdf"), metadata=_metadata)
     plt.close()
     # plt.show()
     return
@@ -127,7 +127,8 @@ def plot_evecs_all(plotdir, mod_p, evecs, lambda_index):
             plt.ylabel(rf"$|v_i^{{{evec_num}}}|^2$")
             plt.ylim(0, 1)
             plt.savefig(
-                plotdir / ("eigenvectors_" + chi + "_evec" + str(inum + 1) + ".pdf")
+                plotdir / ("eigenvectors_" + chi + "_evec" + str(inum + 1) + ".pdf"),
+                metadata=_metadata,
             )
             # plt.savefig(plotdir / ("eigenvectors_both.pdf"))
             plt.close()
@@ -192,7 +193,7 @@ def plot_evecs_all(plotdir, mod_p, evecs, lambda_index):
     # plt.xlabel(r"$|\vec{p}_N|$")
     # # plt.ylabel(r"eigenvector values squared")
     # plt.ylabel(r"$(v_0^i)^2$")
-    # plt.savefig(plotdir / ("eigenvectors_both.pdf"))
+    # plt.savefig(plotdir / ("eigenvectors_both.pdf"), metadata=_metadata)
     # plt.close()
     # # plt.show()
     # return
@@ -254,7 +255,8 @@ def plot_evecs_violin_all(plotdir, mod_p, evecs, lambda_values, lambda_index):
             plt.ylabel(r"eigenvector values squared")
             plt.ylim(0, 1)
             plt.savefig(
-                plotdir / ("eigenvectors_bs_" + chi + "_evec" + str(evec_num) + ".pdf")
+                plotdir / ("eigenvectors_bs_" + chi + "_evec" + str(evec_num) + ".pdf"),
+                metadata=_metadata,
             )
             plt.close()
     return
@@ -303,7 +305,7 @@ def plot_evals_lambda(plotdir, evals, lambdas, nucleon, sigma, name=""):
     plt.legend(fontsize="x-small")
 
     plt.ylabel(r"Energy")
-    plt.savefig(plotdir / ("eigenvalues" + name + ".pdf"))
+    plt.savefig(plotdir / ("eigenvalues" + name + ".pdf"), metadata=_metadata)
     # plt.show()
     plt.close()
     return
@@ -354,7 +356,7 @@ def plot_energy_lambda(plotdir, states, lambdas, nucleon, sigma, name=""):
 
     plt.ylabel(r"Energy")
     plt.xlabel(r"$\lambda$")
-    plt.savefig(plotdir / ("energy_values_" + name + ".pdf"))
+    plt.savefig(plotdir / ("energy_values_" + name + ".pdf"), metadata=_metadata)
     plt.close()
     return
 
@@ -392,7 +394,7 @@ def plot_evecs_lambda(plotdir, state1, state2, lambdas, name=""):
 
     plt.ylabel(r"eigenvector values squared")
     plt.xlabel(r"$\lambda$")
-    plt.savefig(plotdir / ("evecs_lambda_" + name + ".pdf"))
+    plt.savefig(plotdir / ("evecs_lambda_" + name + ".pdf"), metadata=_metadata)
     plt.close()
     return
 
@@ -431,7 +433,7 @@ def plot_all_evecs_lambda(plotdir, state1, state2, lambdas, mod_p, name=""):
     # plt.ylabel(r"eigenvector values squared")
     plt.ylabel(r"$|v_0^i|^2$")
     plt.xlabel(r"$\lambda$")
-    plt.savefig(plotdir / ("evecs_lambda_" + name + ".pdf"))
+    plt.savefig(plotdir / ("evecs_lambda_" + name + ".pdf"), metadata=_metadata)
     plt.close()
     return
 
@@ -471,7 +473,7 @@ def plot_all_evecs_lambda_one(plotdir, state1, state2, lambdas, labels, name="")
     # plt.ylabel(r"eigenvector values squared")
     plt.ylabel(r"$|v_0^i|^2$")
     plt.xlabel(r"$\lambda$")
-    plt.savefig(plotdir / ("evecs_lambda_" + name + ".pdf"))
+    plt.savefig(plotdir / ("evecs_lambda_" + name + ".pdf"), metadata=_metadata)
     plt.close()
     return
 
@@ -573,7 +575,7 @@ def plot_orders_evecs_lambda(plotdir, state1, state2, lambdas, name=""):
     plt.legend(fontsize="x-small")
     plt.ylabel(r"eigenvector values squared")
     plt.xlabel(r"$\lambda$")
-    plt.savefig(plotdir / ("evecs_lambda_" + name + ".pdf"))
+    plt.savefig(plotdir / ("evecs_lambda_" + name + ".pdf"), metadata=_metadata)
     plt.close()
     return
 

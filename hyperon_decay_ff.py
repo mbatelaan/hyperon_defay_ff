@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 from formatting import err_brackets
 
-# _metadata = {"Author": "Mischa Batelaan", "Creator": __file__}
+_metadata = {"Author": "Mischa Batelaan", "Creator": __file__}
 
 # _colors = [
 #     "#377eb8",
@@ -161,7 +161,7 @@ def evffplot5(
     plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
     plt.ylim(0, 1.5)
     # plt.grid(True, alpha=0.4)
-    plt.savefig(plotdir / (plotname + "_4.pdf"))  # , metadata=_metadata)
+    plt.savefig(plotdir / (plotname + "_4.pdf"), metadata=_metadata)
     if show:
         plt.show()
     plt.close()
@@ -234,7 +234,7 @@ def evffplot6(
     plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
     plt.ylim(0, 1.5)
     # plt.grid(True, alpha=0.4)
-    plt.savefig(plotdir / (plotname + "_qmax.pdf"))  # , metadata=_metadata)
+    plt.savefig(plotdir / (plotname + "_qmax.pdf"), metadata=_metadata)
     if show:
         plt.show()
     plt.close()
@@ -292,7 +292,7 @@ def evffplot7(
     )
     plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
     plt.ylim(0, 1.5)
-    plt.savefig(plotdir / (plotname + "_all.pdf"))  # , metadata=_metadata)
+    plt.savefig(plotdir / (plotname + "_all.pdf"), metadata=_metadata)
 
     plt.figure(figsize=(5, 4))
     plt.errorbar(
@@ -331,7 +331,7 @@ def evffplot7(
     )
     plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
     plt.ylim(0, 1.5)
-    plt.savefig(plotdir / (plotname + "_all_together.pdf"))  # , metadata=_metadata)
+    plt.savefig(plotdir / (plotname + "_all_together.pdf"), metadata=_metadata)
     if show:
         plt.show()
     plt.close()

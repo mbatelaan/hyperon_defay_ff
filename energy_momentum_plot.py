@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 from formatting import err_brackets
 
-# _metadata = {"Author": "Mischa Batelaan", "Creator": __file__}
+_metadata = {"Author": "Mischa Batelaan", "Creator": __file__}
 
 # _colors = [
 #     "#377eb8",
@@ -172,7 +172,7 @@ def evffplot5(
     plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
     plt.ylim(0, 1.5)
     # plt.grid(True, alpha=0.4)
-    plt.savefig(plotdir / (plotname + "_4.pdf"))  # , metadata=_metadata)
+    plt.savefig(plotdir / (plotname + "_4.pdf"), metadata=_metadata)
     if show:
         plt.show()
     plt.close()
@@ -245,7 +245,7 @@ def evffplot6(
     plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
     plt.ylim(0, 1.5)
     # plt.grid(True, alpha=0.4)
-    plt.savefig(plotdir / (plotname + "_qmax.pdf"))  # , metadata=_metadata)
+    plt.savefig(plotdir / (plotname + "_qmax.pdf"), metadata=_metadata)
     if show:
         plt.show()
     plt.close()
@@ -305,7 +305,7 @@ def evffplot7(
     plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
     plt.ylim(0, 1.5)
     # plt.grid(True, alpha=0.4)
-    plt.savefig(plotdir / (plotname + "_all.pdf"))  # , metadata=_metadata)
+    plt.savefig(plotdir / (plotname + "_all.pdf"), metadata=_metadata)
     if show:
         plt.show()
     plt.close()
@@ -563,7 +563,7 @@ def plot_energy_mom(
     plt.xlim(-0.002, 0.052)
     plt.ylim(0.42, 0.53)
     # # plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
-    plt.savefig(plotdir / ("energy_momentum.pdf"))
+    plt.savefig(plotdir / ("energy_momentum.pdf"), metadata=_metadata)
     # plt.show()
 
 
@@ -656,7 +656,7 @@ def plot_energy_mom_div_sigma(
     plt.xlim(-0.002, 0.052)
     plt.ylim(-0.051, 0.05)
     # # plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
-    plt.savefig(plotdir / ("energy_momentum_div_sigma.pdf"))
+    plt.savefig(plotdir / ("energy_momentum_div_sigma.pdf"), metadata=_metadata)
     # plt.show()
     return
 
