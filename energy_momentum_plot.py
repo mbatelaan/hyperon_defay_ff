@@ -4,14 +4,15 @@ from BootStrap3 import bootstrap
 import scipy.optimize as syopt
 from scipy.optimize import curve_fit
 import pickle
-
+import csv
 import matplotlib.pyplot as plt
-
-# from matplotlib import rcParams
-
 from formatting import err_brackets
 
+
+# from plot_utils import make_description
+
 _metadata = {"Author": "Mischa Batelaan", "Creator": __file__}
+# _metadata = {"Author": "Mischa Batelaan", "Creator": make_description()}
 
 # _colors = [
 #     "#377eb8",
@@ -514,7 +515,7 @@ def plot_energy_mom(
         mod_p + 0.0004,
         np.average(state2_l, axis=1),
         np.std(state2_l, axis=1),
-        fmt="x",
+        fmt="*",
         label=rf"State 2 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
         color=_colors[3],
         capsize=4,
@@ -561,7 +562,7 @@ def plot_energy_mom(
     plt.xlabel(r"$\vec{q}^{\,2}$")
     plt.ylabel(r"$E$")
     plt.xlim(-0.002, 0.052)
-    plt.ylim(0.42, 0.53)
+    plt.ylim(0.41, 0.53)
     # # plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
     plt.savefig(plotdir / ("energy_momentum.pdf"), metadata=_metadata)
     # plt.show()
@@ -624,7 +625,7 @@ def plot_energy_mom_div_sigma(
         mod_p + 0.0004,
         np.average(state2_l, axis=1),
         np.std(state2_l, axis=1),
-        fmt="x",
+        fmt="*",
         label=rf"State 2 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
         color=_colors[3],
         capsize=4,
@@ -661,7 +662,31 @@ def plot_energy_mom_div_sigma(
     return
 
 
-if __name__ == "__main__":
+def saveplotdata(nucleon_l0, sigma_l0, p_sq, plotdatadir):
+    # headernames = ["qsq", "nucleon energy", "sigma energy"]
+    headernames = ["qsq", "nucleon energy"]
+    with open(plotdatadir / Path("nucleon_energy.csv"), "w") as csvfile:
+        datawrite = csv.writer(csvfile, delimiter=",", quotechar="|")
+        # datawrite.writerow(p_sq)
+        datawrite.writerow(headernames)
+        for i in range(len(nucleon_l0)):
+            datawrite.writerow(np.append(p_sq[i], nucleon_l0[i]))
+        # for i in range(len(nucleon_l0[0])):
+        #     datawrite.writerow(nucleon_l0[:, i])
+
+    headernames = ["qsq", "sigma energy"]
+    with open(plotdatadir / Path("sigma_energy.csv"), "w") as csvfile:
+        datawrite = csv.writer(csvfile, delimiter=",", quotechar="|")
+        # datawrite.writerow(p_sq)
+        datawrite.writerow(headernames)
+        for i in range(len(sigma_l0)):
+            datawrite.writerow(np.append(p_sq[i], sigma_l0[i]))
+        # for i in range(len(sigma_l0[0])):
+        #     datawrite.writerow(sigma_l0[:, i])
+    return
+
+
+def main():
     # plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
     # plt.rc("text", usetex=True)
     # rcParams.update({"figure.autolayout": True})
@@ -671,16 +696,19 @@ if __name__ == "__main__":
     evffdir = Path.home() / Path("Dropbox/PhD/lattice_results/eddie/sig2n/ff/")
     resultsdir = Path.home() / Path("Documents/PhD/analysis_results")
     plotdir = resultsdir / Path("sig2n/")
-    datadir0 = resultsdir / Path("six_point_fn_theta8/data/")
-    # datadir1 = resultsdir / Path("six_point_fn_theta2_fix/data/")
-    datadir1 = resultsdir / Path("six_point_fn_theta7/data/")
-    datadir2 = resultsdir / Path("six_point_fn_theta3/data/")
-    datadir4 = resultsdir / Path("six_point_fn_theta4/data/")
-    datadir5 = resultsdir / Path("six_point_fn_theta5/data/")
-    datadir_qmax = resultsdir / Path("six_point_fn_qmax/data/")
-    # datadir6 = resultsdir / Path(
-    #     "six_point_fn_one_fourier/data/"
-    # )
+    plotdatadir = resultsdir / Path("sig2n/data")
+    # datadir0 = resultsdir / Path("six_point_fn_theta8/data/")
+    # datadir1 = resultsdir / Path("six_point_fn_theta7/data/")
+    # datadir2 = resultsdir / Path("six_point_fn_theta3/data/")
+    # datadir4 = resultsdir / Path("six_point_fn_theta4/data/")
+    # datadir5 = resultsdir / Path("six_point_fn_theta5/data/")
+    # datadir_qmax = resultsdir / Path("six_point_fn_qmax/data/")
+    datadir0 = resultsdir / Path("six_point_fn_all/data/pickles/theta8/")
+    datadir1 = resultsdir / Path("six_point_fn_all/data/pickles/theta7/")
+    datadir2 = resultsdir / Path("six_point_fn_all/data/pickles/theta3/")
+    datadir4 = resultsdir / Path("six_point_fn_all/data/pickles/theta4/")
+    datadir5 = resultsdir / Path("six_point_fn_all/data/pickles/theta5/")
+    datadir_qmax = resultsdir / Path("six_point_fn_all/data/pickles/qmax/")
     plotdir.mkdir(parents=True, exist_ok=True)
 
     # --- Lattice specs ---
@@ -700,7 +728,7 @@ if __name__ == "__main__":
 
     # extra_points_qsq = [0.338, 0.29 - 0.002, 0.29, 0.29 + 0.002, -0.015210838956772907]
     zero_array = np.array([0, 0, 0])
-    lambda_index = 5
+    lambda_index = 9
 
     # ==================================================
     # q_max
@@ -709,15 +737,12 @@ if __name__ == "__main__":
         data_set_qmax = pickle.load(file_in)
     lambdas_qmax = np.array([d["lambdas"] for d in data_set_qmax])
     order3_fit_qmax = np.array([d["order3_states_fit"] for d in data_set_qmax])
-    # order3_fit_qmax = data_set_qmax["order3_states_fit"]
     states_l0_qmax = np.array(
         [
-            # data_set_qmax["bootfit_unpert_sigma"][:, 1],
-            # data_set_qmax["bootfit_unpert_nucl"][:, 1],
-            # np.array([d["weighted_energy_sigma"] for d in data_set_qmax]),
-            # np.array([d["weighted_energy_nucl"] for d in data_set_qmax]),
-            data_set_qmax[0]["weighted_energy_sigma"],
-            data_set_qmax[0]["weighted_energy_nucl"],
+            # data_set_qmax[0]["weighted_energy_sigma"],
+            # data_set_qmax[0]["weighted_energy_nucl"],
+            data_set_qmax[0]["chosen_sigma_fit"]["param"][:, 1],
+            data_set_qmax[0]["chosen_nucl_fit"]["param"][:, 1],
         ]
     )
     states_l0p4_qmax = order3_fit_qmax[lambda_index, :, :, 1]
@@ -726,8 +751,12 @@ if __name__ == "__main__":
     )
     states_l0_div_qmax = np.array(
         [
-            np.zeros(np.shape(data_set_qmax[0]["weighted_energy_nucldivsigma"])),
-            data_set_qmax[0]["weighted_energy_nucldivsigma"],
+            # np.zeros(np.shape(data_set_qmax[0]["weighted_energy_nucldivsigma"])),
+            # data_set_qmax[0]["weighted_energy_nucldivsigma"],
+            np.zeros(
+                np.shape(data_set_qmax[0]["chosen_nucldivsigma_fit"]["param"][:, 1])
+            ),
+            data_set_qmax[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
         ]
     )
     states_l0p4_div_qmax = order3_fit_div_qmax[lambda_index, :, :, 1]
@@ -783,8 +812,8 @@ if __name__ == "__main__":
             # data_set0["bootfit_unpert_nucl"][:, 1],
             # np.array([d["weighted_energy_sigma"] for d in data_set0]),
             # np.array([d["weighted_energy_nucl"] for d in data_set0]),
-            data_set0[0]["weighted_energy_sigma"],
-            data_set0[0]["weighted_energy_nucl"],
+            data_set0[0]["chosen_sigma_fit"]["param"][:, 1],
+            data_set0[0]["chosen_nucl_fit"]["param"][:, 1],
         ]
     )
     print(np.shape(order3_fit_0))
@@ -793,8 +822,8 @@ if __name__ == "__main__":
     order3_fit_div_0 = np.array([d["order3_states_fit_divsigma"] for d in data_set0])
     states_l0_div_0 = np.array(
         [
-            np.zeros(np.shape(data_set0[0]["weighted_energy_nucldivsigma"])),
-            data_set0[0]["weighted_energy_nucldivsigma"],
+            np.zeros(np.shape(data_set0[0]["chosen_nucldivsigma_fit"]["param"][:, 1])),
+            data_set0[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
         ]
     )
     states_l0p4_div_0 = order3_fit_div_0[lambda_index, :, :, 1]
@@ -824,8 +853,8 @@ if __name__ == "__main__":
     print(f"{qsq_0_small=}")
 
     # ==================================================
-    # Theta_2
-    with open(datadir1 / "lambda_dep_t6_dt4.pkl", "rb") as file_in:  # theta2
+    # Theta_7
+    with open(datadir1 / "lambda_dep_t6_dt4.pkl", "rb") as file_in:  # theta7
         data_set1 = pickle.load(file_in)
     lambdas_1 = np.array([d["lambdas"] for d in data_set1])
     order3_fit_1 = np.array([d["order3_states_fit"] for d in data_set1])
@@ -837,16 +866,16 @@ if __name__ == "__main__":
             # data_set1["bootfit_unpert_nucl"][:, 1],
             # np.array([d["weighted_energy_sigma"] for d in data_set1]),
             # np.array([d["weighted_energy_nucl"] for d in data_set1]),
-            data_set1[0]["weighted_energy_sigma"],
-            data_set1[0]["weighted_energy_nucl"],
+            data_set1[0]["chosen_sigma_fit"]["param"][:, 1],
+            data_set1[0]["chosen_nucl_fit"]["param"][:, 1],
         ]
     )
     states_l0p4_1 = order3_fit_1[lambda_index, :, :, 1]
     order3_fit_div_1 = np.array([d["order3_states_fit_divsigma"] for d in data_set1])
     states_l0_div_1 = np.array(
         [
-            np.zeros(np.shape(data_set1[0]["weighted_energy_nucldivsigma"])),
-            data_set1[0]["weighted_energy_nucldivsigma"],
+            np.zeros(np.shape(data_set1[0]["chosen_nucldivsigma_fit"]["param"][:, 1])),
+            data_set1[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
         ]
     )
     states_l0p4_div_1 = order3_fit_div_1[lambda_index, :, :, 1]
@@ -891,16 +920,16 @@ if __name__ == "__main__":
             # data_set2["bootfit_unpert_nucl"][:, 1],
             # np.array([d["weighted_energy_sigma"] for d in data_set2]),
             # np.array([d["weighted_energy_nucl"] for d in data_set2]),
-            data_set2[0]["weighted_energy_sigma"],
-            data_set2[0]["weighted_energy_nucl"],
+            data_set2[0]["chosen_sigma_fit"]["param"][:, 1],
+            data_set2[0]["chosen_nucl_fit"]["param"][:, 1],
         ]
     )
     states_l0p4_2 = order3_fit_2[lambda_index, :, :, 1]
     order3_fit_div_2 = np.array([d["order3_states_fit_divsigma"] for d in data_set2])
     states_l0_div_2 = np.array(
         [
-            np.zeros(np.shape(data_set2[0]["weighted_energy_nucldivsigma"])),
-            data_set2[0]["weighted_energy_nucldivsigma"],
+            np.zeros(np.shape(data_set2[0]["chosen_nucldivsigma_fit"]["param"][:, 1])),
+            data_set2[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
         ]
     )
     states_l0p4_div_2 = order3_fit_div_2[lambda_index, :, :, 1]
@@ -942,18 +971,18 @@ if __name__ == "__main__":
             # data_set4["bootfit_unpert_nucl"][:, 1],
             # np.array([d["weighted_energy_sigma"] for d in data_set4]),
             # np.array([d["weighted_energy_nucl"] for d in data_set4]),
-            data_set4[0]["weighted_energy_sigma"],
-            data_set4[0]["weighted_energy_nucl"],
+            data_set4[0]["chosen_sigma_fit"]["param"][:, 1],
+            data_set4[0]["chosen_nucl_fit"]["param"][:, 1],
         ]
     )
     states_l0p4_4 = order3_fit_4[lambda_index, :, :, 1]
     order3_fit_div_4 = np.array([d["order3_states_fit_divsigma"] for d in data_set4])
     states_l0_div_4 = np.array(
         [
-            np.zeros(np.shape(data_set4[0]["weighted_energy_nucldivsigma"])),
-            data_set4[0]["weighted_energy_nucldivsigma"],
-            # np.zeros(np.shape([d["weighted_energy_nucldivsigma"] for d in data_set4])),
-            # np.array([d["weighted_energy_nucldivsigma"] for d in data_set4]),
+            np.zeros(np.shape(data_set4[0]["chosen_nucldivsigma_fit"]["param"][:, 1])),
+            data_set4[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
+            # np.zeros(np.shape([d["chosen_nucldivsigma_fit"] for d in data_set4])),
+            # np.array([d["chosen_nucldivsigma_fit"] for d in data_set4]),
         ]
     )
     states_l0p4_div_4 = order3_fit_div_4[lambda_index, :, :, 1]
@@ -995,16 +1024,16 @@ if __name__ == "__main__":
             # data_set5["bootfit_unpert_nucl"][:, 1],
             # np.array([d["weighted_energy_sigma"] for d in data_set5]),
             # np.array([d["weighted_energy_nucl"] for d in data_set5]),
-            data_set5[0]["weighted_energy_sigma"],
-            data_set5[0]["weighted_energy_nucl"],
+            data_set5[0]["chosen_sigma_fit"]["param"][:, 1],
+            data_set5[0]["chosen_nucl_fit"]["param"][:, 1],
         ]
     )
     states_l0p4_5 = order3_fit_5[lambda_index, :, :, 1]
     order3_fit_div_5 = np.array([d["order3_states_fit_divsigma"] for d in data_set5])
     states_l0_div_5 = np.array(
         [
-            np.zeros(np.shape(data_set5[0]["weighted_energy_nucldivsigma"])),
-            data_set5[0]["weighted_energy_nucldivsigma"],
+            np.zeros(np.shape(data_set5[0]["chosen_nucldivsigma_fit"]["param"][:, 1])),
+            data_set5[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
         ]
     )
     states_l0p4_div_5 = order3_fit_div_5[lambda_index, :, :, 1]
@@ -1061,7 +1090,6 @@ if __name__ == "__main__":
             states_l0_4[0, :],
             states_l0_2[0, :],
             states_l0_5[0, :],
-            # states_l0_6[0, :],
             states_l0_qmax[0, :],
         ]
     )
@@ -1072,10 +1100,12 @@ if __name__ == "__main__":
             states_l0_4[1, :],
             states_l0_2[1, :],
             states_l0_5[1, :],
-            # states_l0_6[1, :],
             states_l0_qmax[1, :],
         ]
     )
+    print(f"{np.shape(nucleon_l0)=}")
+
+    saveplotdata(nucleon_l0, sigma_l0, p_sq, plotdatadir)
     # print(np.shape(states_l0p4_0))
     # print(states_l0p4_0[0, :])
     # print(states_l0p4_0[1, :])
@@ -1178,3 +1208,7 @@ if __name__ == "__main__":
         lambdas_0,
         lambda_index,
     )
+
+
+if __name__ == "__main__":
+    main()

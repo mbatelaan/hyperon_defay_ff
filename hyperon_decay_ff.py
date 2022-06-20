@@ -438,32 +438,40 @@ if __name__ == "__main__":
 
     # --- directories ---
     evffdir = Path.home() / Path("Dropbox/PhD/lattice_results/eddie/sig2n/ff/")
-    plotdir = Path.home() / Path("Documents/PhD/analysis_results/sig2n/")
+    resultsdir = Path.home() / Path("Documents/PhD/analysis_results")
+    plotdir = resultsdir / Path("sig2n/")
     # datadir1 = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn4/data/")
-    datadir1 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_theta8/data/"
-    )
-    datadir2 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_theta7/data/"
-    )
-    datadir3 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_theta3/data/"
-    )
-    datadir4 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_theta4/data/"
-    )
-    datadir5 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_theta5/data/"
-    )
-    datadir7 = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_theta7/data/"
-    )
-    datadir_qmax = Path.home() / Path(
-        "Documents/PhD/analysis_results/six_point_fn_qmax/data/"
-    )
-    # datadir6 = Path.home() / Path(
-    #     "Documents/PhD/analysis_results/six_point_fn_one_fourier/data/"
+    datadir1 = resultsdir / Path("six_point_fn_all/data/pickles/theta8/")
+    datadir3 = resultsdir / Path("six_point_fn_all/data/pickles/theta3/")
+    datadir4 = resultsdir / Path("six_point_fn_all/data/pickles/theta4/")
+    datadir5 = resultsdir / Path("six_point_fn_all/data/pickles/theta5/")
+    datadir7 = resultsdir / Path("six_point_fn_all/data/pickles/theta7/")
+    datadir_qmax = resultsdir / Path("six_point_fn_all/data/pickles/qmax/")
+
+    # datadir1 = Path.home() / Path(
+    #     "Documents/PhD/analysis_results/six_point_fn_theta8/data/"
     # )
+    # # datadir2 = Path.home() / Path(
+    # #     "Documents/PhD/analysis_results/six_point_fn_theta7/data/"
+    # # )
+    # datadir3 = Path.home() / Path(
+    #     "Documents/PhD/analysis_results/six_point_fn_theta3/data/"
+    # )
+    # datadir4 = Path.home() / Path(
+    #     "Documents/PhD/analysis_results/six_point_fn_theta4/data/"
+    # )
+    # datadir5 = Path.home() / Path(
+    #     "Documents/PhD/analysis_results/six_point_fn_theta5/data/"
+    # )
+    # datadir7 = Path.home() / Path(
+    #     "Documents/PhD/analysis_results/six_point_fn_theta7/data/"
+    # )
+    # datadir_qmax = Path.home() / Path(
+    #     "Documents/PhD/analysis_results/six_point_fn_qmax/data/"
+    # )
+    # # datadir6 = Path.home() / Path(
+    # #     "Documents/PhD/analysis_results/six_point_fn_one_fourier/data/"
+    # # )
     plotdir.mkdir(parents=True, exist_ok=True)
 
     # --- Lattice specs ---
