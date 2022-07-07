@@ -4,11 +4,12 @@ from BootStrap3 import bootstrap
 import scipy.optimize as syopt
 from scipy.optimize import curve_fit
 import pickle
-
+import random
 
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib import rcParams
+from matplotlib.widgets import Slider, Button
 
 from formatting import err_brackets
 
@@ -24,9 +25,11 @@ _colors = [
     "#999999",
     "#e41a1c",
     "#dede00",
+    "k",
+    "b",
 ]
 
-_fmts = ["s", "^", "*", "o", ".", ",", "v", "p", "P"]
+_fmts = ["s", "^", "*", "o", ".", ",", "v", "p", "P", "s", "^"]
 
 
 def plot_evecs(plotdir, mod_p, state1, state2, lambda_index):
@@ -438,6 +441,193 @@ def plot_all_evecs_lambda(plotdir, state1, state2, lambdas, mod_p, name=""):
     return
 
 
+def plot_all_evec_angles_lambda(plotdir, evecs, lambdas, mod_p, name=""):
+    """Plot the eigenvalues against the lambda values"""
+    print(f"{lambdas=}")
+
+    # evec1 = abs(evecs[:, :, :, 0])
+    # evec2 = abs(evecs[:, :, :, 1])
+    # evec1 = np.real(evecs[:, :, :, 0])
+    # evec2 = np.real(evecs[:, :, :, 1])
+    # evec1 = np.imag(evecs[:, :, :, 0])
+    # evec2 = np.imag(evecs[:, :, :, 1])
+    # evec1 = evecs[:, :, 0, :]
+    # evec2 = evecs[:, :, 1, :]
+    evec1 = evecs[:, :, :, 0]
+    evec2 = evecs[:, :, :, 1]
+    # evec1[:, :, 0] = evec1[:, :, 0] * np.sign(evec1[:, :, 1])
+    # evec1[:, :, 1] = evec1[:, :, 1] * np.sign(evec1[:, :, 1])
+    # evec2[:, :, 0] = evec2[:, :, 0] * np.sign(evec1[:, :, 1])
+    # evec2[:, :, 1] = evec2[:, :, 1] * np.sign(evec1[:, :, 1])
+
+    # angle1 = np.arctan(evec1[:, :, 1] / evec1[:, :, 0])
+    # angle2 = np.arctan(evec2[:, :, 1] / evec2[:, :, 0])
+    # angle1 = np.arctan2(evec1[:, :, 1], evec1[:, :, 0])
+    # angle2 = np.arctan2(evec2[:, :, 1], evec2[:, :, 0])
+    angle1 = np.angle(evec1[:, :, 1] / evec1[:, :, 0])
+    angle2 = np.angle(evec2[:, :, 1] / evec2[:, :, 0])
+    # print(np.shape(evec1))
+    # print(evec1[10])
+
+    lmb_choice = 1
+    plt.figure(figsize=(6, 6))
+    # plt.scatter(evec1[lmb_choice, :, 0], evec1[lmb_choice, :, 1], color=_colors[2], label="10")
+    # plt.scatter(evec2[lmb_choice, :, 0], evec2[lmb_choice, :, 1], color=_colors[3], label="10")
+    plt.scatter(
+        np.cos(angle1[lmb_choice, :]),
+        np.sin(angle1[lmb_choice, :]),
+        color=_colors[2],
+        label="10",
+    )
+    plt.scatter(
+        np.cos(angle2[lmb_choice, :]),
+        np.sin(angle2[lmb_choice, :]),
+        color=_colors[3],
+        label="10",
+    )
+    plt.ylim(-1.2, 1.2)
+    plt.xlim(-1.2, 1.2)
+    plt.savefig(plotdir / ("evec_angles1_lambda_" + name + ".pdf"), metadata=_metadata)
+
+    # stepsize = 95
+    pointnumber = 10
+    random.seed(1234)
+    indices = np.array([random.randint(0, 500) for _ in range(pointnumber)])
+    # print(indices)
+    # indices = np.arange(3, 500, stepsize)
+    plt.figure(figsize=(9, 12))
+    for i, index in enumerate(indices):
+        print(i)
+        plt.plot(
+            lambdas,
+            angle1[:, index],
+            marker=_fmts[i],
+            # label="angle1",
+            # label=rf"$|\vec{{p}}|={mod_p[j]:0.2}$",
+            color=_colors[i],
+            linestyle="-",
+            # elinewidth=1,
+            markerfacecolor="none",
+        )
+        plt.plot(
+            lambdas,
+            angle2[:, index],
+            marker=_fmts[i],
+            # label="angle1",
+            # label=rf"$|\vec{{p}}|={mod_p[j]:0.2}$",
+            color=_colors[i],
+            linestyle="--",
+            # elinewidth=1,
+            markerfacecolor="none",
+        )
+    # plt.errorbar(
+    #     lambdas,
+    #     np.average(angle1, axis=1),
+    #     np.std(angle1, axis=1),
+    #     fmt=_fmts[0],
+    #     label="angle1",
+    #     # label=rf"$|\vec{{p}}|={mod_p[j]:0.2}$",
+    #     color=_colors[0],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # plt.errorbar(
+    #     lambdas,
+    #     np.average(angle2, axis=1),
+    #     np.std(angle2, axis=1),
+    #     fmt=_fmts[1],
+    #     label="angle2",
+    #     # label=rf"$|\vec{{p}}|={mod_p[j]:0.2}$",
+    #     color=_colors[1],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+
+    plt.legend(fontsize="x-small")
+    plt.ylabel(r"$tan^{-1}(v_1^i/v_0^i)$")
+    plt.xlabel(r"$\lambda$")
+    plt.savefig(plotdir / ("evec_angles_lambda_" + name + ".pdf"), metadata=_metadata)
+    plt.close()
+    return
+
+
+def f(lambda_, evec):
+    # return evec[lambda_, :, 0], evec[lambda_, :, 1]
+    angle1 = np.angle(evec[lambda_, :, 1] / evec[lambda_, :, 0])
+    # angle1 = np.angle(evec[lambda_, :, 1] - evec[lambda_, :, 0])
+    return np.cos(angle1), np.sin(angle1)
+
+
+def reset(event):
+    lambda_slider.reset()
+
+
+def plot_circle_evecs_lambda(plotdir, evecs, lambdas, mod_p, name=""):
+    """Plot the eigenvalues against the lambda values"""
+    print(f"{lambdas=}")
+
+    # evec1 = np.real(evecs[:, :, :, 0])
+    # evec2 = np.real(evecs[:, :, :, 1])
+    evec1 = evecs[:, :, :, 0]
+    evec2 = evecs[:, :, :, 1]
+    # evec1[:, :, 0] = evec1[:, :, 0] * np.sign(evec1[:, :, 1])
+    # evec1[:, :, 1] = evec1[:, :, 1] * np.sign(evec1[:, :, 1])
+    # evec2[:, :, 0] = evec2[:, :, 0] * np.sign(evec1[:, :, 1])
+    # evec2[:, :, 1] = evec2[:, :, 1] * np.sign(evec1[:, :, 1])
+    # angle1 = np.arctan(evec1[:, :, 1] / evec1[:, :, 0])
+    # angle2 = np.arctan(evec2[:, :, 1] / evec2[:, :, 0])
+
+    # evec1 = np.abs(evec1)
+    # evec2 = np.abs(evec2)
+
+    fig, ax = plt.subplots(figsize=(6, 6))
+    ax.set_ylim(-1.2, 1.2)
+    ax.set_xlim(-1.2, 1.2)
+    plt.subplots_adjust(bottom=0.75)
+    (line,) = plt.plot(
+        f(0, evec1)[0], f(0, evec1)[1], lw=0, marker="o", color=_colors[0]
+    )
+    (line2,) = plt.plot(
+        f(0, evec2)[0], f(0, evec2)[1], lw=0, marker="o", color=_colors[1]
+    )
+    axlambda = plt.axes([0.25, 0.1, 0.65, 0.03])
+    allowed_amplitudes = np.arange(15)
+    print(f"\n\n\n\n{allowed_amplitudes}")
+    lambda_slider = Slider(
+        ax=axlambda,
+        label="lambda",
+        valmin=0,
+        valmax=14,
+        valinit=0,
+        valstep=allowed_amplitudes,
+    )
+
+    def update(val):
+        """The function to be called anytime a slider's value changes"""
+        # line.set_ydata(f(t, amp_slider.val, lambda_slider.val))
+        lambda_ = lambda_slider.val
+        line.set_xdata(f(lambda_, evec1)[0])
+        line.set_ydata(f(lambda_, evec1)[1])
+        line2.set_xdata(f(lambda_, evec2)[0])
+        line2.set_ydata(f(lambda_, evec2)[1])
+        fig.canvas.draw_idle()
+
+    # register the update function with each slider
+    lambda_slider.on_changed(update)
+
+    # Create a `matplotlib.widgets.Button` to reset the sliders to initial values.
+    resetax = plt.axes([0.8, 0.025, 0.1, 0.04])
+    button = Button(resetax, "Reset", hovercolor="0.975")
+
+    # plt.scatter(evec1[10, :, 0], evec1[10, :, 1], color=_colors[2], label="10")
+    # plt.scatter(evec2[10, :, 0], evec2[10, :, 1], color=_colors[3], label="10")
+    plt.savefig(plotdir / ("plot_evecs_lambda_" + name + ".pdf"), metadata=_metadata)
+    plt.show()
+    return
+
+
 def plot_all_evecs_lambda_one(plotdir, state1, state2, lambdas, labels, name=""):
     """Plot the eigenvalues against the lambda values"""
     print(f"{lambdas=}")
@@ -673,9 +863,6 @@ def get_data(datadir, theta, m_N, m_S, NX):
 
 
 if __name__ == "__main__":
-    # plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
-    # plt.rc("text", usetex=True)
-    # rcParams.update({"figure.autolayout": True})
     plt.style.use("./mystyle.txt")
 
     # --- directories ---
@@ -856,7 +1043,7 @@ if __name__ == "__main__":
         [
             [
                 order3_evec_left_0,
-                order1_evec_left_1,
+                order3_evec_left_1,
                 order3_evec_left_4,
                 order3_evec_left_2,
                 order3_evec_left_5,
@@ -864,7 +1051,7 @@ if __name__ == "__main__":
             ],
             [
                 order3_evec_right_0,
-                order1_evec_right_1,
+                order3_evec_right_1,
                 order3_evec_right_4,
                 order3_evec_right_2,
                 order3_evec_right_5,
@@ -939,7 +1126,7 @@ if __name__ == "__main__":
         [
             [
                 order3_evec_left_0,
-                order1_evec_left_1,
+                order3_evec_left_1,
                 order3_evec_left_4,
                 order3_evec_left_2,
                 order3_evec_left_5,
@@ -947,7 +1134,7 @@ if __name__ == "__main__":
             ],
             [
                 order3_evec_right_0,
-                order1_evec_right_1,
+                order3_evec_right_1,
                 order3_evec_right_4,
                 order3_evec_right_2,
                 order3_evec_right_5,
@@ -956,4 +1143,17 @@ if __name__ == "__main__":
         ]
     )
     plot_evecs_violin_all(plotdir, mod_p, evecs, lambdas_0, lambda_index)
-    # plot_one_fourier()
+
+    plot_circle_evecs_lambda(plotdir, evecs[0][5], lambdas_0, mod_p, name="qmax")
+    plot_circle_evecs_lambda(plotdir, evecs[0][4], lambdas_0, mod_p, name="theta5")
+    plot_circle_evecs_lambda(plotdir, evecs[0][3], lambdas_0, mod_p, name="theta3")
+    plot_circle_evecs_lambda(plotdir, evecs[0][2], lambdas_0, mod_p, name="theta4")
+    plot_circle_evecs_lambda(plotdir, evecs[0][1], lambdas_0, mod_p, name="theta7")
+    plot_circle_evecs_lambda(plotdir, evecs[0][0], lambdas_0, mod_p, name="theta8")
+
+    # plot_all_evec_angles_lambda(plotdir, evecs[0][5], lambdas_0, mod_p, name="qmax")
+    # plot_all_evec_angles_lambda(plotdir, evecs[0][4], lambdas_0, mod_p, name="theta5")
+    # plot_all_evec_angles_lambda(plotdir, evecs[0][3], lambdas_0, mod_p, name="theta3")
+    plot_all_evec_angles_lambda(plotdir, evecs[0][2], lambdas_0, mod_p, name="theta4")
+    plot_all_evec_angles_lambda(plotdir, evecs[0][1], lambdas_0, mod_p, name="theta7")
+    # plot_all_evec_angles_lambda(plotdir, evecs[0][0], lambdas_0, mod_p, name="theta8")

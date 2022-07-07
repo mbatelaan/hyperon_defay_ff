@@ -562,7 +562,7 @@ def plot_energy_mom(
     plt.xlabel(r"$\vec{q}^{\,2}$")
     plt.ylabel(r"$E$")
     plt.xlim(-0.002, 0.052)
-    plt.ylim(0.41, 0.53)
+    plt.ylim(0.39, 0.53)
     # # plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
     plt.savefig(plotdir / ("energy_momentum.pdf"), metadata=_metadata)
     # plt.show()
@@ -655,7 +655,7 @@ def plot_energy_mom_div_sigma(
     plt.ylabel(r"$\Delta E$")
     # plt.xlim(-0.01, 0.23)
     plt.xlim(-0.002, 0.052)
-    plt.ylim(-0.051, 0.05)
+    plt.ylim(-0.068, 0.05)
     # # plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
     plt.savefig(plotdir / ("energy_momentum_div_sigma.pdf"), metadata=_metadata)
     # plt.show()
@@ -728,7 +728,7 @@ def main():
 
     # extra_points_qsq = [0.338, 0.29 - 0.002, 0.29, 0.29 + 0.002, -0.015210838956772907]
     zero_array = np.array([0, 0, 0])
-    lambda_index = 9
+    lambda_index = 8
 
     # ==================================================
     # q_max
@@ -739,10 +739,10 @@ def main():
     order3_fit_qmax = np.array([d["order3_states_fit"] for d in data_set_qmax])
     states_l0_qmax = np.array(
         [
-            # data_set_qmax[0]["weighted_energy_sigma"],
-            # data_set_qmax[0]["weighted_energy_nucl"],
-            data_set_qmax[0]["chosen_sigma_fit"]["param"][:, 1],
-            data_set_qmax[0]["chosen_nucl_fit"]["param"][:, 1],
+            data_set_qmax[0]["weighted_energy_sigma"],
+            data_set_qmax[0]["weighted_energy_nucl"],
+            # data_set_qmax[0]["chosen_sigma_fit"]["param"][:, 1],
+            # data_set_qmax[0]["chosen_nucl_fit"]["param"][:, 1],
         ]
     )
     states_l0p4_qmax = order3_fit_qmax[lambda_index, :, :, 1]
@@ -751,12 +751,12 @@ def main():
     )
     states_l0_div_qmax = np.array(
         [
-            # np.zeros(np.shape(data_set_qmax[0]["weighted_energy_nucldivsigma"])),
-            # data_set_qmax[0]["weighted_energy_nucldivsigma"],
-            np.zeros(
-                np.shape(data_set_qmax[0]["chosen_nucldivsigma_fit"]["param"][:, 1])
-            ),
-            data_set_qmax[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
+            np.zeros(np.shape(data_set_qmax[0]["weighted_energy_nucldivsigma"])),
+            data_set_qmax[0]["weighted_energy_nucldivsigma"],
+            # np.zeros(
+            #     np.shape(data_set_qmax[0]["chosen_nucldivsigma_fit"]["param"][:, 1])
+            # ),
+            # data_set_qmax[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
         ]
     )
     states_l0p4_div_qmax = order3_fit_div_qmax[lambda_index, :, :, 1]
@@ -806,14 +806,14 @@ def main():
     order3_fit_0 = np.array([d["order3_states_fit"] for d in data_set0])
     states_l0_0 = np.array(
         [
-            # data_set0["weighted_energy_sigma"],
-            # data_set0["weighted_energy_nucl"],
+            data_set0[0]["weighted_energy_sigma"],
+            data_set0[0]["weighted_energy_nucl"],
             # data_set0["bootfit_unpert_sigma"][:, 1],
             # data_set0["bootfit_unpert_nucl"][:, 1],
             # np.array([d["weighted_energy_sigma"] for d in data_set0]),
             # np.array([d["weighted_energy_nucl"] for d in data_set0]),
-            data_set0[0]["chosen_sigma_fit"]["param"][:, 1],
-            data_set0[0]["chosen_nucl_fit"]["param"][:, 1],
+            # data_set0[0]["chosen_sigma_fit"]["param"][:, 1],
+            # data_set0[0]["chosen_nucl_fit"]["param"][:, 1],
         ]
     )
     print(np.shape(order3_fit_0))
@@ -822,8 +822,10 @@ def main():
     order3_fit_div_0 = np.array([d["order3_states_fit_divsigma"] for d in data_set0])
     states_l0_div_0 = np.array(
         [
-            np.zeros(np.shape(data_set0[0]["chosen_nucldivsigma_fit"]["param"][:, 1])),
-            data_set0[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
+            np.zeros(np.shape(data_set0[0]["weighted_energy_nucldivsigma"])),
+            data_set0[0]["weighted_energy_nucldivsigma"],
+            # np.zeros(np.shape(data_set0[0]["chosen_nucldivsigma_fit"]["param"][:, 1])),
+            # data_set0[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
         ]
     )
     states_l0p4_div_0 = order3_fit_div_0[lambda_index, :, :, 1]
@@ -860,22 +862,24 @@ def main():
     order3_fit_1 = np.array([d["order3_states_fit"] for d in data_set1])
     states_l0_1 = np.array(
         [
-            # data_set1["weighted_energy_sigma"],
-            # data_set1["weighted_energy_nucl"],
+            data_set1[0]["weighted_energy_sigma"],
+            data_set1[0]["weighted_energy_nucl"],
             # data_set1["bootfit_unpert_sigma"][:, 1],
             # data_set1["bootfit_unpert_nucl"][:, 1],
             # np.array([d["weighted_energy_sigma"] for d in data_set1]),
             # np.array([d["weighted_energy_nucl"] for d in data_set1]),
-            data_set1[0]["chosen_sigma_fit"]["param"][:, 1],
-            data_set1[0]["chosen_nucl_fit"]["param"][:, 1],
+            # data_set1[0]["chosen_sigma_fit"]["param"][:, 1],
+            # data_set1[0]["chosen_nucl_fit"]["param"][:, 1],
         ]
     )
     states_l0p4_1 = order3_fit_1[lambda_index, :, :, 1]
     order3_fit_div_1 = np.array([d["order3_states_fit_divsigma"] for d in data_set1])
     states_l0_div_1 = np.array(
         [
-            np.zeros(np.shape(data_set1[0]["chosen_nucldivsigma_fit"]["param"][:, 1])),
-            data_set1[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
+            np.zeros(np.shape(data_set1[0]["weighted_energy_nucldivsigma"])),
+            data_set1[0]["weighted_energy_nucldivsigma"],
+            # np.zeros(np.shape(data_set1[0]["chosen_nucldivsigma_fit"]["param"][:, 1])),
+            # data_set1[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
         ]
     )
     states_l0p4_div_1 = order3_fit_div_1[lambda_index, :, :, 1]
@@ -914,22 +918,24 @@ def main():
     order3_fit_2 = np.array([d["order3_states_fit"] for d in data_set2])
     states_l0_2 = np.array(
         [
-            # data_set2["weighted_energy_sigma"],
-            # data_set2["weighted_energy_nucl"],
+            data_set2[0]["weighted_energy_sigma"],
+            data_set2[0]["weighted_energy_nucl"],
             # data_set2["bootfit_unpert_sigma"][:, 1],
             # data_set2["bootfit_unpert_nucl"][:, 1],
             # np.array([d["weighted_energy_sigma"] for d in data_set2]),
             # np.array([d["weighted_energy_nucl"] for d in data_set2]),
-            data_set2[0]["chosen_sigma_fit"]["param"][:, 1],
-            data_set2[0]["chosen_nucl_fit"]["param"][:, 1],
+            # data_set2[0]["chosen_sigma_fit"]["param"][:, 1],
+            # data_set2[0]["chosen_nucl_fit"]["param"][:, 1],
         ]
     )
     states_l0p4_2 = order3_fit_2[lambda_index, :, :, 1]
     order3_fit_div_2 = np.array([d["order3_states_fit_divsigma"] for d in data_set2])
     states_l0_div_2 = np.array(
         [
-            np.zeros(np.shape(data_set2[0]["chosen_nucldivsigma_fit"]["param"][:, 1])),
-            data_set2[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
+            np.zeros(np.shape(data_set2[0]["weighted_energy_nucldivsigma"])),
+            data_set2[0]["weighted_energy_nucldivsigma"],
+            # np.zeros(np.shape(data_set2[0]["chosen_nucldivsigma_fit"]["param"][:, 1])),
+            # data_set2[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
         ]
     )
     states_l0p4_div_2 = order3_fit_div_2[lambda_index, :, :, 1]
@@ -965,24 +971,24 @@ def main():
     order3_fit_4 = np.array([d["order3_states_fit"] for d in data_set4])
     states_l0_4 = np.array(
         [
-            # data_set4["weighted_energy_sigma"],
-            # data_set4["weighted_energy_nucl"],
+            data_set4[0]["weighted_energy_sigma"],
+            data_set4[0]["weighted_energy_nucl"],
             # data_set4["bootfit_unpert_sigma"][:, 1],
             # data_set4["bootfit_unpert_nucl"][:, 1],
             # np.array([d["weighted_energy_sigma"] for d in data_set4]),
             # np.array([d["weighted_energy_nucl"] for d in data_set4]),
-            data_set4[0]["chosen_sigma_fit"]["param"][:, 1],
-            data_set4[0]["chosen_nucl_fit"]["param"][:, 1],
+            # data_set4[0]["chosen_sigma_fit"]["param"][:, 1],
+            # data_set4[0]["chosen_nucl_fit"]["param"][:, 1],
         ]
     )
     states_l0p4_4 = order3_fit_4[lambda_index, :, :, 1]
     order3_fit_div_4 = np.array([d["order3_states_fit_divsigma"] for d in data_set4])
     states_l0_div_4 = np.array(
         [
-            np.zeros(np.shape(data_set4[0]["chosen_nucldivsigma_fit"]["param"][:, 1])),
-            data_set4[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
-            # np.zeros(np.shape([d["chosen_nucldivsigma_fit"] for d in data_set4])),
-            # np.array([d["chosen_nucldivsigma_fit"] for d in data_set4]),
+            np.zeros(np.shape(data_set4[0]["weighted_energy_nucldivsigma"])),
+            data_set4[0]["weighted_energy_nucldivsigma"],
+            # np.zeros(np.shape(data_set4[0]["chosen_nucldivsigma_fit"]["param"][:, 1])),
+            # data_set4[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
         ]
     )
     states_l0p4_div_4 = order3_fit_div_4[lambda_index, :, :, 1]
@@ -1018,22 +1024,24 @@ def main():
     order3_fit_5 = np.array([d["order3_states_fit"] for d in data_set5])
     states_l0_5 = np.array(
         [
-            # data_set5["weighted_energy_sigma"],
-            # data_set5["weighted_energy_nucl"],
+            data_set5[0]["weighted_energy_sigma"],
+            data_set5[0]["weighted_energy_nucl"],
             # data_set5["bootfit_unpert_sigma"][:, 1],
             # data_set5["bootfit_unpert_nucl"][:, 1],
             # np.array([d["weighted_energy_sigma"] for d in data_set5]),
             # np.array([d["weighted_energy_nucl"] for d in data_set5]),
-            data_set5[0]["chosen_sigma_fit"]["param"][:, 1],
-            data_set5[0]["chosen_nucl_fit"]["param"][:, 1],
+            # data_set5[0]["chosen_sigma_fit"]["param"][:, 1],
+            # data_set5[0]["chosen_nucl_fit"]["param"][:, 1],
         ]
     )
     states_l0p4_5 = order3_fit_5[lambda_index, :, :, 1]
     order3_fit_div_5 = np.array([d["order3_states_fit_divsigma"] for d in data_set5])
     states_l0_div_5 = np.array(
         [
-            np.zeros(np.shape(data_set5[0]["chosen_nucldivsigma_fit"]["param"][:, 1])),
-            data_set5[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
+            np.zeros(np.shape(data_set5[0]["weighted_energy_nucldivsigma"])),
+            data_set5[0]["weighted_energy_nucldivsigma"],
+            # np.zeros(np.shape(data_set5[0]["chosen_nucldivsigma_fit"]["param"][:, 1])),
+            # data_set5[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
         ]
     )
     states_l0p4_div_5 = order3_fit_div_5[lambda_index, :, :, 1]
