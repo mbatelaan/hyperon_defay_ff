@@ -887,7 +887,7 @@ if __name__ == "__main__":
     dm_S = 0.0042
 
     # lambda_index = 8
-    lambda_index = 14
+    lambda_index = 7
 
     # ==================================================
     # Theta_8

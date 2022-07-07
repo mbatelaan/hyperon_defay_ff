@@ -5,6 +5,8 @@ import scipy.optimize as syopt
 from scipy.optimize import curve_fit
 import pickle
 
+from plot_utils import save_plot
+
 import matplotlib.pyplot as plt
 
 # from matplotlib import rcParams
@@ -122,7 +124,7 @@ def evffplot5(
 ):
     """plot the form factor data against Q^2"""
     # plt.figure(figsize=(9, 6))
-    plt.figure(figsize=(5, 4))
+    fig = plt.figure(figsize=(5, 4))
     plt.errorbar(
         xdata,
         ydata,
@@ -161,7 +163,8 @@ def evffplot5(
     plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
     plt.ylim(0, 1.5)
     # plt.grid(True, alpha=0.4)
-    plt.savefig(plotdir / (plotname + "_4.pdf"), metadata=_metadata)
+    # plt.savefig(plotdir / (plotname + "_4.pdf"), metadata=_metadata)
+    save_plot(fig, plotname + "_4.pdf", subdir=plotdir)
     if show:
         plt.show()
     plt.close()
@@ -179,7 +182,7 @@ def evffplot6(
 ):
     """plot the form factor data against Q^2"""
     # plt.figure(figsize=(9, 6))
-    plt.figure(figsize=(5, 4))
+    fig = plt.figure(figsize=(5, 4))
     plt.errorbar(
         xdata,
         ydata,
@@ -234,7 +237,8 @@ def evffplot6(
     plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
     plt.ylim(0, 1.5)
     # plt.grid(True, alpha=0.4)
-    plt.savefig(plotdir / (plotname + "_qmax.pdf"), metadata=_metadata)
+    # plt.savefig(plotdir / (plotname + "_qmax.pdf"), metadata=_metadata)
+    save_plot(fig, plotname + "_qmax.pdf", subdir=plotdir)
     if show:
         plt.show()
     plt.close()
@@ -247,15 +251,13 @@ def evffplot7(
     plotdir,
     plotname,
     extra_points=None,
-    # extra_points_qsq=None,
     show=False,
 ):
     """plot the form factor data against Q^2
 
     Plot all of the points
     """
-    # plt.figure(figsize=(9, 6))
-    plt.figure(figsize=(5, 4))
+    fig = plt.figure(figsize=(5, 4))
     plt.errorbar(
         xdata,
         ydata,
@@ -268,7 +270,6 @@ def evffplot7(
         markerfacecolor="none",
     )
 
-    # if any(extra_points):
     if extra_points != None:
         for i, point in enumerate(extra_points["xdata"]):
             plt.errorbar(
@@ -285,21 +286,20 @@ def evffplot7(
             )
     plt.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
     plt.legend(fontsize="xx-small")
-    # _metadata["Title"] = plotname
     plt.ylabel(
         r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2} + \frac{m_{\Sigma} - E_N}{m_N+m_{\Sigma}}F_3$",
         fontsize="x-small",
     )
     plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
     plt.ylim(0, 1.5)
-    plt.savefig(plotdir / (plotname + "_all.pdf"), metadata=_metadata)
+    save_plot(fig, plotname + "_all.pdf", subdir=plotdir)
 
-    plt.figure(figsize=(5, 4))
+    fig = plt.figure(figsize=(5, 4))
     plt.errorbar(
         xdata,
         ydata,
         errordata,
-        label="3-pt function",
+        label="three-point function",
         capsize=4,
         elinewidth=1,
         color=_colors[0],
@@ -320,21 +320,88 @@ def evffplot7(
             color=_colors[1],
             fmt=_fmts[1],
             markerfacecolor="none",
-            label="sequential source",
+            # label="sequential source",
+            label="Feynman-Hellmann",
+        )
+
+    plt.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
+    plt.legend(fontsize="xx-small")
+    # plt.ylabel(
+    #     r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2} + \frac{m_{\Sigma} - E_N}{m_N+m_{\Sigma}}F_3$",
+    #     fontsize="x-small",
+    # )
+    plt.ylabel(
+        "Matrix element",
+        fontsize="x-small",
+    )
+    plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
+    plt.ylim(0, 1.5)
+    save_plot(fig, plotname + "_all_together.pdf", subdir=plotdir)
+    if show:
+        plt.show()
+    plt.close()
+
+
+def evffplot8(
+    xdata,
+    ydata,
+    errordata,
+    plotdir,
+    plotname,
+    extra_points=None,
+    show=False,
+):
+    """plot the form factor data against Q^2
+
+    Plot all of the points
+    """
+    normalisation = 0.863
+    ydata = ydata * normalisation
+    errordata = errordata * normalisation
+    print(np.shape(extra_points["ydata"]))
+    extradata = np.array(extra_points["ydata"])[:, 0, :] * normalisation
+
+    fig = plt.figure(figsize=(5, 4))
+    plt.errorbar(
+        xdata,
+        ydata,
+        errordata,
+        label="three-point function",
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="s",
+        markerfacecolor="none",
+    )
+
+    if extra_points != None:
+        plt.errorbar(
+            extra_points["xdata"],
+            # np.average(extra_points["ydata"], axis=2)[:, 0],
+            # np.std(extra_points["ydata"], axis=2)[:, 0],
+            np.average(extradata, axis=1),
+            np.std(extradata, axis=1),
+            capsize=4,
+            elinewidth=1,
+            color=_colors[1],
+            fmt=_fmts[1],
+            # markerfacecolor="none",
+            label="Feynman-Hellmann",
         )
 
     plt.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
     plt.legend(fontsize="xx-small")
     plt.ylabel(
-        r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2} + \frac{m_{\Sigma} - E_N}{m_N+m_{\Sigma}}F_3$",
+        "Matrix element",
         fontsize="x-small",
     )
     plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
     plt.ylim(0, 1.5)
-    plt.savefig(plotdir / (plotname + "_all_together.pdf"), metadata=_metadata)
+    save_plot(fig, plotname + "_normalised.pdf", subdir=plotdir)
     if show:
         plt.show()
     plt.close()
+    return ydata, errordata, extradata
 
 
 def energy(m, L, n):
@@ -545,31 +612,29 @@ if __name__ == "__main__":
     # --- Read the sequential src data ---
     with open(datadir1 / "matrix_element.pkl", "rb") as file_in:  # fn4
         mat_elements1 = pickle.load(file_in)
-    mat_element_fn4 = np.array([mat_elements1["bootfit3"].T[1]])
-
-    # with open(datadir2 / "matrix_element.pkl", "rb") as file_in:  # theta2
-    #     mat_elements2 = pickle.load(file_in)
-    # mat_element_theta2 = np.array([mat_elements2["bootfit3"].T[1]])
+    # mat_element_fn4 = np.array([mat_elements1["bootfit3"].T[1]])
+    # print(np.shape(mat_elements1["bootfit3"]))
+    mat_element_fn4 = np.array([mat_elements1["bootfit3"].T[0]])
 
     with open(datadir3 / "matrix_element.pkl", "rb") as file_in:
         mat_elements3 = pickle.load(file_in)
-    mat_element_theta3 = np.array([mat_elements3["bootfit3"].T[1]])
+    mat_element_theta3 = np.array([mat_elements3["bootfit3"].T[0]])
 
     with open(datadir4 / "matrix_element.pkl", "rb") as file_in:
         mat_elements4 = pickle.load(file_in)
-    mat_element_theta4 = np.array([mat_elements4["bootfit3"].T[1]])
+    mat_element_theta4 = np.array([mat_elements4["bootfit3"].T[0]])
 
     with open(datadir5 / "matrix_element.pkl", "rb") as file_in:
         mat_elements5 = pickle.load(file_in)
-    mat_element_theta5 = np.array([mat_elements5["bootfit3"].T[1]])
+    mat_element_theta5 = np.array([mat_elements5["bootfit3"].T[0]])
 
     with open(datadir7 / "matrix_element.pkl", "rb") as file_in:
         mat_elements7 = pickle.load(file_in)
-    mat_element_theta7 = np.array([mat_elements7["bootfit3"].T[1]])
+    mat_element_theta7 = np.array([mat_elements7["bootfit3"].T[0]])
 
     with open(datadir_qmax / "matrix_element.pkl", "rb") as file_in:  # qmax
         mat_element_qmax_data = pickle.load(file_in)
-    mat_element_qmax = np.array([mat_element_qmax_data["bootfit3"].T[1]])
+    mat_element_qmax = np.array([mat_element_qmax_data["bootfit3"].T[0]])
 
     # --- Multiply energy factors for the form factors ---
     # pvec_list2 = np.array(
@@ -606,10 +671,10 @@ if __name__ == "__main__":
     FF_seq = []
     for i, pvec in enumerate(pvec_list2):
         FF_facs = FF_factors(m_N, m_S, pvec, twist_list[i], NX)
-        print(f"\n{FF_facs=}")
-        print(f"{np.average(seq_src_points[i])=}")
+        # print(f"\n{FF_facs=}")
+        # print(f"{np.average(seq_src_points[i])=}")
         new_point = seq_src_points[i] / FF_facs[-1]
-        print(f"{np.average(new_point)=}")
+        # print(f"{np.average(new_point)=}")
         FF_seq.append(new_point)
 
     # --- Construct arrays for the plotting function ---
@@ -619,7 +684,7 @@ if __name__ == "__main__":
     # extra_points_qsq = [0.29, 0.338, 0.0598666, 0.1731701, 0, -0.015210838956772907]
     # extra_points_qsq = [0.338, 0.29 - 0.002, 0.29, 0.29 + 0.002, -0.015210838956772907]
     extra_points_qsq = [
-        0.338,
+        0.3463,
         # 0.29,
         0.0598666,
         0.1731701,
@@ -680,3 +745,23 @@ if __name__ == "__main__":
         # extra_points_qsq=extra_points_qsq,
         show=False,
     )
+
+    ydata, errordata, extradata = evffplot8(
+        Q_squared,
+        ydata,
+        errordata,
+        plotdir,
+        "matrix_element",
+        extra_points=extra_points,
+        show=False,
+    )
+
+    print("\n\nThree-point function results:")
+    for i, qsq in enumerate(Q_squared):
+        print(f"Q^2={qsq}: \tME={err_brackets(ydata[i], errordata[i])}")
+
+    print("\n\nFH results:")
+    yval = np.average(extradata, axis=1)
+    yerr = np.std(extradata, axis=1)
+    for i, qsq in enumerate(extra_points["xdata"]):
+        print(f"Q^2={qsq:.3f}: \tME={err_brackets(yval[i], yerr[i])}")
