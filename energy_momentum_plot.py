@@ -719,8 +719,7 @@ def main():
     # --- Masses from the theta tuning ---
     NX = 32
 
-    # extra_points_qsq = [0.338, 0.29 - 0.002, 0.29, 0.29 + 0.002, -0.015210838956772907]
-    zero_array = np.array([0, 0, 0])
+    # --- Lambda choice ---
     lambda_index = 8
 
     # ==================================================

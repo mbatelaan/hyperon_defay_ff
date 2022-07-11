@@ -498,9 +498,6 @@ def FF_combination_evff(F1, F2, F3, m_N, m_S, q_vec_squared, NX):
 
 
 if __name__ == "__main__":
-    # plt.rc("font", size=18, **{"family": "sans-serif", "serif": ["Computer Modern"]})
-    # plt.rc("text", usetex=True)
-    # rcParams.update({"figure.autolayout": True})
     plt.style.use("./mystyle.txt")
 
     # --- directories ---
@@ -515,30 +512,6 @@ if __name__ == "__main__":
     datadir7 = resultsdir / Path("six_point_fn_all/data/pickles/theta7/")
     datadir_qmax = resultsdir / Path("six_point_fn_all/data/pickles/qmax/")
 
-    # datadir1 = Path.home() / Path(
-    #     "Documents/PhD/analysis_results/six_point_fn_theta8/data/"
-    # )
-    # # datadir2 = Path.home() / Path(
-    # #     "Documents/PhD/analysis_results/six_point_fn_theta7/data/"
-    # # )
-    # datadir3 = Path.home() / Path(
-    #     "Documents/PhD/analysis_results/six_point_fn_theta3/data/"
-    # )
-    # datadir4 = Path.home() / Path(
-    #     "Documents/PhD/analysis_results/six_point_fn_theta4/data/"
-    # )
-    # datadir5 = Path.home() / Path(
-    #     "Documents/PhD/analysis_results/six_point_fn_theta5/data/"
-    # )
-    # datadir7 = Path.home() / Path(
-    #     "Documents/PhD/analysis_results/six_point_fn_theta7/data/"
-    # )
-    # datadir_qmax = Path.home() / Path(
-    #     "Documents/PhD/analysis_results/six_point_fn_qmax/data/"
-    # )
-    # # datadir6 = Path.home() / Path(
-    # #     "Documents/PhD/analysis_results/six_point_fn_one_fourier/data/"
-    # # )
     plotdir.mkdir(parents=True, exist_ok=True)
 
     # --- Lattice specs ---
@@ -548,22 +521,14 @@ if __name__ == "__main__":
     # --- Masses from the theta tuning ---
     m_N = 0.4179255
     m_S = 0.4641829
-    # pvec = np.array([1, 0, 0])
-    # twist = np.array([0, 0.48325694, 0])
-    # E_N = energy_full(m_N, twist, pvec, NX)
     print(f"{m_N=}")
     print(f"{m_S=}")
-    # print(f"{E_N=}")
 
     # --- Read the data from the 3pt fns ---
     threept_file = evffdir / Path("evff.res_slvec-notwist")
     evff_data = evffdata(threept_file)
     q_squared_lattice = evff_data["par0"]
     Q_squared = -1 * evff_data["par0"] * (0.1973**2) / (0.074**2)
-
-    # print([key for key in evff_data])
-    # print(evff_data["type"])
-    # print(f"{Q_squared=}")
 
     # --- Get \vec{q}^2 from the value of q^2 ---
     q_vec_sq_list = []
@@ -614,7 +579,7 @@ if __name__ == "__main__":
         mat_elements1 = pickle.load(file_in)
     # mat_element_fn4 = np.array([mat_elements1["bootfit3"].T[1]])
     # print(np.shape(mat_elements1["bootfit3"]))
-    mat_element_fn4 = np.array([mat_elements1["bootfit3"].T[0]])
+    mat_element_theta8 = np.array([mat_elements1["bootfit3"].T[0]])
 
     with open(datadir3 / "matrix_element.pkl", "rb") as file_in:
         mat_elements3 = pickle.load(file_in)
@@ -635,6 +600,17 @@ if __name__ == "__main__":
     with open(datadir_qmax / "matrix_element.pkl", "rb") as file_in:  # qmax
         mat_element_qmax_data = pickle.load(file_in)
     mat_element_qmax = np.array([mat_element_qmax_data["bootfit3"].T[0]])
+
+    matrix_elements = np.array(
+        [
+            mat_element_qmax,
+            mat_element_theta5,
+            mat_element_theta3,
+            mat_element_theta4,
+            mat_element_theta7,
+            mat_element_theta8,
+        ]
+    )
 
     # --- Multiply energy factors for the form factors ---
     # pvec_list2 = np.array(
@@ -657,7 +633,7 @@ if __name__ == "__main__":
         ]
     )
     seq_src_points = [
-        mat_element_fn4,
+        mat_element_theta8,
         # mat_element_theta2,
         mat_element_theta3,
         mat_element_theta4,
