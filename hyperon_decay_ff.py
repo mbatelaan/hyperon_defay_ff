@@ -4,6 +4,7 @@ from BootStrap3 import bootstrap
 import scipy.optimize as syopt
 from scipy.optimize import curve_fit
 import pickle
+import csv
 
 from plot_utils import save_plot
 
@@ -391,13 +392,18 @@ def evffplot8(
 
     plt.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
     plt.legend(fontsize="xx-small")
+    # plt.ylabel(
+    #     "Matrix element",
+    #     fontsize="x-small",
+    # )
     plt.ylabel(
-        "Matrix element",
-        fontsize="x-small",
+        r"$\mel{N}{\bar{u}\gamma_{\mu}s}{\Sigma}$",
+        fontsize="small",
     )
     plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
     plt.ylim(0, 1.5)
     save_plot(fig, plotname + "_normalised.pdf", subdir=plotdir)
+    plt.savefig(plotdir / (plotname + "_normalised.png"), dpi=500)
     if show:
         plt.show()
     plt.close()
@@ -499,11 +505,13 @@ def FF_combination_evff(F1, F2, F3, m_N, m_S, q_vec_squared, NX):
 
 if __name__ == "__main__":
     plt.style.use("./mystyle.txt")
+    plt.rc("text.latex", preamble=r"\usepackage{physics}")
 
     # --- directories ---
     evffdir = Path.home() / Path("Dropbox/PhD/lattice_results/eddie/sig2n/ff/")
     resultsdir = Path.home() / Path("Documents/PhD/analysis_results")
     plotdir = resultsdir / Path("sig2n/")
+    plotdatadir = resultsdir / Path("sig2n/data")
     # datadir1 = Path.home() / Path("Documents/PhD/analysis_results/six_point_fn4/data/")
     datadir1 = resultsdir / Path("six_point_fn_all/data/pickles/theta8/")
     datadir3 = resultsdir / Path("six_point_fn_all/data/pickles/theta3/")
@@ -737,6 +745,24 @@ if __name__ == "__main__":
         print(f"Q^2={qsq}: \tME={err_brackets(ydata[i], errordata[i])}")
 
     print("\n\nFH results:")
+    ME_values = np.array(extra_points["ydata"])[:, 0, :]
+    Qsq_values = np.array(extra_points["xdata"])
+    qsq_order = np.argsort(Qsq_values)
+    Qsq_values = Qsq_values[qsq_order]
+    ME_values = ME_values[qsq_order]
+    yval = np.average(ME_values, axis=1)
+    yerr = np.std(ME_values, axis=1)
+    for i, qsq in enumerate(Qsq_values):
+        print(f"Q^2={qsq:.3f}: \tME={err_brackets(yval[i], yerr[i])}")
+
+    headernames = ["qsq", "ME_value", "ME_uncertainty"]
+    with open(plotdatadir / Path("ME_values.csv"), "w") as csvfile:
+        datawrite = csv.writer(csvfile, delimiter=",", quotechar="|")
+        datawrite.writerow(headernames)
+        for i, Q_ in enumerate(Qsq_values):
+            datawrite.writerow(np.array([Q_, yval[i], yerr[i]]))
+
+    print("\n\nFH results (normalised):")
     yval = np.average(extradata, axis=1)
     yerr = np.std(extradata, axis=1)
     for i, qsq in enumerate(extra_points["xdata"]):

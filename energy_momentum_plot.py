@@ -465,6 +465,7 @@ def plot_energy_mom(
     dm_N,
     lambdas_0,
     lambda_index,
+    plot_pert=True,
 ):
     """Plot the energy values against the momentum for the nucleon and sigma states"""
 
@@ -499,6 +500,129 @@ def plot_energy_mom(
         elinewidth=1,
         markerfacecolor="none",
     )
+
+    if plot_pert:
+        plt.errorbar(
+            mod_p + 0.0004,
+            np.average(state1_l, axis=1),
+            np.std(state1_l, axis=1),
+            fmt="x",
+            label=rf"State 1 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+            color=_colors[3],
+            capsize=4,
+            elinewidth=1,
+            markerfacecolor="none",
+        )
+        plt.errorbar(
+            mod_p + 0.0004,
+            np.average(state2_l, axis=1),
+            np.std(state2_l, axis=1),
+            fmt="*",
+            label=rf"State 2 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+            color=_colors[3],
+            capsize=4,
+            elinewidth=1,
+            markerfacecolor="none",
+        )
+
+    m_N = np.average(nucleon_l0, axis=1)[-1]
+    dm_N = np.std(nucleon_l0, axis=1)[-1]
+    m_S = np.average(sigma_l0, axis=1)[-1]
+    dm_S = np.std(sigma_l0, axis=1)[-1]
+    plt.legend(fontsize="x-small")
+    # plt.axhline(y=m_S, color=_colors[1], alpha=0.3, linewidth=0.5)
+    # plt.axhline(
+    #     y=m_S + dm_S, color=_colors[1], linestyle="--", alpha=0.3, linewidth=0.5
+    # )
+    # plt.axhline(
+    #     y=m_S - dm_S, color=_colors[1], linestyle="--", alpha=0.3, linewidth=0.5
+    # )
+
+    # plt.plot(mod_p, dispersion, color=_colors[1], alpha=0.3, linewidth=0.5)
+    print("\n")
+    print(m_S)
+    print(dm_S)
+    xdata = np.linspace(-0.01, 0.3, 100)
+    plt.fill_between(
+        xdata,
+        m_S - dm_S,
+        m_S + dm_S,
+        color=_colors[1],
+        alpha=0.2,
+        linewidth=0,
+    )
+
+    dispersion = np.sqrt(m_N**2 + xdata)
+    dispersion_p = np.sqrt((m_N + dm_N) ** 2 + xdata)
+    dispersion_m = np.sqrt((m_N - dm_N) ** 2 + xdata)
+
+    plt.fill_between(
+        xdata, dispersion_m, dispersion_p, color=_colors[1], alpha=0.2, linewidth=0
+    )
+
+    # plt.xlabel(r"$|\vec{p}_N|$")
+    plt.xlabel(r"$\vec{q}^{\,2}$")
+    plt.ylabel(r"$E$")
+    plt.xlim(-0.002, 0.052)
+    plt.ylim(0.39, 0.53)
+    # # plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
+    # plt.savefig(plotdir / ("energy_momentum.pdf"), metadata=_metadata)
+    plt.savefig(
+        plotdir / ("energy_momentum" + str(plot_pert) + ".pdf"), metadata=_metadata
+    )
+    plt.savefig(
+        plotdir / ("energy_momentum" + str(plot_pert) + ".png"),
+        metadata=_metadata,
+        dpi=500,
+    )
+    # plt.show()
+
+
+def plot_energy_mom_pert(
+    plotdir,
+    mod_p,
+    nucleon_l0,
+    sigma_l0,
+    state1_l,
+    state2_l,
+    m_N,
+    dm_N,
+    lambdas_0,
+    lambda_index,
+):
+    """Plot the energy values against the momentum for the nucleon and sigma states"""
+
+    # dispersion = np.sqrt(m_N**2 + mod_p**2)
+    # dispersion_p = np.sqrt((m_N + dm_N) ** 2 + mod_p**2)
+    # dispersion_m = np.sqrt((m_N - dm_N) ** 2 + mod_p**2)
+
+    plt.figure(figsize=(6, 6))
+    # print(np.shape(mod_p))
+    # print(np.shape(nucleon_l0))
+    # print(np.shape(np.std(nucleon_l0, axis=1)))
+
+    # plt.errorbar(
+    #     mod_p,
+    #     np.average(nucleon_l0, axis=1),
+    #     np.std(nucleon_l0, axis=1),
+    #     fmt="s",
+    #     label=r"Nucleon",
+    #     color=_colors[1],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
+    # plt.errorbar(
+    #     mod_p,
+    #     np.average(sigma_l0, axis=1),
+    #     np.std(sigma_l0, axis=1),
+    #     fmt="^",
+    #     label=r"Sigma",
+    #     color=_colors[1],
+    #     capsize=4,
+    #     elinewidth=1,
+    #     markerfacecolor="none",
+    # )
 
     plt.errorbar(
         mod_p + 0.0004,
@@ -564,7 +688,9 @@ def plot_energy_mom(
     plt.xlim(-0.002, 0.052)
     plt.ylim(0.39, 0.53)
     # # plt.title(rf"$t_{{0}}={all_data['time_choice']}, \Delta t={all_data['delta_t']}$")
-    plt.savefig(plotdir / ("energy_momentum.pdf"), metadata=_metadata)
+    # plt.savefig(plotdir / ("energy_momentum.pdf"), metadata=_metadata)
+    plt.savefig(plotdir / ("energy_momentum_pert.pdf"), metadata=_metadata)
+    plt.savefig(plotdir / ("energy_momentum_pert.png"), metadata=_metadata, dpi=500)
     # plt.show()
 
 
@@ -728,6 +854,8 @@ def main():
         # with open(datadir_qmax / "lambda_dep_t6_dt4.pkl", "rb") as file_in:  # qmax
         data_set_qmax = pickle.load(file_in)
     lambdas_qmax = np.array([d["lambdas"] for d in data_set_qmax])
+    order3_dE_fit_qmax = np.array([d["order3_fit"][:, 1] for d in data_set_qmax])
+    # print(f"\n\n\n\n\n\n\n\n\n\n\n{np.shape(order3_dE_fit_qmax)=}")
     order3_fit_qmax = np.array([d["order3_states_fit"] for d in data_set_qmax])
     states_l0_qmax = np.array(
         [
@@ -798,7 +926,10 @@ def main():
     # Theta_8
     with open(datadir0 / "lambda_dep_t6_dt4.pkl", "rb") as file_in:
         data_set0 = pickle.load(file_in)
+    print("\n\n\n\n\n\n\n\n\n\n\n", [i for i in data_set0[0]], "done")
+    print(np.shape(data_set0))
     lambdas_0 = np.array([d["lambdas"] for d in data_set0])
+    order3_dE_fit_0 = np.array([d["order3_fit"][:, 1] for d in data_set0])
     order3_fit_0 = np.array([d["order3_states_fit"] for d in data_set0])
     states_l0_0 = np.array(
         [
@@ -863,6 +994,7 @@ def main():
     with open(datadir1 / "lambda_dep_t6_dt4.pkl", "rb") as file_in:  # theta7
         data_set1 = pickle.load(file_in)
     lambdas_1 = np.array([d["lambdas"] for d in data_set1])
+    order3_dE_fit_1 = np.array([d["order3_fit"][:, 1] for d in data_set1])
     order3_fit_1 = np.array([d["order3_states_fit"] for d in data_set1])
     states_l0_1 = np.array(
         [
@@ -926,6 +1058,7 @@ def main():
         # with open(datadir2 / "lambda_dep_t6_dt4.pkl", "rb") as file_in:
         data_set2 = pickle.load(file_in)
     lambdas_2 = np.array([d["lambdas"] for d in data_set2])
+    order3_dE_fit_2 = np.array([d["order3_fit"][:, 1] for d in data_set2])
     order3_fit_2 = np.array([d["order3_states_fit"] for d in data_set2])
     states_l0_2 = np.array(
         [
@@ -987,6 +1120,7 @@ def main():
     with open(datadir4 / "lambda_dep_t6_dt4.pkl", "rb") as file_in:  # theta4
         data_set4 = pickle.load(file_in)
     lambdas_4 = np.array([d["lambdas"] for d in data_set4])
+    order3_dE_fit_4 = np.array([d["order3_fit"][:, 1] for d in data_set4])
     order3_fit_4 = np.array([d["order3_states_fit"] for d in data_set4])
     states_l0_4 = np.array(
         [
@@ -1048,6 +1182,7 @@ def main():
     with open(datadir5 / "lambda_dep_t4_dt2.pkl", "rb") as file_in:
         data_set5 = pickle.load(file_in)
     lambdas_5 = np.array([d["lambdas"] for d in data_set5])
+    order3_dE_fit_5 = np.array([d["order3_fit"][:, 1] for d in data_set5])
     order3_fit_5 = np.array([d["order3_states_fit"] for d in data_set5])
     states_l0_5 = np.array(
         [
@@ -1147,6 +1282,17 @@ def main():
         ]
     )
 
+    delta_energy_lambda = np.array(
+        [
+            order3_dE_fit_0[lambda_index, :],
+            order3_dE_fit_1[lambda_index, :],
+            order3_dE_fit_4[lambda_index, :],
+            order3_dE_fit_2[lambda_index, :],
+            order3_dE_fit_5[lambda_index, :],
+            order3_dE_fit_qmax[lambda_index, :],
+        ]
+    )
+
     state1_l = np.array(
         [
             states_l0p4_0[0, :],
@@ -1170,6 +1316,33 @@ def main():
         ]
     )
 
+    plot_energy_mom(
+        plotdir,
+        # mod_p,
+        p_sq,
+        nucleon_l0,
+        sigma_l0,
+        state1_l,
+        state2_l,
+        m_N,
+        dm_N,
+        lambdas_0,
+        lambda_index,
+        plot_pert=False,
+    )
+    plot_energy_mom_pert(
+        plotdir,
+        # mod_p,
+        p_sq,
+        nucleon_l0,
+        sigma_l0,
+        state1_l,
+        state2_l,
+        m_N,
+        dm_N,
+        lambdas_0,
+        lambda_index,
+    )
     plot_energy_mom(
         plotdir,
         # mod_p,
@@ -1248,14 +1421,43 @@ def main():
 
     # print(np.shape(state1_l))
     # print(f"{lambdas_0[lambda_index]:0.3}")
+    print(f"\n\n\n\n\n\n\n\n\n\n{np.shape(nucleon_l0)=}")
     saveplotdata(nucleon_l0, p_sq, plotdatadir, "nucleon_energy")
+    saveplotdata(nucleon_l0_div, p_sq, plotdatadir, "nucleondivsigma_energy")
     saveplotdata(sigma_l0, p_sq, plotdatadir, "sigma_energy")
-    saveplotdata(state1_l, p_sq, plotdatadir, "state1_energy_lmb0p0286")
-    saveplotdata(state2_l, p_sq, plotdatadir, "state2_energy_lmb0p0286")
+
+    saveplotdata(
+        delta_energy_lambda,
+        p_sq,
+        plotdatadir,
+        f"delta_energy_lmb{lambdas_0[lambda_index]:0.3}",
+    )
+
+    saveplotdata(
+        state1_l, p_sq, plotdatadir, f"state1_energy_lmb{lambdas_0[lambda_index]:0.3}"
+    )
+    saveplotdata(
+        state2_l, p_sq, plotdatadir, f"state2_energy_lmb{lambdas_0[lambda_index]:0.3}"
+    )
+    # saveplotdata(state1_l, p_sq, plotdatadir, "state1_energy_lmb0p0286")
+    # saveplotdata(state2_l, p_sq, plotdatadir, "state2_energy_lmb0p0286")
 
     saveplotdata(nucleon_l0_div, p_sq, plotdatadir, "nucleon_div_sigma_energy")
-    saveplotdata(state1_l_div, p_sq, plotdatadir, "state1_divsigma_energy_lmb0p0286")
-    saveplotdata(state2_l_div, p_sq, plotdatadir, "state2_divsigma_energy_lmb0p0286")
+    # f"{lambdas_0[lambda_index]:0.3}"
+    saveplotdata(
+        state1_l_div,
+        p_sq,
+        plotdatadir,
+        f"state1_divsigma_energy_lmb{lambdas_0[lambda_index]:0.3}",
+    )
+    saveplotdata(
+        state2_l_div,
+        p_sq,
+        plotdatadir,
+        f"state2_divsigma_energy_lmb{lambdas_0[lambda_index]:0.3}",
+    )
+    # saveplotdata(state1_l_div, p_sq, plotdatadir, "state1_divsigma_energy_lmb0p0286")
+    # saveplotdata(state2_l_div, p_sq, plotdatadir, "state2_divsigma_energy_lmb0p0286")
 
     print(f"\nQsQ:\n", Qsq_qmax, Qsq_0, Qsq_1, Qsq_2, Qsq_4, Qsq_5)
     print(
@@ -1269,22 +1471,40 @@ def main():
     )
 
     print("\n\nNucleon energies:")
-    for i, energy in enumerate(nucleon_l0):
-        print(
-            f"p^2={p_sq[i]:.3f}: \tE={err_brackets(np.average(energy), np.std(energy))}"
-        )
+    p_sq_order = np.argsort(p_sq)
+    p_sq = p_sq[p_sq_order]
 
+    nucleon_avg = np.average(nucleon_l0, axis=1)[p_sq_order]
+    nucleon_err = np.std(nucleon_l0, axis=1)[p_sq_order]
+    for i, psq in enumerate(p_sq):
+        print(f"p^2={psq:.3f}: \tE={err_brackets(nucleon_avg[i], nucleon_err[i])}")
+
+    # for i, energy in enumerate(nucleon_l0):
+    #     print(
+    #         f"p^2={p_sq[i]:.3f}: \tE={err_brackets(np.average(energy), np.std(energy))}"
+    #     )
+
+    sigma_avg = np.average(sigma_l0, axis=1)[p_sq_order]
+    sigma_err = np.std(sigma_l0, axis=1)[p_sq_order]
     print("\n\nSigma energies:")
-    for i, energy in enumerate(sigma_l0):
-        print(
-            f"p^2={p_sq[i]:.3f}: \tE={err_brackets(np.average(energy), np.std(energy))}"
-        )
+    for i, psq in enumerate(p_sq):
+        print(f"p^2={psq:.3f}: \tE={err_brackets(sigma_avg[i], sigma_err[i])}")
+    # for i, energy in enumerate(sigma_l0):
+    #     print(
+    #         f"p^2={p_sq[i]:.3f}: \tE={err_brackets(np.average(energy), np.std(energy))}"
+    #     )
 
+    nucleon_div_avg = np.average(nucleon_l0_div, axis=1)[p_sq_order]
+    nucleon_div_err = np.std(nucleon_l0_div, axis=1)[p_sq_order]
     print("\n\nNucleon-Sigma energies:")
-    for i, energy in enumerate(nucleon_l0_div):
+    for i, psq in enumerate(p_sq):
         print(
-            f"p^2={p_sq[i]:.3f}: \tE={err_brackets(np.average(energy), np.std(energy))}"
+            f"p^2={psq:.3f}: \tE={err_brackets(nucleon_div_avg[i], nucleon_div_err[i])}"
         )
+    # for i, energy in enumerate(nucleon_l0_div):
+    #     print(
+    #         f"p^2={p_sq[i]:.3f}: \tE={err_brackets(np.average(energy), np.std(energy))}"
+    #     )
 
 
 if __name__ == "__main__":
