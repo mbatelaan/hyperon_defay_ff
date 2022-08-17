@@ -149,7 +149,149 @@ def read_csv_me(plotdatadir, filename):
     return qsq, ME_value, ME_uncertainty
 
 
-if __name__ == "__main__":
+def plot_evecs_all(plotdir, mod_p, evecs, lambda_index):
+    """Plot the overlaps from the eigenvectors against the momentum values
+
+    plotdir: directory to save the plots
+    mod_p: absolute value of the momentum for the x-axis
+    evecs: a numpy array containing all the eigenvectors with indices: [chirality, momentum value, lambda index, bootstraps, eigenvector element, first or second eigenvector]
+    lambda_values: an array of the values for lambda
+    lambda_index: an integer index to set the value of lambda
+    """
+
+    chirality = ["left", "right"]
+    # evec_numbers = [1, 2]
+    evec_numbers = ["-", "+"]
+
+    for ichi, chi in enumerate(chirality):
+        a = np.average(evecs[ichi, 2, lambda_index, :, :, 0], axis=0)
+        b = np.average(evecs[ichi, 2, lambda_index, :, :, 1], axis=0)
+        product = np.dot(
+            np.average(evecs[ichi, 2, lambda_index, :, :, 0], axis=0),
+            np.average(evecs[ichi, 2, lambda_index, :, :, 1], axis=0),
+        )
+        print(f"\n{product=}")
+        for inum, evec_num in enumerate(evec_numbers):
+            labels = []
+            state1 = np.abs(evecs[ichi, :, lambda_index, :, 0, inum]) ** 2
+            state2 = np.abs(evecs[ichi, :, lambda_index, :, 1, inum]) ** 2
+
+            fig = plt.figure(figsize=(5, 5))
+            plt.errorbar(
+                mod_p,
+                np.average(state1, axis=1),
+                np.std(state1, axis=1),
+                fmt=_fmts[0],
+                # label=rf"State 1 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+                label=rf"$|e_1^{{({evec_num})}}|^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+                color=_colors[3],
+                capsize=4,
+                elinewidth=1,
+                markerfacecolor="none",
+            )
+            plt.errorbar(
+                mod_p,
+                np.average(state2, axis=1),
+                np.std(state2, axis=1),
+                fmt=_fmts[1],
+                label=rf"$|e_2^{{({evec_num})}}|^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+                color=_colors[4],
+                capsize=4,
+                elinewidth=1,
+                markerfacecolor="none",
+            )
+            plt.legend(fontsize="x-small")
+            plt.xlabel(r"$\vec{q}^{\,2}$")
+            plt.ylabel(rf"$|e_i^{{({evec_num})}}|^2$")
+            plt.ylim(0, 1)
+            plt.savefig(
+                plotdir / ("eigenvectors_" + chi + "_evec" + str(inum + 1) + ".pdf"),
+                metadata=_metadata,
+            )
+            plt.savefig(
+                plotdir / ("eigenvectors_" + chi + "_evec" + str(inum + 1) + ".png"),
+                dpi=500,
+                metadata=_metadata,
+            )
+            plt.close()
+    return
+
+
+def plot_both_evecs(
+    plotdir, lambda_index, lambdas, mod_p, evecs, theor_evecs, ichi, inum
+):
+    """Plot both the eigenvectors from the GEVP and the theoretical predictions from the fit to the matrix element and the energies"""
+
+    chirality = ["left", "right"]
+    evec_numbers = ["-", "+"]
+    evec_num = evec_numbers[inum]
+    chi = chirality[ichi]
+
+    state1 = np.abs(evecs[ichi, :, lambda_index, :, 0, inum]) ** 2
+    state2 = np.abs(evecs[ichi, :, lambda_index, :, 1, inum]) ** 2
+
+    fig = plt.figure(figsize=(5, 5))
+    plt.errorbar(
+        mod_p,
+        np.average(state1, axis=1),
+        np.std(state1, axis=1),
+        fmt=_fmts[0],
+        label=rf"$|e_1^{{({evec_num})}}|^2$ (GEVP)",
+        color=_colors[3],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        mod_p,
+        np.average(state2, axis=1),
+        np.std(state2, axis=1),
+        fmt=_fmts[0],
+        label=rf"$|e_2^{{({evec_num})}}|^2$ (GEVP)",
+        color=_colors[4],
+        capsize=4,
+        elinewidth=1,
+        markerfacecolor="none",
+    )
+    plt.errorbar(
+        mod_p + 0.0003,
+        np.average(theor_evecs[inum, 0] ** 2, axis=1),
+        np.std(theor_evecs[inum, 0] ** 2, axis=1),
+        label=rf"$|e_1^{{({evec_num})}}|^2$ (fit)",
+        color=_colors[3],
+        fmt=_fmts[1],
+        capsize=4,
+        elinewidth=1,
+    )
+    plt.errorbar(
+        mod_p + 0.0003,
+        np.average(theor_evecs[inum, 1] ** 2, axis=1),
+        np.std(theor_evecs[inum, 1] ** 2, axis=1),
+        label=rf"$|e_2^{{({evec_num})}}|^2$ (fit)",
+        color=_colors[4],
+        fmt=_fmts[1],
+        capsize=4,
+        elinewidth=1,
+    )
+
+    plt.title(rf"$\lambda = {lambdas[lambda_index]:0.2}$")
+    plt.legend(fontsize="xx-small")
+    plt.xlabel(r"$\vec{q}^{\,2}$")
+    plt.ylabel(rf"$|e_i^{{({evec_num})}}|^2$")
+    plt.ylim(0, 1)
+    plt.savefig(
+        # plotdir / ("eigenvectors_" + chi + "_evec" + str(inum + 1) + "_comparison.pdf"),
+        plotdir
+        / (
+            f"eigenvectors_{chi}_evec{inum+1}_l{lambdas[lambda_index]:0.2}_comparison.pdf"
+        ),
+        metadata=_metadata,
+    )
+
+    return
+
+
+def main():
     plt.style.use("./mystyle.txt")
 
     # --- directories ---
@@ -175,7 +317,7 @@ if __name__ == "__main__":
     dm_N = 0.0070
     dm_S = 0.0042
 
-    lambda_index = 8
+    lambda_index = 1
 
     # ==================================================
     # Define the twisted boundary conditions parameters
@@ -209,15 +351,6 @@ if __name__ == "__main__":
     order3_evals_left_1 = np.array([d["order3_eval_left"] for d in dataset_1])
     order3_evals_right_1 = np.array([d["order3_eval_right"] for d in dataset_1])
     order3_delta_e_1 = np.array([d["order3_fit"] for d in dataset_1])
-
-    # states_l0_1 = np.array(
-    #     [
-    #         dataset_1[0]["weighted_energy_sigma"],
-    #         dataset_1[0]["weighted_energy_nucl"],
-    #     ]
-    # )
-    # order3_fit_1 = np.array([d["order3_states_fit"] for d in dataset_1])
-    # states_l_1 = order3_fit_1[:, :, :, 1]
 
     # ==================================================
     # Theta_4
@@ -541,3 +674,62 @@ if __name__ == "__main__":
     ax.set_ylabel(r"$|e_i^{{(-)}}|^2$")
     plt.xlabel(r"$\vec{q}^{\,2}$")
     plt.savefig(plotdir / "theor_evec2.pdf")
+
+    # ==================================================
+    # Plot the eigenvectors from the GEVP
+
+    evecs = np.array(
+        [
+            [
+                order3_evec_left_0,
+                order3_evec_left_1,
+                order3_evec_left_4,
+                order3_evec_left_2,
+                order3_evec_left_5,
+                order3_evec_left_qmax,
+            ],
+            [
+                order3_evec_right_0,
+                order3_evec_right_1,
+                order3_evec_right_4,
+                order3_evec_right_2,
+                order3_evec_right_5,
+                order3_evec_right_qmax,
+            ],
+        ]
+    )
+    # evec_p1 = evec_p1 * norm_p
+    # evec_p2 = evec_p2 * norm_p
+    # evec_m1 = evec_m1 * norm_m
+    # evec_m2 = evec_m2 * norm_m
+    theor_evecs = np.array([[evec_m1, evec_m2], [evec_p1, evec_p2]])
+
+    chirality = 0
+    eigenvector_number = 0
+    plot_both_evecs(
+        plotdir,
+        lambda_index,
+        lambdas_0,
+        p_sq,
+        evecs,
+        theor_evecs,
+        chirality,
+        eigenvector_number,
+    )
+
+    chirality = 0
+    eigenvector_number = 1
+    plot_both_evecs(
+        plotdir,
+        lambda_index,
+        lambdas_0,
+        p_sq,
+        evecs,
+        theor_evecs,
+        chirality,
+        eigenvector_number,
+    )
+
+
+if __name__ == "__main__":
+    main()
