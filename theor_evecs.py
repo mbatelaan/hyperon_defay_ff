@@ -118,7 +118,7 @@ def read_data_file(datadir, theta, m_N, m_S, NX, t0=6, delta_t=4):
         np.array([0, 0, 0]),
         NX,
     )
-    print(f"\n{qsq_small=}")
+    print(f"{qsq_small=}")
     print(f"{Qsq=}")
     print(f"{Qsq_lat=}")
     return data_set, lambdas, qsq_small, Qsq, Qsq_lat
@@ -188,7 +188,7 @@ if __name__ == "__main__":
 
     # ==================================================
     # Theta_8
-    print(f"{theta_8=}")
+    print(f"\n{theta_8=}")
     dataset_0, lambdas_0, qsq_small_0, Qsq_0, Qsq_lat_0 = read_data_file(
         datadir0, theta_8, m_N, m_S, NX, t0=6, delta_t=4
     )
@@ -200,7 +200,7 @@ if __name__ == "__main__":
 
     # ==================================================
     # Theta_7
-    print(f"{theta_7=}")
+    print(f"\n{theta_7=}")
     dataset_1, lambdas_1, qsq_small_1, Qsq_1, Qsq_lat_1 = read_data_file(
         datadir1, theta_7, m_N, m_S, NX, t0=6, delta_t=4
     )
@@ -221,7 +221,7 @@ if __name__ == "__main__":
 
     # ==================================================
     # Theta_4
-    print(f"{theta_4=}")
+    print(f"\n{theta_4=}")
     dataset_4, lambdas_4, qsq_small_4, Qsq_4, Qsq_lat_4 = read_data_file(
         datadir4, theta_4, m_N, m_S, NX, t0=6, delta_t=4
     )
@@ -233,7 +233,7 @@ if __name__ == "__main__":
 
     # ==================================================
     # Theta_3
-    print(f"{theta_3=}")
+    print(f"\n{theta_3=}")
     dataset_2, lambdas_2, qsq_small_2, Qsq_2, Qsq_lat_2 = read_data_file(
         datadir2, theta_3, m_N, m_S, NX, t0=4, delta_t=2
     )
@@ -245,7 +245,7 @@ if __name__ == "__main__":
 
     # ==================================================
     # Theta_5
-    print(f"{theta_5=}")
+    print(f"\n{theta_5=}")
     dataset_5, lambdas_5, qsq_small_5, Qsq_5, Qsq_lat_5 = read_data_file(
         datadir5, theta_5, m_N, m_S, NX, t0=4, delta_t=2
     )
@@ -257,7 +257,7 @@ if __name__ == "__main__":
 
     # ==================================================
     # q_max
-    print(f"{theta_qmax=}")
+    print(f"\n{theta_qmax=}")
     dataset_qmax, lambdas_qmax, qsq_small_qmax, Qsq_qmax, Qsq_lat_qmax = read_data_file(
         datadirqmax, theta_qmax, m_N, m_S, NX, t0=4, delta_t=2
     )
@@ -268,36 +268,114 @@ if __name__ == "__main__":
     order3_delta_e_qmax = np.array([d["order3_fit"] for d in dataset_qmax])
 
     # ==================================================
-    # ==================================================
-
-    qsq_nucleon, nucleon_energy = read_csv_data(plotdatadir, "nucleon_energy")
-    qsq_nucleondivsigma, nucleondivsigma_energy = read_csv_data(
-        plotdatadir, "nucleondivsigma_energy"
+    p_sq = np.array(
+        [
+            qsq_small_0,
+            qsq_small_1,
+            qsq_small_4,
+            qsq_small_2,
+            qsq_small_5,
+            qsq_small_qmax,
+        ]
     )
+    # ==================================================
+    # Read the energies of the nucleons for different momentum
+    nucleon_energy = np.array(
+        [
+            dataset_0[0]["chosen_nucl_fit"]["param"][:, 1],
+            dataset_1[0]["chosen_nucl_fit"]["param"][:, 1],
+            dataset_4[0]["chosen_nucl_fit"]["param"][:, 1],
+            dataset_2[0]["chosen_nucl_fit"]["param"][:, 1],
+            dataset_5[0]["chosen_nucl_fit"]["param"][:, 1],
+            dataset_qmax[0]["chosen_nucl_fit"]["param"][:, 1],
+        ]
+    )
+    nucleondivsigma_energy = np.array(
+        [
+            dataset_0[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
+            dataset_1[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
+            dataset_4[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
+            dataset_2[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
+            dataset_5[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
+            dataset_qmax[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
+        ]
+    )
+    sigma_energy = np.array(
+        [
+            dataset_0[0]["chosen_sigma_fit"]["param"][:, 1],
+            dataset_1[0]["chosen_sigma_fit"]["param"][:, 1],
+            dataset_4[0]["chosen_sigma_fit"]["param"][:, 1],
+            dataset_2[0]["chosen_sigma_fit"]["param"][:, 1],
+            dataset_5[0]["chosen_sigma_fit"]["param"][:, 1],
+            dataset_qmax[0]["chosen_sigma_fit"]["param"][:, 1],
+        ]
+    )
+    delta_energy = np.array(
+        [
+            np.array([d["order3_fit"][:, 1] for d in dataset_0])[lambda_index, :],
+            np.array([d["order3_fit"][:, 1] for d in dataset_1])[lambda_index, :],
+            np.array([d["order3_fit"][:, 1] for d in dataset_4])[lambda_index, :],
+            np.array([d["order3_fit"][:, 1] for d in dataset_2])[lambda_index, :],
+            np.array([d["order3_fit"][:, 1] for d in dataset_5])[lambda_index, :],
+            np.array([d["order3_fit"][:, 1] for d in dataset_qmax])[lambda_index, :],
+        ]
+    )
+    state1_energy = np.array(
+        [
+            np.array([d["order3_states_fit"] for d in dataset_0])[
+                lambda_index, 0, :, 1
+            ],
+            np.array([d["order3_states_fit"] for d in dataset_1])[
+                lambda_index, 0, :, 1
+            ],
+            np.array([d["order3_states_fit"] for d in dataset_4])[
+                lambda_index, 0, :, 1
+            ],
+            np.array([d["order3_states_fit"] for d in dataset_2])[
+                lambda_index, 0, :, 1
+            ],
+            np.array([d["order3_states_fit"] for d in dataset_5])[
+                lambda_index, 0, :, 1
+            ],
+            np.array([d["order3_states_fit"] for d in dataset_qmax])[
+                lambda_index, 0, :, 1
+            ],
+        ]
+    )
+    state2_energy = np.array(
+        [
+            np.array([d["order3_states_fit"] for d in dataset_0])[
+                lambda_index, 1, :, 1
+            ],
+            np.array([d["order3_states_fit"] for d in dataset_1])[
+                lambda_index, 1, :, 1
+            ],
+            np.array([d["order3_states_fit"] for d in dataset_4])[
+                lambda_index, 1, :, 1
+            ],
+            np.array([d["order3_states_fit"] for d in dataset_2])[
+                lambda_index, 1, :, 1
+            ],
+            np.array([d["order3_states_fit"] for d in dataset_5])[
+                lambda_index, 1, :, 1
+            ],
+            np.array([d["order3_states_fit"] for d in dataset_qmax])[
+                lambda_index, 1, :, 1
+            ],
+        ]
+    )
+
     nucleon_avg = np.average(nucleon_energy, axis=1)
     nucleondivsigma_avg = np.average(nucleondivsigma_energy, axis=1)
-
-    qsq_sigma, sigma_energy = read_csv_data(plotdatadir, "sigma_energy")
     sigma_avg = np.average(sigma_energy, axis=1)
-
-    qsq_dE, delta_energy = read_csv_data(
-        plotdatadir, f"delta_energy_lmb{lambdas_0[lambda_index]:0.3}"
-    )
-
-    qsq_1, state1_energy = read_csv_data(
-        plotdatadir, f"state1_energy_lmb{lambdas_0[lambda_index]:0.3}"
-    )
-    qsq_2, state2_energy = read_csv_data(
-        plotdatadir, f"state2_energy_lmb{lambdas_0[lambda_index]:0.3}"
-    )
     state1_avg = np.average(state1_energy, axis=1)
     state2_avg = np.average(state2_energy, axis=1)
 
     qsq_me, ME_values, ME_uncertainty = read_csv_me(plotdatadir, "ME_values")
 
     ME_values = np.array([[me for _ in range(500)] for me in ME_values])
-    print(f"{ME_values=}")
-    print(f"{np.shape(ME_values)=}")
+    # print(f"\n{ME_values=}")
+    print(f"\n{np.shape(ME_values)=}")
     print(f"{np.shape(nucleon_energy)=}")
 
     # alpha defined from fitted M.E.
@@ -348,7 +426,7 @@ if __name__ == "__main__":
     # plt.figure(figsize=(6, 6))
     fig, ax = plt.subplots(2, 1, sharex=True, figsize=(6, 6))
     ax[0].errorbar(
-        qsq_nucleon,
+        p_sq,
         np.average(evec_p1**2, axis=1),
         np.std(evec_p1**2, axis=1),
         label=r"$e^+_1$",
@@ -358,7 +436,7 @@ if __name__ == "__main__":
         elinewidth=1,
     )
     ax[0].errorbar(
-        qsq_nucleon,
+        p_sq,
         np.average(evec_p2**2, axis=1),
         np.std(evec_p2**2, axis=1),
         label=r"$e^+_2$",
@@ -369,7 +447,7 @@ if __name__ == "__main__":
         elinewidth=1,
     )
     ax[1].errorbar(
-        qsq_nucleon,
+        p_sq,
         np.average(evec_m1**2, axis=1),
         np.std(evec_m1**2, axis=1),
         label=r"$e^-_1$",
@@ -379,7 +457,7 @@ if __name__ == "__main__":
         elinewidth=1,
     )
     ax[1].errorbar(
-        qsq_nucleon,
+        p_sq,
         np.average(evec_m2**2, axis=1),
         np.std(evec_m2**2, axis=1),
         label=r"$e^-_2$",
@@ -389,17 +467,17 @@ if __name__ == "__main__":
         capsize=4,
         elinewidth=1,
     )
-    # ax[0].errorbar(qsq_nucleon, evec_p2**2, label=r"$e^+_2$", color="k")
-    # ax[1].errorbar(qsq_nucleon, evec_m1**2, label=r"$e^-_1$", color="y")
-    # ax[1].errorbar(qsq_nucleon, evec_m2**2, label=r"$e^-_2$", color="g")
-    # ax[0].plot(qsq_nucleon, evec_p1**2, label=r"$e^+_1$", color="b")
-    # ax[0].plot(qsq_nucleon, evec_p2**2, label=r"$e^+_2$", color="k")
-    # ax[1].plot(qsq_nucleon, evec_m1**2, label=r"$e^-_1$", color="y")
-    # ax[1].plot(qsq_nucleon, evec_m2**2, label=r"$e^-_2$", color="g")
-    # plt.plot(qsq_nucleon, evec_p1**2, label=r"$e^+_1$", color="b")
-    # plt.plot(qsq_nucleon, evec_p2**2, label=r"$e^+_2$", color="k")
-    # plt.plot(qsq_nucleon, evec_m1**2, label=r"$e^-_1$", color="y")
-    # plt.plot(qsq_nucleon, evec_m2**2, label=r"$e^-_2$", color="g")
+    # ax[0].errorbar(p_sq, evec_p2**2, label=r"$e^+_2$", color="k")
+    # ax[1].errorbar(p_sq, evec_m1**2, label=r"$e^-_1$", color="y")
+    # ax[1].errorbar(p_sq, evec_m2**2, label=r"$e^-_2$", color="g")
+    # ax[0].plot(p_sq, evec_p1**2, label=r"$e^+_1$", color="b")
+    # ax[0].plot(p_sq, evec_p2**2, label=r"$e^+_2$", color="k")
+    # ax[1].plot(p_sq, evec_m1**2, label=r"$e^-_1$", color="y")
+    # ax[1].plot(p_sq, evec_m2**2, label=r"$e^-_2$", color="g")
+    # plt.plot(p_sq, evec_p1**2, label=r"$e^+_1$", color="b")
+    # plt.plot(p_sq, evec_p2**2, label=r"$e^+_2$", color="k")
+    # plt.plot(p_sq, evec_m1**2, label=r"$e^-_1$", color="y")
+    # plt.plot(p_sq, evec_m2**2, label=r"$e^-_2$", color="g")
     ax[0].legend(fontsize="small")
     ax[1].legend(fontsize="small")
     ax[0].set_ylim(0, 1)
@@ -410,7 +488,7 @@ if __name__ == "__main__":
 
     fig, ax = plt.subplots(1, 1, figsize=(5, 5))
     ax.errorbar(
-        qsq_nucleon,
+        p_sq,
         np.average(evec_p1**2, axis=1),
         np.std(evec_p1**2, axis=1),
         label=r"$e^+_1$",
@@ -420,7 +498,7 @@ if __name__ == "__main__":
         elinewidth=1,
     )
     ax.errorbar(
-        qsq_nucleon,
+        p_sq,
         np.average(evec_p2**2, axis=1),
         np.std(evec_p2**2, axis=1),
         label=r"$e^+_2$",
@@ -438,7 +516,7 @@ if __name__ == "__main__":
 
     fig, ax = plt.subplots(1, 1, figsize=(5, 5))
     ax.errorbar(
-        qsq_nucleon,
+        p_sq,
         np.average(evec_m1**2, axis=1),
         np.std(evec_m1**2, axis=1),
         label=r"$e^-_1$",
@@ -448,7 +526,7 @@ if __name__ == "__main__":
         elinewidth=1,
     )
     ax.errorbar(
-        qsq_nucleon,
+        p_sq,
         np.average(evec_m2**2, axis=1),
         np.std(evec_m2**2, axis=1),
         label=r"$e^-_2$",
