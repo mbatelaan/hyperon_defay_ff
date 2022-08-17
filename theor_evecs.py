@@ -86,14 +86,11 @@ def q_small_squared(theta1, theta2, n1, n2, L):
     return qsquared
 
 
-def get_data(datadir, theta, m_N, m_S, NX, t0=4, delta_t=2):
+def read_data_file(datadir, theta, m_N, m_S, NX, t0=6, delta_t=4):
     """Read the dataset from the file and then return the required eigenvectors and lambda values"""
-    # with open(datadir / "lambda_dep_t4_dt2.pkl", "rb") as file_in:  # theta
-    with open(datadir / f"lambda_dep_t{t0}_dt{delta_t}.pkl", "rb") as file_in:  # theta
+    with open(datadir / f"lambda_dep_t{t0}_dt{delta_t}.pkl", "rb") as file_in:
         data_set = pickle.load(file_in)
     lambdas = np.array([d["lambdas"] for d in data_set])
-    order3_evec_left = np.array([d["order3_evec_left"] for d in data_set])
-    order3_evec_right = np.array([d["order3_evec_right"] for d in data_set])
     Qsq = Q_squared(
         m_N,
         m_S,
@@ -124,47 +121,7 @@ def get_data(datadir, theta, m_N, m_S, NX, t0=4, delta_t=2):
     print(f"\n{qsq_small=}")
     print(f"{Qsq=}")
     print(f"{Qsq_lat=}")
-    return data_set, lambdas, order3_evec_left, order3_evec_right, qsq_small
-
-
-def read_data_file(datadir, theta, m_N, m_S, NX, t0=4, delta_t=2):
-    """Read the dataset from the file and then return the required eigenvectors and lambda values"""
-    with open(datadir / f"lambda_dep_t{t0}_dt{delta_t}.pkl", "rb") as file_in:  # theta
-        data_set = pickle.load(file_in)
-    lambdas = np.array([d["lambdas"] for d in data_set])
-    # order3_evec_left = np.array([d["order3_evec_left"] for d in data_set])
-    # order3_evec_right = np.array([d["order3_evec_right"] for d in data_set])
-    Qsq = Q_squared(
-        m_N,
-        m_S,
-        np.array([0, theta, 0]),
-        np.array([0, 0, 0]),
-        np.array([0, 0, 0]),
-        np.array([0, 0, 0]),
-        NX,
-        0.074,
-    )
-    Qsq_lat = Q_squared_lat(
-        m_N,
-        m_S,
-        np.array([0, theta, 0]),
-        np.array([0, 0, 0]),
-        np.array([0, 0, 0]),
-        np.array([0, 0, 0]),
-        NX,
-        0.074,
-    )
-    qsq_small = q_small_squared(
-        np.array([0, theta, 0]),
-        np.array([0, 0, 0]),
-        np.array([0, 0, 0]),
-        np.array([0, 0, 0]),
-        NX,
-    )
-    print(f"\n{qsq_small=}")
-    print(f"{Qsq=}")
-    print(f"{Qsq_lat=}")
-    return data_set, lambdas, qsq_small
+    return data_set, lambdas, qsq_small, Qsq, Qsq_lat
 
 
 def read_csv_data(plotdatadir, filename):
@@ -204,7 +161,7 @@ if __name__ == "__main__":
     datadir2 = resultsdir / Path("six_point_fn_all/data/pickles/theta3/")
     datadir4 = resultsdir / Path("six_point_fn_all/data/pickles/theta4/")
     datadir5 = resultsdir / Path("six_point_fn_all/data/pickles/theta5/")
-    datadir_qmax = resultsdir / Path("six_point_fn_all/data/pickles/qmax/")
+    datadirqmax = resultsdir / Path("six_point_fn_all/data/pickles/qmax/")
 
     plotdir.mkdir(parents=True, exist_ok=True)
 
@@ -219,7 +176,6 @@ if __name__ == "__main__":
     dm_S = 0.0042
 
     lambda_index = 8
-    # lambda_index = 7
 
     # ==================================================
     # Define the twisted boundary conditions parameters
@@ -233,13 +189,11 @@ if __name__ == "__main__":
     # ==================================================
     # Theta_8
     print(f"{theta_8=}")
-    (
-        dataset_0,
-        lambdas_0,
-        order3_evec_left_0,
-        order3_evec_right_0,
-        qsq_small_0,
-    ) = get_data(datadir0, theta_8, m_N, m_S, NX, t0=6, delta_t=4)
+    dataset_0, lambdas_0, qsq_small_0, Qsq_0, Qsq_lat_0 = read_data_file(
+        datadir0, theta_8, m_N, m_S, NX, t0=6, delta_t=4
+    )
+    order3_evec_left_0 = np.array([d["order3_evec_left"] for d in dataset_0])
+    order3_evec_right_0 = np.array([d["order3_evec_right"] for d in dataset_0])
     order3_evals_left_0 = np.array([d["order3_eval_left"] for d in dataset_0])
     order3_evals_right_0 = np.array([d["order3_eval_right"] for d in dataset_0])
     order3_delta_e_0 = np.array([d["order3_fit"] for d in dataset_0])
@@ -247,45 +201,32 @@ if __name__ == "__main__":
     # ==================================================
     # Theta_7
     print(f"{theta_7=}")
-    (
-        dataset_1,
-        lambdas_1,
-        order3_evec_left_1,
-        order3_evec_right_1,
-        qsq_small_1,
-    ) = get_data(datadir1, theta_7, m_N, m_S, NX, t0=6, delta_t=4)
+    dataset_1, lambdas_1, qsq_small_1, Qsq_1, Qsq_lat_1 = read_data_file(
+        datadir1, theta_7, m_N, m_S, NX, t0=6, delta_t=4
+    )
+    order3_evec_left_1 = np.array([d["order3_evec_left"] for d in dataset_1])
+    order3_evec_right_1 = np.array([d["order3_evec_right"] for d in dataset_1])
     order3_evals_left_1 = np.array([d["order3_eval_left"] for d in dataset_1])
     order3_evals_right_1 = np.array([d["order3_eval_right"] for d in dataset_1])
     order3_delta_e_1 = np.array([d["order3_fit"] for d in dataset_1])
 
-    order0_evec_left_1 = np.array([d["order0_evec_left"] for d in dataset_1])
-    order0_evec_right_1 = np.array([d["order0_evec_right"] for d in dataset_1])
-    order1_evec_left_1 = np.array([d["order1_evec_left"] for d in dataset_1])
-    order1_evec_right_1 = np.array([d["order1_evec_right"] for d in dataset_1])
-    order2_evec_left_1 = np.array([d["order2_evec_left"] for d in dataset_1])
-    order2_evec_right_1 = np.array([d["order2_evec_right"] for d in dataset_1])
-    order3_evec_left_1 = np.array([d["order3_evec_left"] for d in dataset_1])
-    order3_evec_right_1 = np.array([d["order3_evec_right"] for d in dataset_1])
-
-    states_l0_1 = np.array(
-        [
-            dataset_1[0]["weighted_energy_sigma"],
-            dataset_1[0]["weighted_energy_nucl"],
-        ]
-    )
-    order3_fit_1 = np.array([d["order3_states_fit"] for d in dataset_1])
-    states_l_1 = order3_fit_1[:, :, :, 1]
+    # states_l0_1 = np.array(
+    #     [
+    #         dataset_1[0]["weighted_energy_sigma"],
+    #         dataset_1[0]["weighted_energy_nucl"],
+    #     ]
+    # )
+    # order3_fit_1 = np.array([d["order3_states_fit"] for d in dataset_1])
+    # states_l_1 = order3_fit_1[:, :, :, 1]
 
     # ==================================================
     # Theta_4
     print(f"{theta_4=}")
-    (
-        dataset_4,
-        lambdas_4,
-        order3_evec_left_4,
-        order3_evec_right_4,
-        qsq_small_4,
-    ) = get_data(datadir4, theta_4, m_N, m_S, NX, t0=6, delta_t=4)
+    dataset_4, lambdas_4, qsq_small_4, Qsq_4, Qsq_lat_4 = read_data_file(
+        datadir4, theta_4, m_N, m_S, NX, t0=6, delta_t=4
+    )
+    order3_evec_left_4 = np.array([d["order3_evec_left"] for d in dataset_4])
+    order3_evec_right_4 = np.array([d["order3_evec_right"] for d in dataset_4])
     order3_evals_left_4 = np.array([d["order3_eval_left"] for d in dataset_4])
     order3_evals_right_4 = np.array([d["order3_eval_right"] for d in dataset_4])
     order3_delta_e_4 = np.array([d["order3_fit"] for d in dataset_4])
@@ -293,13 +234,11 @@ if __name__ == "__main__":
     # ==================================================
     # Theta_3
     print(f"{theta_3=}")
-    (
-        dataset_2,
-        lambdas_2,
-        order3_evec_left_2,
-        order3_evec_right_2,
-        qsq_small_2,
-    ) = get_data(datadir2, theta_3, m_N, m_S, NX, t0=4, delta_t=2)
+    dataset_2, lambdas_2, qsq_small_2, Qsq_2, Qsq_lat_2 = read_data_file(
+        datadir2, theta_3, m_N, m_S, NX, t0=4, delta_t=2
+    )
+    order3_evec_left_2 = np.array([d["order3_evec_left"] for d in dataset_2])
+    order3_evec_right_2 = np.array([d["order3_evec_right"] for d in dataset_2])
     order3_evals_left_2 = np.array([d["order3_eval_left"] for d in dataset_2])
     order3_evals_right_2 = np.array([d["order3_eval_right"] for d in dataset_2])
     order3_delta_e_2 = np.array([d["order3_fit"] for d in dataset_2])
@@ -307,13 +246,11 @@ if __name__ == "__main__":
     # ==================================================
     # Theta_5
     print(f"{theta_5=}")
-    (
-        dataset_5,
-        lambdas_5,
-        order3_evec_left_5,
-        order3_evec_right_5,
-        qsq_small_5,
-    ) = get_data(datadir5, theta_5, m_N, m_S, NX, t0=4, delta_t=2)
+    dataset_5, lambdas_5, qsq_small_5, Qsq_5, Qsq_lat_5 = read_data_file(
+        datadir5, theta_5, m_N, m_S, NX, t0=4, delta_t=2
+    )
+    order3_evec_left_5 = np.array([d["order3_evec_left"] for d in dataset_5])
+    order3_evec_right_5 = np.array([d["order3_evec_right"] for d in dataset_5])
     order3_evals_left_5 = np.array([d["order3_eval_left"] for d in dataset_5])
     order3_evals_right_5 = np.array([d["order3_eval_right"] for d in dataset_5])
     order3_delta_e_5 = np.array([d["order3_fit"] for d in dataset_5])
@@ -321,13 +258,11 @@ if __name__ == "__main__":
     # ==================================================
     # q_max
     print(f"{theta_qmax=}")
-    (
-        dataset_qmax,
-        lambdas_qmax,
-        order3_evec_left_qmax,
-        order3_evec_right_qmax,
-        qsq_small_qmax,
-    ) = get_data(datadir_qmax, theta_qmax, m_N, m_S, NX, t0=4, delta_t=2)
+    dataset_qmax, lambdas_qmax, qsq_small_qmax, Qsq_qmax, Qsq_lat_qmax = read_data_file(
+        datadirqmax, theta_qmax, m_N, m_S, NX, t0=4, delta_t=2
+    )
+    order3_evec_left_qmax = np.array([d["order3_evec_left"] for d in dataset_qmax])
+    order3_evec_right_qmax = np.array([d["order3_evec_right"] for d in dataset_qmax])
     order3_evals_left_qmax = np.array([d["order3_eval_left"] for d in dataset_qmax])
     order3_evals_right_qmax = np.array([d["order3_eval_right"] for d in dataset_qmax])
     order3_delta_e_qmax = np.array([d["order3_fit"] for d in dataset_qmax])

@@ -1255,7 +1255,7 @@ if __name__ == "__main__":
     dm_N = 0.0070
     dm_S = 0.0042
 
-    lambda_index = 1
+    lambda_index = 8
     # lambda_index = 7
 
     # ==================================================
