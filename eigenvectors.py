@@ -1192,6 +1192,7 @@ def get_data(datadir, theta, m_N, m_S, NX, t0=4, delta_t=2):
     """Read the dataset from the file and then return the required eigenvectors and lambda values"""
     # with open(datadir / "lambda_dep_t4_dt2.pkl", "rb") as file_in:  # theta
     with open(datadir / f"lambda_dep_t{t0}_dt{delta_t}.pkl", "rb") as file_in:  # theta
+        print("here")
         data_set = pickle.load(file_in)
     lambdas = np.array([d["lambdas"] for d in data_set])
     order3_evec_left = np.array([d["order3_evec_left"] for d in data_set])
