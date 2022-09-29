@@ -34,7 +34,7 @@ _colors = [
 _fmts = ["s", "^", "*", "o", ".", ",", "v", "p", "P", "s", "^"]
 
 
-def plot_evecs(plotdir, mod_p, state1, state2, lambda_index):
+def plot_evecs(plotdir, mod_p, state1, state2, lambda_index, lambdas_0):
     """Plot the overlaps from the eigenvectors against the momentum values"""
     print(f"{mod_p=}")
     print(f"{np.average(state1,axis=1)=}")
@@ -76,7 +76,7 @@ def plot_evecs(plotdir, mod_p, state1, state2, lambda_index):
     return
 
 
-def plot_evecs_all(plotdir, mod_p, evecs, lambda_index):
+def plot_evecs_all(plotdir, mod_p, evecs, lambda_index, lambdas_0):
     """Plot the overlaps from the eigenvectors against the momentum values
 
     plotdir: directory to save the plots
@@ -110,7 +110,7 @@ def plot_evecs_all(plotdir, mod_p, evecs, lambda_index):
                 np.std(state1, axis=1),
                 fmt=_fmts[0],
                 # label=rf"State 1 ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
-                label=rf"$|e_1^{{({evec_num})}}|^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+                label=rf"$|v_1^{{({evec_num})}}|^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
                 color=_colors[3],
                 capsize=4,
                 elinewidth=1,
@@ -121,7 +121,7 @@ def plot_evecs_all(plotdir, mod_p, evecs, lambda_index):
                 np.average(state2, axis=1),
                 np.std(state2, axis=1),
                 fmt=_fmts[1],
-                label=rf"$|e_2^{{({evec_num})}}|^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
+                label=rf"$|v_2^{{({evec_num})}}|^2$ ($\lambda = {lambdas_0[lambda_index]:0.2}$)",
                 color=_colors[4],
                 capsize=4,
                 elinewidth=1,
@@ -129,7 +129,7 @@ def plot_evecs_all(plotdir, mod_p, evecs, lambda_index):
             )
             plt.legend(fontsize="x-small")
             plt.xlabel(r"$\vec{q}^{\,2}$")
-            plt.ylabel(rf"$|e_i^{{({evec_num})}}|^2$")
+            plt.ylabel(rf"$|v_i^{{({evec_num})}}|^2$")
             plt.ylim(0, 1)
             plt.savefig(
                 plotdir / ("eigenvectors_" + chi + "_evec" + str(inum + 1) + ".pdf"),
@@ -215,7 +215,9 @@ def add_label(violin, label, labels):
     return labels
 
 
-def plot_evecs_violin_all(plotdir, mod_p, evecs, lambda_values, lambda_index):
+def plot_evecs_violin_all(
+    plotdir, mod_p, evecs, lambda_values, lambda_index, lambdas_0
+):
     """Plot the square of the first and second element of each eigenvector. Meaning the two eigenvectors from both the left and right hand GEVP
 
     plotdir: directory to save the plots
@@ -1230,19 +1232,19 @@ def get_data(datadir, theta, m_N, m_S, NX, t0=4, delta_t=2):
     return data_set, lambdas, order3_evec_left, order3_evec_right, qsq_small
 
 
-if __name__ == "__main__":
+def main():
     plt.style.use("./mystyle.txt")
 
     # --- directories ---
     plotdir = Path.home() / Path("Documents/PhD/analysis_results/sig2n/")
     resultsdir = Path.home() / Path("Documents/PhD/analysis_results")
 
-    datadir0 = resultsdir / Path("six_point_fn_all/data/pickles/theta8/")
-    datadir1 = resultsdir / Path("six_point_fn_all/data/pickles/theta7/")
-    datadir2 = resultsdir / Path("six_point_fn_all/data/pickles/theta3/")
-    datadir4 = resultsdir / Path("six_point_fn_all/data/pickles/theta4/")
-    datadir5 = resultsdir / Path("six_point_fn_all/data/pickles/theta5/")
-    datadir_qmax = resultsdir / Path("six_point_fn_all/data/pickles/qmax/")
+    datadir_run1 = resultsdir / Path("six_point_fn_all/data/pickles/qmax/")  # qmax
+    datadir_run2 = resultsdir / Path("six_point_fn_all/data/pickles/theta5/")  # theta5
+    datadir_run3 = resultsdir / Path("six_point_fn_all/data/pickles/theta3/")  # theta3
+    datadir_run4 = resultsdir / Path("six_point_fn_all/data/pickles/theta4/")  # theta4
+    datadir_run5 = resultsdir / Path("six_point_fn_all/data/pickles/theta7/")  # theta7
+    datadir_run6 = resultsdir / Path("six_point_fn_all/data/pickles/theta8/")  # theta8
 
     plotdir.mkdir(parents=True, exist_ok=True)
 
@@ -1256,254 +1258,253 @@ if __name__ == "__main__":
     dm_N = 0.0070
     dm_S = 0.0042
 
-    lambda_index = 8
-    # lambda_index = 7
+    lambda_index = 7
 
     # ==================================================
     # Theta_8
     theta_8 = 2.25
     print(f"{theta_8=}")
     (
-        dataset_0,
-        lambdas_0,
-        order3_evec_left_0,
-        order3_evec_right_0,
-        qsq_small_0,
-    ) = get_data(datadir0, theta_8, m_N, m_S, NX, t0=6, delta_t=4)
-    order3_evals_left_0 = np.array([d["order3_eval_left"] for d in dataset_0])
-    order3_evals_right_0 = np.array([d["order3_eval_right"] for d in dataset_0])
-    order3_delta_e_0 = np.array([d["order3_fit"] for d in dataset_0])
+        dataset_run6,
+        lambdas_run6,
+        order3_evec_left_run6,
+        order3_evec_right_run6,
+        qsq_small_run6,
+    ) = get_data(datadir_run6, theta_8, m_N, m_S, NX, t0=6, delta_t=4)
+    order3_evals_left_run6 = np.array([d["order3_eval_left"] for d in dataset_run6])
+    order3_evals_right_run6 = np.array([d["order3_eval_right"] for d in dataset_run6])
+    order3_delta_e_run6 = np.array([d["order3_fit"] for d in dataset_run6])
 
     # ==================================================
     # Theta_7
     theta_7 = 2.05755614
     print(f"{theta_7=}")
     (
-        dataset_1,
-        lambdas_1,
-        order3_evec_left_1,
-        order3_evec_right_1,
-        qsq_small_1,
-    ) = get_data(datadir1, theta_7, m_N, m_S, NX, t0=6, delta_t=4)
-    order3_evals_left_1 = np.array([d["order3_eval_left"] for d in dataset_1])
-    order3_evals_right_1 = np.array([d["order3_eval_right"] for d in dataset_1])
-    order3_delta_e_1 = np.array([d["order3_fit"] for d in dataset_1])
+        dataset_run5,
+        lambdas_run5,
+        order3_evec_left_run5,
+        order3_evec_right_run5,
+        qsq_small_run5,
+    ) = get_data(datadir_run5, theta_7, m_N, m_S, NX, t0=6, delta_t=4)
+    order3_evals_left_run5 = np.array([d["order3_eval_left"] for d in dataset_run5])
+    order3_evals_right_run5 = np.array([d["order3_eval_right"] for d in dataset_run5])
+    order3_delta_e_run5 = np.array([d["order3_fit"] for d in dataset_run5])
 
-    order0_evec_left_1 = np.array([d["order0_evec_left"] for d in dataset_1])
-    order0_evec_right_1 = np.array([d["order0_evec_right"] for d in dataset_1])
-    order1_evec_left_1 = np.array([d["order1_evec_left"] for d in dataset_1])
-    order1_evec_right_1 = np.array([d["order1_evec_right"] for d in dataset_1])
-    order2_evec_left_1 = np.array([d["order2_evec_left"] for d in dataset_1])
-    order2_evec_right_1 = np.array([d["order2_evec_right"] for d in dataset_1])
-    order3_evec_left_1 = np.array([d["order3_evec_left"] for d in dataset_1])
-    order3_evec_right_1 = np.array([d["order3_evec_right"] for d in dataset_1])
-    # if len(np.shape(order3_evecs_1)) == 4:
-    #     # estate1_ = order3_evecs_1[lambda_index, :, 0, 0] ** 2
-    #     # estate2_ = order3_evecs_1[lambda_index, :, 1, 0] ** 2
-    #     estate1_ = order3_evecs_1[lambda_index, :, :, :]
-    #     estate2_ = order3_evecs_1[lambda_index, :, :, :]
+    order0_evec_left_run5 = np.array([d["order0_evec_left"] for d in dataset_run5])
+    order0_evec_right_run5 = np.array([d["order0_evec_right"] for d in dataset_run5])
+    order1_evec_left_run5 = np.array([d["order1_evec_left"] for d in dataset_run5])
+    order1_evec_right_run5 = np.array([d["order1_evec_right"] for d in dataset_run5])
+    order2_evec_left_run5 = np.array([d["order2_evec_left"] for d in dataset_run5])
+    order2_evec_right_run5 = np.array([d["order2_evec_right"] for d in dataset_run5])
+    order3_evec_left_run5 = np.array([d["order3_evec_left"] for d in dataset_run5])
+    order3_evec_right_run5 = np.array([d["order3_evec_right"] for d in dataset_run5])
+    # if len(np.shape(order3_evecs_run5)) == 4:
+    #     # estate1_ = order3_evecs_run5[lambda_index, :, 0, 0] ** 2
+    #     # estate2_ = order3_evecs_run5[lambda_index, :, 1, 0] ** 2
+    #     estate1_ = order3_evecs_run5[lambda_index, :, :, :]
+    #     estate2_ = order3_evecs_run5[lambda_index, :, :, :]
     #     print(f"{np.average(estate1_, axis=0)=}")
     #     print(f"{np.std(estate1_, axis=0)=}")
     #     print(f"{np.average(estate2_, axis=0)=}")
     #     print(f"{np.std(estate2_, axis=0)=}")
-    # order3_evals_1 = dataset_1["order3_evals"]
-    states_l0_1 = np.array(
+    # order3_evals_run5 = dataset_run5["order3_evals"]
+    states_l0_run5 = np.array(
         [
-            dataset_1[0]["weighted_energy_sigma"],
-            dataset_1[0]["weighted_energy_nucl"],
+            dataset_run5[0]["weighted_energy_sigma"],
+            dataset_run5[0]["weighted_energy_nucl"],
         ]
     )
-    order3_fit_1 = np.array([d["order3_states_fit"] for d in dataset_1])
-    states_l_1 = order3_fit_1[:, :, :, 1]
+    order3_fit_run5 = np.array([d["order3_states_fit"] for d in dataset_run5])
+    states_l_run5 = order3_fit_run5[:, :, :, 1]
 
     # ==================================================
     # Theta_4
     theta_4 = 1.6
     print(f"{theta_4=}")
     (
-        dataset_4,
-        lambdas_4,
-        order3_evec_left_4,
-        order3_evec_right_4,
-        qsq_small_4,
-    ) = get_data(datadir4, theta_4, m_N, m_S, NX, t0=6, delta_t=4)
-    order3_evals_left_4 = np.array([d["order3_eval_left"] for d in dataset_4])
-    order3_evals_right_4 = np.array([d["order3_eval_right"] for d in dataset_4])
-    order3_delta_e_4 = np.array([d["order3_fit"] for d in dataset_4])
+        dataset_run4,
+        lambdas_run4,
+        order3_evec_left_run4,
+        order3_evec_right_run4,
+        qsq_small_run4,
+    ) = get_data(datadir_run4, theta_4, m_N, m_S, NX, t0=6, delta_t=4)
+    order3_evals_left_run4 = np.array([d["order3_eval_left"] for d in dataset_run4])
+    order3_evals_right_run4 = np.array([d["order3_eval_right"] for d in dataset_run4])
+    order3_delta_e_run4 = np.array([d["order3_fit"] for d in dataset_run4])
 
     # ==================================================
     # Theta_3
     theta_3 = 1.0
     print(f"{theta_3=}")
     (
-        dataset_2,
-        lambdas_2,
-        order3_evec_left_2,
-        order3_evec_right_2,
-        qsq_small_2,
-    ) = get_data(datadir2, theta_3, m_N, m_S, NX, t0=4, delta_t=2)
-    order3_evals_left_2 = np.array([d["order3_eval_left"] for d in dataset_2])
-    order3_evals_right_2 = np.array([d["order3_eval_right"] for d in dataset_2])
-    order3_delta_e_2 = np.array([d["order3_fit"] for d in dataset_2])
+        dataset_run3,
+        lambdas_run3,
+        order3_evec_left_run3,
+        order3_evec_right_run3,
+        qsq_small_run3,
+    ) = get_data(datadir_run3, theta_3, m_N, m_S, NX, t0=4, delta_t=2)
+    order3_evals_left_run3 = np.array([d["order3_eval_left"] for d in dataset_run3])
+    order3_evals_right_run3 = np.array([d["order3_eval_right"] for d in dataset_run3])
+    order3_delta_e_run3 = np.array([d["order3_fit"] for d in dataset_run3])
 
     # ==================================================
     # Theta_5
     theta_5 = 0.448
     print(f"{theta_5=}")
     (
-        dataset_5,
-        lambdas_5,
-        order3_evec_left_5,
-        order3_evec_right_5,
-        qsq_small_5,
-    ) = get_data(datadir5, theta_5, m_N, m_S, NX, t0=4, delta_t=2)
-    order3_evals_left_5 = np.array([d["order3_eval_left"] for d in dataset_5])
-    order3_evals_right_5 = np.array([d["order3_eval_right"] for d in dataset_5])
-    order3_delta_e_5 = np.array([d["order3_fit"] for d in dataset_5])
+        dataset_run2,
+        lambdas_run2,
+        order3_evec_left_run2,
+        order3_evec_right_run2,
+        qsq_small_run2,
+    ) = get_data(datadir_run2, theta_5, m_N, m_S, NX, t0=4, delta_t=2)
+    order3_evals_left_run2 = np.array([d["order3_eval_left"] for d in dataset_run2])
+    order3_evals_right_run2 = np.array([d["order3_eval_right"] for d in dataset_run2])
+    order3_delta_e_run2 = np.array([d["order3_fit"] for d in dataset_run2])
 
     # ==================================================
     # q_max
     theta_qmax = 0
     print(f"{theta_qmax=}")
     (
-        dataset_qmax,
-        lambdas_qmax,
-        order3_evec_left_qmax,
-        order3_evec_right_qmax,
-        qsq_small_qmax,
-    ) = get_data(datadir_qmax, theta_qmax, m_N, m_S, NX, t0=4, delta_t=2)
-    order3_evals_left_qmax = np.array([d["order3_eval_left"] for d in dataset_qmax])
-    order3_evals_right_qmax = np.array([d["order3_eval_right"] for d in dataset_qmax])
-    order3_delta_e_qmax = np.array([d["order3_fit"] for d in dataset_qmax])
+        dataset_run1,
+        lambdas_run1,
+        order3_evec_left_run1,
+        order3_evec_right_run1,
+        qsq_small_run1,
+    ) = get_data(datadir_run1, theta_qmax, m_N, m_S, NX, t0=4, delta_t=2)
+    order3_evals_left_run1 = np.array([d["order3_eval_left"] for d in dataset_run1])
+    order3_evals_right_run1 = np.array([d["order3_eval_right"] for d in dataset_run1])
+    order3_delta_e_run1 = np.array([d["order3_fit"] for d in dataset_run1])
 
     # ==================================================
     mod_p = np.array(
         [
-            np.sqrt(qsq_small_0),
-            np.sqrt(qsq_small_1),
-            np.sqrt(qsq_small_4),
-            np.sqrt(qsq_small_2),
-            np.sqrt(qsq_small_5),
-            np.sqrt(qsq_small_qmax),
+            np.sqrt(qsq_small_run6),
+            np.sqrt(qsq_small_run5),
+            np.sqrt(qsq_small_run4),
+            np.sqrt(qsq_small_run3),
+            np.sqrt(qsq_small_run2),
+            np.sqrt(qsq_small_run1),
         ]
     )
     p_sq = np.array(
         [
-            qsq_small_0,
-            qsq_small_1,
-            qsq_small_4,
-            qsq_small_2,
-            qsq_small_5,
-            qsq_small_qmax,
+            qsq_small_run6,
+            qsq_small_run5,
+            qsq_small_run4,
+            qsq_small_run3,
+            qsq_small_run2,
+            qsq_small_run1,
         ]
     )
     print("\n")
-    print(np.shape(order3_evec_left_0))
-    print(np.average(order3_evec_left_0[lambda_index, :, :, :], axis=0) ** 2)
-    print(np.average(order3_evec_right_0[lambda_index, :, :, :], axis=0) ** 2)
+    print(np.shape(order3_evec_left_run6))
+    print(np.average(order3_evec_left_run6[lambda_index, :, :, :], axis=0) ** 2)
+    print(np.average(order3_evec_right_run6[lambda_index, :, :, :], axis=0) ** 2)
 
     evec_num = 0
     state1_left = np.array(
         [
-            np.abs(order3_evec_left_0[lambda_index, :, 0, evec_num]) ** 2,
-            np.abs(order3_evec_left_1[lambda_index, :, 0, evec_num]) ** 2,
-            np.abs(order3_evec_left_4[lambda_index, :, 0, evec_num]) ** 2,
-            np.abs(order3_evec_left_2[lambda_index, :, 0, evec_num]) ** 2,
-            np.abs(order3_evec_left_5[lambda_index, :, 0, evec_num]) ** 2,
-            np.abs(order3_evec_left_qmax[lambda_index, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_run6[lambda_index, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_run5[lambda_index, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_run4[lambda_index, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_run3[lambda_index, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_run2[lambda_index, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_run1[lambda_index, :, 0, evec_num]) ** 2,
         ]
     )
     state2_left = np.array(
         [
-            np.abs(order3_evec_left_0[lambda_index, :, 1, evec_num]) ** 2,
-            np.abs(order3_evec_left_1[lambda_index, :, 1, evec_num]) ** 2,
-            np.abs(order3_evec_left_4[lambda_index, :, 1, evec_num]) ** 2,
-            np.abs(order3_evec_left_2[lambda_index, :, 1, evec_num]) ** 2,
-            np.abs(order3_evec_left_5[lambda_index, :, 1, evec_num]) ** 2,
-            np.abs(order3_evec_left_qmax[lambda_index, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_run6[lambda_index, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_run5[lambda_index, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_run4[lambda_index, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_run3[lambda_index, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_run2[lambda_index, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_run1[lambda_index, :, 1, evec_num]) ** 2,
         ]
     )
 
-    plot_evecs(plotdir, mod_p, state1_left, state2_left, lambda_index)
+    plot_evecs(plotdir, mod_p, state1_left, state2_left, lambda_index, lambdas_run6)
     # plot_evecs(plotdir, mod_p, state1_left, state2_left, lambda_index)
 
     # ==================================================
     evecs = np.array(
         [
             [
-                order3_evec_left_0,
-                order3_evec_left_1,
-                order3_evec_left_4,
-                order3_evec_left_2,
-                order3_evec_left_5,
-                order3_evec_left_qmax,
+                order3_evec_left_run6,
+                order3_evec_left_run5,
+                order3_evec_left_run4,
+                order3_evec_left_run3,
+                order3_evec_left_run2,
+                order3_evec_left_run1,
             ],
             [
-                order3_evec_right_0,
-                order3_evec_right_1,
-                order3_evec_right_4,
-                order3_evec_right_2,
-                order3_evec_right_5,
-                order3_evec_right_qmax,
+                order3_evec_right_run6,
+                order3_evec_right_run5,
+                order3_evec_right_run4,
+                order3_evec_right_run3,
+                order3_evec_right_run2,
+                order3_evec_right_run1,
             ],
         ]
     )
-    plot_evecs_all(plotdir, p_sq, evecs, lambda_index)
+    plot_evecs_all(plotdir, p_sq, evecs, lambda_index, lambdas_run6)
 
     # ==================================================
-    state1_lmb = np.abs(order3_evec_left_1[:, :, 0, evec_num]) ** 2
-    state2_lmb = np.abs(order3_evec_left_1[:, :, 1, evec_num]) ** 2
-    # plot_evecs_lambda(plotdir, state1_lmb, state2_lmb, lambdas_1, name="theta2_fix")
+    state1_lmb = np.abs(order3_evec_left_run5[:, :, 0, evec_num]) ** 2
+    state2_lmb = np.abs(order3_evec_left_run5[:, :, 1, evec_num]) ** 2
+    # plot_evecs_lambda(plotdir, state1_lmb, state2_lmb, lambdas_run5, name="theta2_fix")
 
     # ==================================================
     states1_lmb = np.array(
         [
-            np.abs(order3_evec_left_0[:, :, 0, evec_num]) ** 2,
-            np.abs(order3_evec_left_1[:, :, 0, evec_num]) ** 2,
-            np.abs(order3_evec_left_4[:, :, 0, evec_num]) ** 2,
-            np.abs(order3_evec_left_2[:, :, 0, evec_num]) ** 2,
-            np.abs(order3_evec_left_5[:, :, 0, evec_num]) ** 2,
-            np.abs(order3_evec_left_qmax[:, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_run6[:, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_run5[:, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_run4[:, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_run3[:, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_run2[:, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_run1[:, :, 0, evec_num]) ** 2,
         ]
     )
     states2_lmb = np.array(
         [
-            np.abs(order3_evec_left_0[:, :, 1, evec_num]) ** 2,
-            np.abs(order3_evec_left_1[:, :, 1, evec_num]) ** 2,
-            np.abs(order3_evec_left_4[:, :, 1, evec_num]) ** 2,
-            np.abs(order3_evec_left_2[:, :, 1, evec_num]) ** 2,
-            np.abs(order3_evec_left_5[:, :, 1, evec_num]) ** 2,
-            np.abs(order3_evec_left_qmax[:, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_run6[:, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_run5[:, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_run4[:, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_run3[:, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_run2[:, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_run1[:, :, 1, evec_num]) ** 2,
         ]
     )
     # plot_all_evecs_lambda(
     #     plotdir,
     #     states1_lmb,
     #     states2_lmb,
-    #     lambdas_1,
+    #     lambdas_run5,
     #     mod_p,
     #     name="all",
     # )
 
     # ==================================================
-    states1_lmb_2 = np.array(
+    states1_lmb_run3 = np.array(
         [
-            np.abs(order0_evec_left_1[:, :, 0, evec_num]) ** 2,
-            np.abs(order1_evec_left_1[:, :, 0, evec_num]) ** 2,
-            np.abs(order2_evec_left_1[:, :, 0, evec_num]) ** 2,
-            np.abs(order3_evec_left_1[:, :, 0, evec_num]) ** 2,
+            np.abs(order0_evec_left_run5[:, :, 0, evec_num]) ** 2,
+            np.abs(order1_evec_left_run5[:, :, 0, evec_num]) ** 2,
+            np.abs(order2_evec_left_run5[:, :, 0, evec_num]) ** 2,
+            np.abs(order3_evec_left_run5[:, :, 0, evec_num]) ** 2,
         ]
     )
-    states2_lmb_2 = np.array(
+    states2_lmb_run3 = np.array(
         [
-            np.abs(order0_evec_left_1[:, :, 1, evec_num]) ** 2,
-            np.abs(order1_evec_left_1[:, :, 1, evec_num]) ** 2,
-            np.abs(order2_evec_left_1[:, :, 1, evec_num]) ** 2,
-            np.abs(order3_evec_left_1[:, :, 1, evec_num]) ** 2,
+            np.abs(order0_evec_left_run5[:, :, 1, evec_num]) ** 2,
+            np.abs(order1_evec_left_run5[:, :, 1, evec_num]) ** 2,
+            np.abs(order2_evec_left_run5[:, :, 1, evec_num]) ** 2,
+            np.abs(order3_evec_left_run5[:, :, 1, evec_num]) ** 2,
         ]
     )
     # plot_orders_evecs_lambda(
-    #     plotdir, states1_lmb_2, states2_lmb_2, lambdas_1, name="orders"
+    #     plotdir, states1_lmb_run3, states2_lmb_run3, lambdas_run5, name="orders"
     # )
 
     # ==================================================
@@ -1511,20 +1512,20 @@ if __name__ == "__main__":
     evecs = np.array(
         [
             [
-                order3_evec_left_0,
-                order3_evec_left_1,
-                order3_evec_left_4,
-                order3_evec_left_2,
-                order3_evec_left_5,
-                order3_evec_left_qmax,
+                order3_evec_left_run6,
+                order3_evec_left_run5,
+                order3_evec_left_run4,
+                order3_evec_left_run3,
+                order3_evec_left_run2,
+                order3_evec_left_run1,
             ],
             [
-                order3_evec_right_0,
-                order3_evec_right_1,
-                order3_evec_right_4,
-                order3_evec_right_2,
-                order3_evec_right_5,
-                order3_evec_right_qmax,
+                order3_evec_right_run6,
+                order3_evec_right_run5,
+                order3_evec_right_run4,
+                order3_evec_right_run3,
+                order3_evec_right_run2,
+                order3_evec_right_run1,
             ],
         ]
     )
@@ -1532,66 +1533,68 @@ if __name__ == "__main__":
     evals = np.array(
         [
             [
-                order3_evals_left_0,
-                order3_evals_left_1,
-                order3_evals_left_4,
-                order3_evals_left_2,
-                order3_evals_left_5,
-                order3_evals_left_qmax,
+                order3_evals_left_run6,
+                order3_evals_left_run5,
+                order3_evals_left_run4,
+                order3_evals_left_run3,
+                order3_evals_left_run2,
+                order3_evals_left_run1,
             ],
             [
-                order3_evals_right_0,
-                order3_evals_right_1,
-                order3_evals_right_4,
-                order3_evals_right_2,
-                order3_evals_right_5,
-                order3_evals_right_qmax,
+                order3_evals_right_run6,
+                order3_evals_right_run5,
+                order3_evals_right_run4,
+                order3_evals_right_run3,
+                order3_evals_right_run2,
+                order3_evals_right_run1,
             ],
         ]
     )
 
     delta_e_vals = np.array(
         [
-            order3_delta_e_0,
-            order3_delta_e_1,
-            order3_delta_e_4,
-            order3_delta_e_2,
-            order3_delta_e_5,
-            order3_delta_e_qmax,
+            order3_delta_e_run6,
+            order3_delta_e_run5,
+            order3_delta_e_run4,
+            order3_delta_e_run3,
+            order3_delta_e_run2,
+            order3_delta_e_run1,
         ]
     )
     print("\n\n\n\n\n\n\n", np.shape(delta_e_vals[1]))
     print("\n\n\n\n\n\n\n", np.average(delta_e_vals[1][0], axis=0))
 
-    plot_evecs_violin_all(plotdir, mod_p, evecs, lambdas_0, lambda_index)
+    plot_evecs_violin_all(
+        plotdir, mod_p, evecs, lambdas_run6, lambda_index, lambdas_run6
+    )
 
-    # plot_circle_evecs_lambda(plotdir, evecs[0][5], lambdas_qmax, mod_p, name="qmax")
-    # plot_circle_evecs_lambda(plotdir, evecs[0][4], lambdas_5, mod_p, name="theta5")
-    # plot_circle_evecs_lambda(plotdir, evecs[0][3], lambdas_2, mod_p, name="theta3")
-    # plot_circle_evecs_lambda(plotdir, evecs[0][2], lambdas_4, mod_p, name="theta4")
-    # plot_circle_evecs_lambda(plotdir, evecs[0][1], lambdas_1, mod_p, name="theta7")
-    # plot_circle_evecs_lambda(plotdir, evecs[0][0], lambdas_0, mod_p, name="theta8")
+    # plot_circle_evecs_lambda(plotdir, evecs[0][5], lambdas_run1, mod_p, name="qmax")
+    # plot_circle_evecs_lambda(plotdir, evecs[0][4], lambdas_run2, mod_p, name="theta5")
+    # plot_circle_evecs_lambda(plotdir, evecs[0][3], lambdas_run3, mod_p, name="theta3")
+    # plot_circle_evecs_lambda(plotdir, evecs[0][2], lambdas_run4, mod_p, name="theta4")
+    # plot_circle_evecs_lambda(plotdir, evecs[0][1], lambdas_run5, mod_p, name="theta7")
+    # plot_circle_evecs_lambda(plotdir, evecs[0][0], lambdas_run6, mod_p, name="theta8")
 
-    # animate_circle_evecs(plotdir, evecs[0][3], lambdas_2, mod_p, name="theta3")
-    # animate_circle_evecs(plotdir, evecs[0][2], lambdas_4, mod_p, name="theta4")
-    # animate_circle_evecs(plotdir, evecs[0][1], lambdas_1, mod_p, name="theta7")
-    # animate_circle_evecs(plotdir, evecs[0][0], lambdas_0, mod_p, name="theta8")
+    # animate_circle_evecs(plotdir, evecs[0][3], lambdas_run3, mod_p, name="theta3")
+    # animate_circle_evecs(plotdir, evecs[0][2], lambdas_run4, mod_p, name="theta4")
+    # animate_circle_evecs(plotdir, evecs[0][1], lambdas_run5, mod_p, name="theta7")
+    # animate_circle_evecs(plotdir, evecs[0][0], lambdas_run6, mod_p, name="theta8")
 
-    # animate_circle_evecs_360(plotdir, evecs[0][3], lambdas_2, mod_p, name="theta3")
-    # animate_circle_evecs_360(plotdir, evecs[0][2], lambdas_4, mod_p, name="theta4")
-    # animate_circle_evecs_360(plotdir, evecs[0][1], lambdas_1, mod_p, name="theta7")
-    # animate_circle_evecs_360(plotdir, evecs[0][0], lambdas_0, mod_p, name="theta8")
+    # animate_circle_evecs_360(plotdir, evecs[0][3], lambdas_run3, mod_p, name="theta3")
+    # animate_circle_evecs_360(plotdir, evecs[0][2], lambdas_run4, mod_p, name="theta4")
+    # animate_circle_evecs_360(plotdir, evecs[0][1], lambdas_run5, mod_p, name="theta7")
+    # animate_circle_evecs_360(plotdir, evecs[0][0], lambdas_run6, mod_p, name="theta8")
 
-    # animate_circle_evecs_evals(plotdir, evals[0][1], lambdas_1, mod_p, name="theta7")
-    # animate_circle_evecs_evals(plotdir, evals[0][2], lambdas_4, mod_p, name="theta4")
-    # animate_circle_delta_e(plotdir, delta_e_vals[1], lambdas_1, mod_p, name="theta7")
+    # animate_circle_evecs_evals(plotdir, evals[0][1], lambdas_run5, mod_p, name="theta7")
+    # animate_circle_evecs_evals(plotdir, evals[0][2], lambdas_run4, mod_p, name="theta4")
+    # animate_circle_delta_e(plotdir, delta_e_vals[1], lambdas_run5, mod_p, name="theta7")
 
-    # plot_all_evec_angles_lambda(plotdir, evecs[0][5], lambdas_qmax, mod_p, name="qmax")
-    # plot_all_evec_angles_lambda(plotdir, evecs[0][4], lambdas_5, mod_p, name="theta5")
-    # plot_all_evec_angles_lambda(plotdir, evecs[0][3], lambdas_2, mod_p, name="theta3")
-    # plot_all_evec_angles_lambda(plotdir, evecs[0][2], lambdas_4, mod_p, name="theta4")
-    # plot_all_evec_angles_lambda(plotdir, evecs[0][1], lambdas_1, mod_p, name="theta7")
-    # plot_all_evec_angles_lambda(plotdir, evecs[0][0], lambdas_0, mod_p, name="theta8")
+    # plot_all_evec_angles_lambda(plotdir, evecs[0][5], lambdas_run1, mod_p, name="qmax")
+    # plot_all_evec_angles_lambda(plotdir, evecs[0][4], lambdas_run2, mod_p, name="theta5")
+    # plot_all_evec_angles_lambda(plotdir, evecs[0][3], lambdas_run3, mod_p, name="theta3")
+    # plot_all_evec_angles_lambda(plotdir, evecs[0][2], lambdas_run4, mod_p, name="theta4")
+    # plot_all_evec_angles_lambda(plotdir, evecs[0][1], lambdas_run5, mod_p, name="theta7")
+    # plot_all_evec_angles_lambda(plotdir, evecs[0][0], lambdas_run6, mod_p, name="theta8")
 
     def read_csv_data(plotdatadir, filename):
         with open(plotdatadir / Path(f"{filename}.csv"), "r") as csvfile:
@@ -1600,3 +1603,7 @@ if __name__ == "__main__":
             for i in range(len(energies)):
                 datawrite.writerow(np.append(p_sq[i], energies[i]))
         return
+
+
+if __name__ == "__main__":
+    main()

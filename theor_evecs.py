@@ -90,6 +90,15 @@ def read_data_file(datadir, theta, m_N, m_S, NX, t0=6, delta_t=4):
     """Read the dataset from the file and then return the required eigenvectors and lambda values"""
     with open(datadir / f"lambda_dep_t{t0}_dt{delta_t}.pkl", "rb") as file_in:
         data_set = pickle.load(file_in)
+    # print(f"{(len(data_set))=}")
+    # print(f"{(len(data_set[0]))=}")
+    # print([key for key in data_set[0]])
+    # print(f"{np.shape(data_set[0]['weighted_energy_nucl'])=}")
+    # print(f"{[i for i in data_set[0]['chosen_nucl_fit']]=}")
+    # print(f"{data_set[0]['chosen_nucl_fit']['fitfunction']=}")
+    # print(f"{data_set[0]['chosen_nucl_fit']['paramavg']=}")
+    # print(f"{np.average(data_set[0]['order3_states_fit'][0], axis=0)=}")
+    # print(f"{np.average(data_set[0]['order3_states_fit'][1], axis=0)=}")
     lambdas = np.array([d["lambdas"] for d in data_set])
     Qsq = Q_squared(
         m_N,
@@ -458,7 +467,7 @@ def main():
     dm_N = 0.0070
     dm_S = 0.0042
 
-    lambda_index = 2
+    lambda_index = 8
 
     # ==================================================
     # Define the twisted boundary conditions parameters
@@ -479,7 +488,11 @@ def main():
     order3_evec_right_0 = np.array([d["order3_evec_right"] for d in dataset_0])
     order3_evals_left_0 = np.array([d["order3_eval_left"] for d in dataset_0])
     order3_evals_right_0 = np.array([d["order3_eval_right"] for d in dataset_0])
-    order3_delta_e_0 = np.array([d["order3_fit"] for d in dataset_0])
+    # order3_delta_e_0 = np.array([d["order3_fit"] for d in dataset_0])
+
+    order3_corr_fits_0 = np.array([d["order3_perturbed_corr_fits"] for d in dataset_0])
+    nucleon_amp_0 = order3_corr_fits_0[lambda_index][0][0][:, 0]
+    print(f"{np.average(nucleon_amp_0)=}")
 
     # ==================================================
     # Theta_7
@@ -492,6 +505,8 @@ def main():
     order3_evals_left_1 = np.array([d["order3_eval_left"] for d in dataset_1])
     order3_evals_right_1 = np.array([d["order3_eval_right"] for d in dataset_1])
     order3_delta_e_1 = np.array([d["order3_fit"] for d in dataset_1])
+    order3_corr_fits_1 = np.array([d["order3_perturbed_corr_fits"] for d in dataset_1])
+    nucleon_amp_1 = order3_corr_fits_1[lambda_index][0][0][:, 0]
 
     # ==================================================
     # Theta_4
@@ -504,6 +519,8 @@ def main():
     order3_evals_left_4 = np.array([d["order3_eval_left"] for d in dataset_4])
     order3_evals_right_4 = np.array([d["order3_eval_right"] for d in dataset_4])
     order3_delta_e_4 = np.array([d["order3_fit"] for d in dataset_4])
+    order3_corr_fits_4 = np.array([d["order3_perturbed_corr_fits"] for d in dataset_4])
+    nucleon_amp_4 = order3_corr_fits_4[lambda_index][0][0][:, 0]
 
     # ==================================================
     # Theta_3
@@ -516,6 +533,8 @@ def main():
     order3_evals_left_2 = np.array([d["order3_eval_left"] for d in dataset_2])
     order3_evals_right_2 = np.array([d["order3_eval_right"] for d in dataset_2])
     order3_delta_e_2 = np.array([d["order3_fit"] for d in dataset_2])
+    order3_corr_fits_2 = np.array([d["order3_perturbed_corr_fits"] for d in dataset_2])
+    nucleon_amp_2 = order3_corr_fits_2[lambda_index][0][0][:, 0]
 
     # ==================================================
     # Theta_5
@@ -528,6 +547,8 @@ def main():
     order3_evals_left_5 = np.array([d["order3_eval_left"] for d in dataset_5])
     order3_evals_right_5 = np.array([d["order3_eval_right"] for d in dataset_5])
     order3_delta_e_5 = np.array([d["order3_fit"] for d in dataset_5])
+    order3_corr_fits_5 = np.array([d["order3_perturbed_corr_fits"] for d in dataset_5])
+    nucleon_amp_5 = order3_corr_fits_5[lambda_index][0][0][:, 0]
 
     # ==================================================
     # q_max
@@ -540,6 +561,10 @@ def main():
     order3_evals_left_qmax = np.array([d["order3_eval_left"] for d in dataset_qmax])
     order3_evals_right_qmax = np.array([d["order3_eval_right"] for d in dataset_qmax])
     order3_delta_e_qmax = np.array([d["order3_fit"] for d in dataset_qmax])
+    order3_corr_fits_qmax = np.array(
+        [d["order3_perturbed_corr_fits"] for d in dataset_qmax]
+    )
+    nucleon_amp_qmax = order3_corr_fits_qmax[lambda_index][0][0][:, 0]
 
     # ==================================================
     p_sq = np.array(
@@ -584,16 +609,16 @@ def main():
     #         dataset_qmax[0]["order3_states_fit"][0, :, 1],
     #     ]
     # )
-    nucleondivsigma_energy = np.array(
-        [
-            dataset_0[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
-            dataset_1[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
-            dataset_4[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
-            dataset_2[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
-            dataset_5[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
-            dataset_qmax[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
-        ]
-    )
+    # nucleondivsigma_energy = np.array(
+    #     [
+    #         dataset_0[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
+    #         dataset_1[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
+    #         dataset_4[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
+    #         dataset_2[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
+    #         dataset_5[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
+    #         dataset_qmax[0]["chosen_nucldivsigma_fit"]["param"][:, 1],
+    #     ]
+    # )
     # sigma_energy = np.array(
     #     [
     #         dataset_0[0]["chosen_sigma_fit"]["param"][:, 1],
@@ -681,7 +706,7 @@ def main():
     )
 
     nucleon_avg = np.average(nucleon_energy, axis=1)
-    nucleondivsigma_avg = np.average(nucleondivsigma_energy, axis=1)
+    # nucleondivsigma_avg = np.average(nucleondivsigma_energy, axis=1)
     sigma_avg = np.average(sigma_energy, axis=1)
     state1_avg = np.average(state1_energy, axis=1)
     state2_avg = np.average(state2_energy, axis=1)

@@ -267,8 +267,106 @@ def evffplot7(
         capsize=4,
         elinewidth=1,
         color=_colors[0],
-        fmt="s",
+        fmt="o",
         markerfacecolor="none",
+    )
+
+    if extra_points != None:
+        for i, point in enumerate(extra_points["xdata"]):
+            plt.errorbar(
+                extra_points["xdata"][i],
+                np.average(extra_points["ydata"][i]),
+                np.std(extra_points["ydata"][i]),
+                capsize=4,
+                elinewidth=1,
+                color=_colors[i + 1],
+                fmt=_fmts[i + 1],
+                markerfacecolor="none",
+                # label=r"$\theta_" + str(i) + "$",
+                label=extra_points["labels"][i],
+            )
+    plt.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
+    plt.legend(fontsize="xx-small")
+    plt.ylabel(
+        r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2} + \frac{m_{\Sigma} - E_N}{m_N+m_{\Sigma}}F_3$",
+        fontsize="x-small",
+    )
+    plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
+    plt.ylim(0, 1.5)
+    save_plot(fig, plotname + "_all.pdf", subdir=plotdir)
+
+    fig = plt.figure(figsize=(5, 4))
+    plt.errorbar(
+        xdata,
+        ydata,
+        errordata,
+        label="three-point function",
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="o",
+        # markerfacecolor="none",
+    )
+
+    if extra_points != None:
+        print(len(extra_points["xdata"]))
+        print(np.shape(extra_points["ydata"]))
+        print(np.shape(extra_points["ydata"]))
+        plt.errorbar(
+            extra_points["xdata"],
+            np.average(extra_points["ydata"], axis=2)[:, 0],
+            np.std(extra_points["ydata"], axis=2)[:, 0],
+            capsize=4,
+            elinewidth=1,
+            color=_colors[1],
+            fmt=_fmts[1],
+            markerfacecolor="none",
+            # label="sequential source",
+            label="Feynman-Hellmann",
+        )
+
+    plt.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
+    plt.legend(fontsize="xx-small")
+    # plt.ylabel(
+    #     r"$F_{1}- \frac{\mathbf{p}'^{2}}{(E_N+m_N)(m_{N}+m_{\Sigma})} F_{2} + \frac{m_{\Sigma} - E_N}{m_N+m_{\Sigma}}F_3$",
+    #     fontsize="x-small",
+    # )
+    plt.ylabel(
+        "Matrix element",
+        fontsize="x-small",
+    )
+    plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
+    plt.ylim(0, 1.5)
+    save_plot(fig, plotname + "_all_together.pdf", subdir=plotdir)
+    if show:
+        plt.show()
+    plt.close()
+
+
+def evffplot7_3pt(
+    xdata,
+    ydata,
+    errordata,
+    plotdir,
+    plotname,
+    extra_points=None,
+    show=False,
+):
+    """plot the form factor data against Q^2
+
+    Plot all of the points
+    """
+    fig = plt.figure(figsize=(5, 4))
+    plt.errorbar(
+        xdata,
+        ydata,
+        errordata,
+        label="3-pt fn",
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt="o",
+        # markerfacecolor="none",
     )
 
     if extra_points != None:
@@ -371,8 +469,8 @@ def evffplot8(
         capsize=4,
         elinewidth=1,
         color=_colors[0],
-        fmt="s",
-        markerfacecolor="none",
+        fmt="o",
+        # markerfacecolor="none",
     )
 
     if extra_points != None:
@@ -509,6 +607,9 @@ if __name__ == "__main__":
 
     # --- directories ---
     evffdir = Path.home() / Path("Dropbox/PhD/lattice_results/eddie/sig2n/ff/")
+    threeptfn_dir = Path.home() / Path(
+        "Dropbox/PhD/analysis_code/transition_3pt_function/data/"
+    )
     resultsdir = Path.home() / Path("Documents/PhD/analysis_results")
     plotdir = resultsdir / Path("sig2n/")
     plotdatadir = resultsdir / Path("sig2n/data")
@@ -532,11 +633,19 @@ if __name__ == "__main__":
     print(f"{m_N=}")
     print(f"{m_S=}")
 
-    # --- Read the data from the 3pt fns ---
+    # --- Read the data from the old 3pt fns ---
     threept_file = evffdir / Path("evff.res_slvec-notwist")
     evff_data = evffdata(threept_file)
     q_squared_lattice = evff_data["par0"]
     Q_squared = -1 * evff_data["par0"] * (0.1973**2) / (0.074**2)
+
+    # --- Read the data from the new 3pt fns ---
+    threeptfn_file = threeptfn_dir / Path("matrix_element_3pt_fit.pkl")
+    with open(threeptfn_file, "rb") as file_in:
+        form_factor_values = pickle.load(file_in)
+    print(f"{np.shape(form_factor_values)=}")
+    me_3pt_avg = np.average(form_factor_values, axis=1)
+    me_3pt_std = np.std(form_factor_values, axis=1)
 
     # --- Get \vec{q}^2 from the value of q^2 ---
     q_vec_sq_list = []
@@ -730,12 +839,33 @@ if __name__ == "__main__":
         show=False,
     )
 
+    evffplot7(
+        Q_squared,
+        me_3pt_avg[::-1],
+        me_3pt_std[::-1],
+        plotdir,
+        "3ptfn_ratiofit_",
+        extra_points=extra_points,
+        # extra_points=extra_points,
+        # extra_points_qsq=extra_points_qsq,
+        show=False,
+    )
+    print(f"{np.shape(extra_points)=}")
     ydata, errordata, extradata = evffplot8(
         Q_squared,
         ydata,
         errordata,
         plotdir,
         "matrix_element",
+        extra_points=extra_points,
+        show=False,
+    )
+    ydata, errordata, extradata = evffplot8(
+        Q_squared,
+        me_3pt_avg[::-1],
+        me_3pt_std[::-1],
+        plotdir,
+        "matrix_element_3pt_fit",
         extra_points=extra_points,
         show=False,
     )

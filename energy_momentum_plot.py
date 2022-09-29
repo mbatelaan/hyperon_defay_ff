@@ -440,6 +440,42 @@ def Q_squared(m1, m2, theta1, theta2, n1, n2, L, a):
     return Qsquared
 
 
+def Q_squared_energies(E1, E2, theta1, theta2, n1, n2, L, a):
+    """Returns Q^2 between two particles with momentum and twisted BC's
+    n1, n2 are arrays which contain the fourier momenta for the first and second particle.
+    theta1, theta2 are arrays which contain the twisted BC's parameters in units of 2pi.
+    L is the spatial lattice extent
+    a is the lattice spacing
+    """
+    energydiff = np.sqrt(E2**2) - np.sqrt(E1**2)
+    qvector_diff = ((2 * n2 + theta2) - (2 * n1 + theta1)) * (np.pi / L)
+    Qsquared = (
+        -1
+        * (energydiff**2 - np.dot(qvector_diff, qvector_diff))
+        * (0.1973**2)
+        / (a**2)
+    )
+    return Qsquared
+
+
+def Q_squared_energydiff(deltaE, theta1, L=32, a=0.074):
+    """Returns Q^2 between two particles with momentum and twisted BC's
+    n1, n2 are arrays which contain the fourier momenta for the first and second particle.
+    theta1, theta2 are arrays which contain the twisted BC's parameters in units of 2pi.
+    L is the spatial lattice extent
+    a is the lattice spacing
+    """
+    energydiff = deltaE
+    qvector_diff = (-1 * theta1) * (np.pi / L)
+    Qsquared = (
+        -1
+        * (energydiff**2 - np.dot(qvector_diff, qvector_diff))
+        * (0.1973**2)
+        / (a**2)
+    )
+    return Qsquared
+
+
 def Q_squared_lat(m1, m2, theta1, theta2, n1, n2, L, a):
     """Returns the qsq
 
@@ -451,6 +487,18 @@ def Q_squared_lat(m1, m2, theta1, theta2, n1, n2, L, a):
         m2**2 + np.sum(((2 * n2 + theta2) * (np.pi / L)) ** 2)
     ) - np.sqrt(m1**2 + np.sum(((2 * n1 + theta1) * (np.pi / L)) ** 2))
     qvector_diff = ((2 * n2 + theta2) - (2 * n1 + theta1)) * (np.pi / L)
+    return -1 * (energydiff**2 - np.dot(qvector_diff, qvector_diff))
+
+
+def Q_squared_energydiff_lat(deltaE, theta1, L=32, a=0.074):
+    """Returns the qsq
+
+    theta and n are arrays which contain the momentum contributions for all spatial directions
+    m1, m2 are the masses of the states, where m2 is the mass corresponding to the state with TBC
+    L is the lattice extent
+    """
+    energydiff = deltaE
+    qvector_diff = -1 * theta1 * (np.pi / L)
     return -1 * (energydiff**2 - np.dot(qvector_diff, qvector_diff))
 
 
@@ -665,22 +713,22 @@ def plot_energy_mom_pert(
     print(m_S)
     print(dm_S)
     xdata = np.linspace(-0.01, 0.3, 100)
-    plt.fill_between(
-        xdata,
-        m_S - dm_S,
-        m_S + dm_S,
-        color=_colors[1],
-        alpha=0.2,
-        linewidth=0,
-    )
+    # plt.fill_between(
+    #     xdata,
+    #     m_S - dm_S,
+    #     m_S + dm_S,
+    #     color=_colors[1],
+    #     alpha=0.2,
+    #     linewidth=0,
+    # )
 
-    dispersion = np.sqrt(m_N**2 + xdata)
-    dispersion_p = np.sqrt((m_N + dm_N) ** 2 + xdata)
-    dispersion_m = np.sqrt((m_N - dm_N) ** 2 + xdata)
+    # dispersion = np.sqrt(m_N**2 + xdata)
+    # dispersion_p = np.sqrt((m_N + dm_N) ** 2 + xdata)
+    # dispersion_m = np.sqrt((m_N - dm_N) ** 2 + xdata)
 
-    plt.fill_between(
-        xdata, dispersion_m, dispersion_p, color=_colors[1], alpha=0.2, linewidth=0
-    )
+    # plt.fill_between(
+    #     xdata, dispersion_m, dispersion_p, color=_colors[1], alpha=0.2, linewidth=0
+    # )
 
     # plt.xlabel(r"$|\vec{p}_N|$")
     plt.xlabel(r"$\vec{q}^{\,2}$")
@@ -846,7 +894,7 @@ def main():
     NX = 32
 
     # --- Lambda choice ---
-    lambda_index = 8
+    lambda_index = 7
 
     # ==================================================
     # q_max
@@ -955,11 +1003,11 @@ def main():
     qsq_0 = 0.3376966834768195
     psq_0 = 0.3380670060434127
     # theta_0 = 0.967
-    theta_0 = 2.25
+    theta_8 = 2.25
     Qsq_0 = Q_squared(
         m_N,
         m_S,
-        np.array([0, theta_0, 0]),
+        np.array([0, theta_8, 0]),
         np.array([0, 0, 0]),
         np.array([0, 0, 0]),
         np.array([0, 0, 0]),
@@ -969,7 +1017,7 @@ def main():
     Qsq_0_lat = Q_squared_lat(
         m_N,
         m_S,
-        np.array([0, theta_0, 0]),
+        np.array([0, theta_8, 0]),
         np.array([0, 0, 0]),
         np.array([0, 0, 0]),
         np.array([0, 0, 0]),
@@ -977,7 +1025,7 @@ def main():
         0.074,
     )
     qsq_0_small = q_small_squared(
-        np.array([0, theta_0, 0]),
+        np.array([0, theta_8, 0]),
         np.array([0, 0, 0]),
         np.array([0, 0, 0]),
         np.array([0, 0, 0]),
@@ -1459,19 +1507,10 @@ def main():
     # saveplotdata(state1_l_div, p_sq, plotdatadir, "state1_divsigma_energy_lmb0p0286")
     # saveplotdata(state2_l_div, p_sq, plotdatadir, "state2_divsigma_energy_lmb0p0286")
 
-    print(f"\nQsQ:\n", Qsq_qmax, Qsq_0, Qsq_1, Qsq_2, Qsq_4, Qsq_5)
-    print(
-        f"\nQsQ_lat:\n",
-        Qsq_qmax_lat,
-        Qsq_0_lat,
-        Qsq_1_lat,
-        Qsq_2_lat,
-        Qsq_4_lat,
-        Qsq_5_lat,
-    )
-
+    # ============================================================
     print("\n\nNucleon energies:")
     p_sq_order = np.argsort(p_sq)
+    print(f"{p_sq_order=}")
     p_sq = p_sq[p_sq_order]
 
     nucleon_avg = np.average(nucleon_l0, axis=1)[p_sq_order]
@@ -1505,6 +1544,110 @@ def main():
     #     print(
     #         f"p^2={p_sq[i]:.3f}: \tE={err_brackets(np.average(energy), np.std(energy))}"
     #     )
+
+    # ============================================================
+    # Calculate the momentum transfer
+
+    # print(f"\nQsQ:\n", Qsq_qmax, Qsq_0, Qsq_1, Qsq_2, Qsq_4, Qsq_5)
+    # print(
+    #     f"\nQsQ_lat:\n",
+    #     Qsq_qmax_lat,
+    #     Qsq_0_lat,
+    #     Qsq_1_lat,
+    #     Qsq_2_lat,
+    #     Qsq_4_lat,
+    #     Qsq_5_lat,
+    # )
+    # Qsquared_gev = np.array([Qsq_qmax, Qsq_0, Qsq_1, Qsq_2, Qsq_4, Qsq_5])
+    # Qsquared_gev = np.array([Qsq_0, Qsq_1, Qsq_4, Qsq_2, Qsq_5, Qsq_qmax])
+    # Qsquared_lat = np.array(
+    #     [Qsq_0_lat, Qsq_1_lat, Qsq_4_lat, Qsq_2_lat, Qsq_5_lat, Qsq_qmax_lat]
+    # )
+    # print(f"\nQsq [GeV]: {Qsquared_gev[::-1]}")
+    # print(f"\nQsq [Lat]: {Qsquared_lat[::-1]}")
+
+    # Qsq_qmax = Q_squared_energies(
+    #     nucleon_avg[0],
+    #     sigma_avg[0],
+    #     np.array([0, theta_qmax, 0]),
+    #     np.array([0, 0, 0]),
+    #     np.array([0, 0, 0]),
+    #     np.array([0, 0, 0]),
+    #     NX,
+    #     0.074,
+    # )
+    # print(f"{Qsq_qmax=}")
+    # Qsq_5 = Q_squared_energies(
+    #     nucleon_avg[1],
+    #     sigma_avg[0],
+    #     np.array([0, theta_5, 0]),
+    #     np.array([0, 0, 0]),
+    #     np.array([0, 0, 0]),
+    #     np.array([0, 0, 0]),
+    #     NX,
+    #     0.074,
+    # )
+    # print(f"{Qsq_5=}")
+
+    Qsq_qmax = Q_squared_energydiff(
+        nucleon_div_avg[0],
+        np.array([0, theta_qmax, 0]),
+    )
+    Qsq_5 = Q_squared_energydiff(
+        nucleon_div_avg[1],
+        np.array([0, theta_5, 0]),
+    )
+    Qsq_2 = Q_squared_energydiff(
+        nucleon_div_avg[2],
+        np.array([0, theta_2, 0]),
+    )
+    Qsq_4 = Q_squared_energydiff(
+        nucleon_div_avg[3],
+        np.array([0, theta_4, 0]),
+    )
+    Qsq_1 = Q_squared_energydiff(
+        nucleon_div_avg[4],
+        np.array([0, theta_7, 0]),
+    )
+    Qsq_0 = Q_squared_energydiff(
+        nucleon_div_avg[5],
+        np.array([0, theta_8, 0]),
+    )
+
+    Qsq_qmax_lat = Q_squared_energydiff_lat(
+        nucleon_div_avg[0],
+        np.array([0, theta_qmax, 0]),
+    )
+    Qsq_5_lat = Q_squared_energydiff_lat(
+        nucleon_div_avg[1],
+        np.array([0, theta_5, 0]),
+    )
+    Qsq_2_lat = Q_squared_energydiff_lat(
+        nucleon_div_avg[2],
+        np.array([0, theta_2, 0]),
+    )
+    Qsq_4_lat = Q_squared_energydiff_lat(
+        nucleon_div_avg[3],
+        np.array([0, theta_4, 0]),
+    )
+    Qsq_1_lat = Q_squared_energydiff_lat(
+        nucleon_div_avg[4],
+        np.array([0, theta_7, 0]),
+    )
+    Qsq_0_lat = Q_squared_energydiff_lat(
+        nucleon_div_avg[5],
+        np.array([0, theta_8, 0]),
+    )
+
+    Qsquared_gev = np.array([Qsq_0, Qsq_1, Qsq_4, Qsq_2, Qsq_5, Qsq_qmax])
+    Qsquared_lat = np.array(
+        [Qsq_0_lat, Qsq_1_lat, Qsq_4_lat, Qsq_2_lat, Qsq_5_lat, Qsq_qmax_lat]
+    )
+    print(f"\nQsq [GeV]: {Qsquared_gev[::-1]}")
+    print(f"\nQsq [Lat]: {Qsquared_lat[::-1]}")
+
+    # print(f"{Qsq_qmax=}")
+    # print(f"{Qsq_5=}")
 
 
 if __name__ == "__main__":
