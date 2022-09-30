@@ -441,6 +441,76 @@ def plot_both_evecs_gamma(
     return
 
 
+def plot_both_evecs_gamma_test(
+    plotdir, lambda_index, lambdas, mod_p, theor_evecs, gamma_evecs, ichi, inum
+):
+    """Plot both the eigenvectors from the GEVP and the theoretical predictions from the fit to the matrix element and the energies"""
+
+    chirality = ["left", "right"]
+    evec_numbers = ["-", "+"]
+    evec_num = evec_numbers[inum]
+    chi = chirality[ichi]
+
+    fig = plt.figure(figsize=(5, 5))
+    plt.errorbar(
+        mod_p,
+        np.average(gamma_evecs[inum, 0], axis=1),
+        np.std(gamma_evecs[inum, 0], axis=1),
+        label=rf"$|e_1^{{({evec_num})}}|^2$ (gamma)",
+        color=_colors[3],
+        fmt=_fmts[0],
+        capsize=4,
+        elinewidth=1,
+    )
+    plt.errorbar(
+        mod_p,
+        np.average(gamma_evecs[inum, 1], axis=1),
+        np.std(gamma_evecs[inum, 1], axis=1),
+        label=rf"$|e_2^{{({evec_num})}}|^2$ (gamma)",
+        color=_colors[4],
+        fmt=_fmts[0],
+        capsize=4,
+        elinewidth=1,
+    )
+    offset = 0.0005
+    plt.errorbar(
+        mod_p + offset,
+        np.average(theor_evecs[inum, 0], axis=1),
+        np.std(theor_evecs[inum, 0], axis=1),
+        label=rf"$|e_1^{{({evec_num})}}|^2$ (fit)",
+        color=_colors[3],
+        fmt=_fmts[1],
+        capsize=4,
+        elinewidth=1,
+    )
+    plt.errorbar(
+        mod_p + offset,
+        np.average(theor_evecs[inum, 1], axis=1),
+        np.std(theor_evecs[inum, 1], axis=1),
+        label=rf"$|e_2^{{({evec_num})}}|^2$ (fit)",
+        color=_colors[4],
+        fmt=_fmts[1],
+        capsize=4,
+        elinewidth=1,
+    )
+
+    plt.title(rf"$\lambda = {lambdas[lambda_index]:0.2}$")
+    plt.legend(fontsize="xx-small")
+    plt.xlabel(r"$\vec{q}^{\,2}$")
+    plt.ylabel(rf"$|v_i^{{({evec_num})}}|^2$")
+    plt.ylim(0, 1)
+    plt.savefig(
+        plotdir
+        / (
+            f"eigenvectors_{chi}_evec{inum+1}_l{lambdas[lambda_index]:0.2}_comparison_gamma.pdf"
+        ),
+        metadata=_metadata,
+    )
+    plt.show()
+    plt.close()
+    return
+
+
 def main():
     plt.style.use("./mystyle.txt")
 
@@ -567,6 +637,17 @@ def main():
     nucleon_amp_qmax = order3_corr_fits_qmax[lambda_index][0][0][:, 0]
 
     # ==================================================
+    nucleon_amp_vals = np.array(
+        [
+            nucleon_amp_0,
+            nucleon_amp_1,
+            nucleon_amp_4,
+            nucleon_amp_2,
+            nucleon_amp_5,
+            nucleon_amp_qmax,
+        ]
+    )
+    # ==================================================
     p_sq = np.array(
         [
             qsq_small_0,
@@ -686,30 +767,44 @@ def main():
 
     sigma_energy = np.array(
         [
-            np.array([d["order3_states_fit"] for d in dataset_0])[0, 0, :, 1],
-            np.array([d["order3_states_fit"] for d in dataset_1])[0, 0, :, 1],
-            np.array([d["order3_states_fit"] for d in dataset_4])[0, 0, :, 1],
-            np.array([d["order3_states_fit"] for d in dataset_2])[0, 0, :, 1],
-            np.array([d["order3_states_fit"] for d in dataset_5])[0, 0, :, 1],
-            np.array([d["order3_states_fit"] for d in dataset_qmax])[0, 0, :, 1],
-        ]
-    )
-    nucleon_energy = np.array(
-        [
-            np.array([d["order3_states_fit"] for d in dataset_0])[0, 1, :, 1],
-            np.array([d["order3_states_fit"] for d in dataset_1])[0, 1, :, 1],
-            np.array([d["order3_states_fit"] for d in dataset_4])[0, 1, :, 1],
-            np.array([d["order3_states_fit"] for d in dataset_2])[0, 1, :, 1],
-            np.array([d["order3_states_fit"] for d in dataset_5])[0, 1, :, 1],
-            np.array([d["order3_states_fit"] for d in dataset_qmax])[0, 1, :, 1],
+            np.array([d["order0_states_fit"] for d in dataset_qmax])[0, 0, :, 1],
+            np.array([d["order0_states_fit"] for d in dataset_qmax])[0, 0, :, 1],
+            np.array([d["order0_states_fit"] for d in dataset_qmax])[0, 0, :, 1],
+            np.array([d["order0_states_fit"] for d in dataset_qmax])[0, 0, :, 1],
+            np.array([d["order0_states_fit"] for d in dataset_qmax])[0, 0, :, 1],
+            np.array([d["order0_states_fit"] for d in dataset_qmax])[0, 0, :, 1],
         ]
     )
 
-    nucleon_avg = np.average(nucleon_energy, axis=1)
+    # sigma_energy = np.array(
+    #     [
+    #         np.array([d["order0_states_fit"] for d in dataset_0])[0, 0, :, 1],
+    #         np.array([d["order0_states_fit"] for d in dataset_1])[0, 0, :, 1],
+    #         np.array([d["order0_states_fit"] for d in dataset_4])[0, 0, :, 1],
+    #         np.array([d["order0_states_fit"] for d in dataset_2])[0, 0, :, 1],
+    #         np.array([d["order0_states_fit"] for d in dataset_5])[0, 0, :, 1],
+    #         np.array([d["order0_states_fit"] for d in dataset_qmax])[0, 0, :, 1],
+    #     ]
+    # )
+    nucleon_energy = np.array(
+        [
+            np.array([d["order0_states_fit"] for d in dataset_0])[0, 1, :, 1],
+            np.array([d["order0_states_fit"] for d in dataset_1])[0, 1, :, 1],
+            np.array([d["order0_states_fit"] for d in dataset_4])[0, 1, :, 1],
+            np.array([d["order0_states_fit"] for d in dataset_2])[0, 1, :, 1],
+            np.array([d["order0_states_fit"] for d in dataset_5])[0, 1, :, 1],
+            np.array([d["order0_states_fit"] for d in dataset_qmax])[0, 1, :, 1],
+        ]
+    )
+
+    print(f"{np.average(sigma_energy,axis=1)=}")
+    print(f"{np.average(nucleon_energy,axis=1)=}")
+
+    # nucleon_avg = np.average(nucleon_energy, axis=1)
     # nucleondivsigma_avg = np.average(nucleondivsigma_energy, axis=1)
-    sigma_avg = np.average(sigma_energy, axis=1)
-    state1_avg = np.average(state1_energy, axis=1)
-    state2_avg = np.average(state2_energy, axis=1)
+    # sigma_avg = np.average(sigma_energy, axis=1)
+    # state1_avg = np.average(state1_energy, axis=1)
+    # state2_avg = np.average(state2_energy, axis=1)
 
     qsq_me, ME_values, ME_uncertainty = read_csv_me(plotdatadir, "ME_values")
 
@@ -785,6 +880,48 @@ def main():
             [evec_p1, gamma_p] * np.sqrt(1 / (evec_p1**2 + gamma_p**2)),
         ]
     )
+
+    fixed_p = 0.029
+    gamma_p = 0.5 * (nucleon_energy - sigma_energy) + 0.5 * np.sqrt(
+        (nucleon_energy - sigma_energy) ** 2 + fixed_p
+    )
+    gamma_m = 0.5 * (nucleon_energy - sigma_energy) - 0.5 * np.sqrt(
+        (nucleon_energy - sigma_energy) ** 2 + fixed_p
+    )
+    gamma_evecs = np.array(
+        [
+            [gamma_m / gamma_m * np.sqrt(fixed_p) / 2, gamma_m],
+            [gamma_p / gamma_p * np.sqrt(fixed_p) / 2, gamma_p],
+        ]
+    )
+    print(f"{np.shape(gamma_evecs)=}")
+    print(f"{np.shape(gamma_m)=}")
+    print(f"{np.shape(gamma_p)=}")
+
+    gamma_evecs_norm = np.array(
+        [
+            gamma_evecs[0]
+            * np.sqrt(1 / (gamma_evecs[0, 0] ** 2 + gamma_evecs[0, 1] ** 2)),
+            gamma_evecs[1]
+            * np.sqrt(1 / (gamma_evecs[1, 0] ** 2 + gamma_evecs[1, 1] ** 2)),
+        ]
+    )
+
+    theor_evecs = np.array([[evec_m1, evec_m2], [evec_p1, evec_p2]])
+    chirality = 0
+    eigenvector_number = 0
+
+    plot_both_evecs_gamma(
+        plotdir,
+        lambda_index,
+        lambdas_0,
+        p_sq,
+        theor_evecs,
+        gamma_evecs_norm,
+        chirality,
+        eigenvector_number,
+    )
+    exit()
 
     # =======================================
     # eigenvector normalisation
