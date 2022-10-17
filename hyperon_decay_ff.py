@@ -556,6 +556,23 @@ def qsquared(m1, m2, theta1, theta2, n1, n2, L, a):
     )
 
 
+def Q_squared_energies(E1, E2, n1, n2, L, a):
+    """Returns Q^2 between two particles with momentum and twisted BC's
+    n1, n2 are arrays which contain the fourier momenta for the first and second particle.
+    L is the spatial lattice extent
+    a is the lattice spacing
+    """
+    energydiff = np.sqrt(E2**2) - np.sqrt(E1**2)
+    qvector_diff = ((2 * n2) - (2 * n1)) * (np.pi / L)
+    Qsquared = (
+        -1
+        * (energydiff**2 - np.dot(qvector_diff, qvector_diff))
+        * (0.1973**2)
+        / (a**2)
+    )
+    return Qsquared
+
+
 def FF_factors(m_N, m_S, pvec, twist, NX):
     """Calculate the values of the factors that multiply the three form factors.
     These will consist of  energies, masses and momenta, these values will all be kept in lattice units as the units will cancel out anyway, so there is no need to convert them.
@@ -601,7 +618,7 @@ def FF_combination_evff(F1, F2, F3, m_N, m_S, q_vec_squared, NX):
     return FF_comb
 
 
-if __name__ == "__main__":
+def main():
     plt.style.use("./mystyle.txt")
     plt.rc("text.latex", preamble=r"\usepackage{physics}")
 
@@ -897,3 +914,241 @@ if __name__ == "__main__":
     yerr = np.std(extradata, axis=1)
     for i, qsq in enumerate(extra_points["xdata"]):
         print(f"Q^2={qsq:.3f}: \tME={err_brackets(yval[i], yerr[i])}")
+
+
+def feynhell_3pt_comparison():
+    plt.style.use("./mystyle.txt")
+    plt.rc("text.latex", preamble=r"\usepackage{physics}")
+
+    # --- directories ---
+    evffdir = Path.home() / Path("Dropbox/PhD/lattice_results/eddie/sig2n/ff/")
+    threeptfn_dir = Path.home() / Path(
+        "Dropbox/PhD/analysis_code/transition_3pt_function/data/"
+    )
+    resultsdir = Path.home() / Path("Documents/PhD/analysis_results")
+    plotdir = resultsdir / Path("sig2n/")
+    plotdatadir = resultsdir / Path("sig2n/data")
+    datadir_run6 = resultsdir / Path("six_point_fn_all/data/pickles/theta8/")
+    datadir_run3 = resultsdir / Path("six_point_fn_all/data/pickles/theta3/")
+    datadir_run4 = resultsdir / Path("six_point_fn_all/data/pickles/theta4/")
+    datadir_run2 = resultsdir / Path("six_point_fn_all/data/pickles/theta5/")
+    datadir_run5 = resultsdir / Path("six_point_fn_all/data/pickles/theta7/")
+    datadir_run1 = resultsdir / Path("six_point_fn_all/data/pickles/qmax/")
+
+    plotdir.mkdir(parents=True, exist_ok=True)
+
+    # --- Lattice specs ---
+    NX = 32
+    NT = 64
+
+    # --- Masses from the theta tuning ---
+    m_N = 0.4179255
+    m_S = 0.4641829
+
+    # ================================================================================
+    # --- Read the data from the new 3pt fns ---
+    threeptfn_file_zeromom = threeptfn_dir / Path("matrix_element_3pt_fit_zeromom.pkl")
+    threeptfn_file_n2sig = threeptfn_dir / Path("matrix_element_3pt_fit_n2sig.pkl")
+    threeptfn_file_sig2n = threeptfn_dir / Path("matrix_element_3pt_fit_sig2n.pkl")
+    with open(threeptfn_file_zeromom, "rb") as file_in:
+        form_factor_values_zeromom = pickle.load(file_in)
+    with open(threeptfn_file_n2sig, "rb") as file_in:
+        form_factor_values_n2sig = pickle.load(file_in)
+    with open(threeptfn_file_sig2n, "rb") as file_in:
+        form_factor_values_sig2n = pickle.load(file_in)
+    # print(f"{np.shape(form_factor_values)=}")
+    print(f"{np.shape(form_factor_values_zeromom)=}")
+    me_3pt_zeromom_avg = np.average(form_factor_values_zeromom)
+    me_3pt_zeromom_std = np.std(form_factor_values_zeromom)
+    me_3pt_n2sig_avg = np.average(form_factor_values_n2sig, axis=1)
+    me_3pt_n2sig_std = np.std(form_factor_values_n2sig, axis=1)
+    me_3pt_sig2n_avg = np.average(form_factor_values_sig2n, axis=1)
+    me_3pt_sig2n_std = np.std(form_factor_values_sig2n, axis=1)
+    print(f"{np.shape(me_3pt_zeromom_avg)=}")
+    print(f"{np.shape(me_3pt_n2sig_avg)=}")
+    print(f"{np.shape(form_factor_values_n2sig)=}")
+
+    # Read the Q^2 values for the 3pt fn data
+    datafile_sig2n = threeptfn_dir / Path(f"Qsquared_sig2n.pkl")
+    datafile_n2sig = threeptfn_dir / Path(f"Qsquared_n2sig.pkl")
+    with open(datafile_sig2n, "rb") as file_in:
+        qsquared_sig2n_list = pickle.load(file_in)
+    with open(datafile_n2sig, "rb") as file_in:
+        qsquared_n2sig_list = pickle.load(file_in)
+
+    threeptfn_points = {
+        "xdata": np.array(
+            [qsquared_sig2n_list[0], qsquared_sig2n_list[1:], qsquared_n2sig_list[1:]]
+        ),
+        "ydata": np.array(
+            [
+                form_factor_values_zeromom,
+                form_factor_values_sig2n,
+                form_factor_values_n2sig,
+            ]
+        ),
+        "labels": [
+            "Double Ratio",
+            r"$\Sigma \to N$",
+            r"$N \to \Sigma$",
+        ],
+    }
+
+    # ================================================================================
+    # --- Read the sequential src data ---
+    with open(datadir_run1 / "matrix_element.pkl", "rb") as file_in:  # qmax
+        mat_element_run1_data = pickle.load(file_in)
+    mat_element_run1 = np.array([mat_element_run1_data["bootfit3"].T[0]])
+
+    with open(datadir_run2 / "matrix_element.pkl", "rb") as file_in:
+        mat_elements5 = pickle.load(file_in)
+    mat_element_run2 = np.array([mat_elements5["bootfit3"].T[0]])
+
+    with open(datadir_run3 / "matrix_element.pkl", "rb") as file_in:
+        mat_elements3 = pickle.load(file_in)
+    mat_element_run3 = np.array([mat_elements3["bootfit3"].T[0]])
+
+    with open(datadir_run4 / "matrix_element.pkl", "rb") as file_in:
+        mat_elements4 = pickle.load(file_in)
+    mat_element_run4 = np.array([mat_elements4["bootfit3"].T[0]])
+
+    with open(datadir_run5 / "matrix_element.pkl", "rb") as file_in:
+        mat_elements7 = pickle.load(file_in)
+    mat_element_run5 = np.array([mat_elements7["bootfit3"].T[0]])
+
+    with open(datadir_run6 / "matrix_element.pkl", "rb") as file_in:  # fn4
+        mat_elements1 = pickle.load(file_in)
+    mat_element_run6 = np.array([mat_elements1["bootfit3"].T[0]])
+
+    # --- Multiply energy factors for the form factors ---
+    pvec_list2 = np.array(
+        [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
+    )
+    twist_list = np.array(
+        [
+            [0, 0, 0],
+            [0, 0.448, 0],
+            [0, 1, 0],
+            [0, 1.6, 0],
+            [0, 2.06, 0],
+            [0, 2.25, 0],
+        ]
+    )
+    seq_src_matrix_elem = np.array(
+        [
+            mat_element_run1,
+            mat_element_run2,
+            mat_element_run3,
+            mat_element_run4,
+            mat_element_run5,
+            mat_element_run6,
+        ]
+    )
+    seq_src_Qsq = np.array(
+        [
+            -0.0095,
+            0.0048,
+            0.062,
+            0.1732,
+            0.2901,
+            0.3472,
+        ]
+    )
+
+    # # Divide out a common factor of all the form factors to get the FF combination
+    # # in a slightly nicer form.
+    # FF_seq = []
+    # for i, pvec in enumerate(pvec_list2):
+    #     FF_facs = FF_factors(m_N, m_S, pvec, twist_list[i], NX)
+    #     # print(f"\n{FF_facs=}")
+    #     # print(f"{np.average(seq_src_points[i])=}")
+    #     new_point = seq_src_points[i] / FF_facs[-1]
+    #     # print(f"{np.average(new_point)=}")
+    #     FF_seq.append(new_point)
+
+    feynhell_points = {
+        "xdata": seq_src_Qsq,
+        "ydata": seq_src_matrix_elem,
+        "labels": [
+            "Run #1",
+            "Run #2",
+            "Run #3",
+            "Run #4",
+            "Run #5",
+            "Run #6",
+        ],
+    }
+
+    plot_matrix_element(feynhell_points, threeptfn_points, "test", plotdir)
+
+    exit()
+
+
+def plot_matrix_element(feynhell_points, threeptfn_points, plotname, plotdir):
+    """Plot the matrix element"""
+    print(np.shape(feynhell_points["xdata"]))
+    print(np.shape(np.average(feynhell_points["ydata"], axis=2)[:, 0]))
+    print(np.shape(np.std(feynhell_points["ydata"], axis=2)[:, 0]))
+
+    fig = plt.figure(figsize=(5, 4))
+    plt.errorbar(
+        feynhell_points["xdata"],
+        np.average(feynhell_points["ydata"], axis=2)[:, 0],
+        np.std(feynhell_points["ydata"], axis=2)[:, 0],
+        label="Feynman-Hellmann",
+        capsize=4,
+        elinewidth=1,
+        color=_colors[1],
+        fmt=_fmts[1],
+        # markerfacecolor="none",
+    )
+    # Plot the 3pt fn results
+    print(np.shape(threeptfn_points["ydata"][1]))
+    plt.errorbar(
+        threeptfn_points["xdata"][0],
+        np.average(threeptfn_points["ydata"][0]),
+        np.std(threeptfn_points["ydata"][0]),
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt=_fmts[3],
+        # markerfacecolor="none",
+        label=threeptfn_points["labels"][0],
+    )
+    plt.errorbar(
+        threeptfn_points["xdata"][1],
+        np.average(threeptfn_points["ydata"][1], axis=1),
+        np.std(threeptfn_points["ydata"][1], axis=1),
+        capsize=4,
+        elinewidth=1,
+        color=_colors[2],
+        fmt=_fmts[3],
+        # markerfacecolor="none",
+        label=threeptfn_points["labels"][1],
+    )
+    plt.errorbar(
+        threeptfn_points["xdata"][2],
+        np.average(threeptfn_points["ydata"][2], axis=1),
+        np.std(threeptfn_points["ydata"][2], axis=1),
+        capsize=4,
+        elinewidth=1,
+        color=_colors[3],
+        fmt=_fmts[3],
+        # markerfacecolor="none",
+        label=threeptfn_points["labels"][2],
+    )
+
+    plt.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
+    plt.legend(fontsize="xx-small")
+    plt.ylabel(
+        "Matrix element",
+        fontsize="x-small",
+    )
+    plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
+    plt.ylim(0, 1.5)
+    save_plot(fig, plotname + "_matrix_element.pdf", subdir=plotdir)
+
+
+if __name__ == "__main__":
+    feynhell_3pt_comparison()
+    # main()
