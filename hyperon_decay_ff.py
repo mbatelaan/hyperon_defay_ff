@@ -1141,12 +1141,75 @@ def plot_matrix_element(feynhell_points, threeptfn_points, plotname, plotdir):
     plt.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
     plt.legend(fontsize="xx-small")
     plt.ylabel(
-        "Matrix element",
-        fontsize="x-small",
+        r"$\mel{N}{\bar{u}\gamma_{\mu}s}{\Sigma}$",
+        fontsize="small",
     )
     plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
     plt.ylim(0, 1.5)
     save_plot(fig, plotname + "_matrix_element.pdf", subdir=plotdir)
+
+    # ======================================================================
+    # Renormalised values plot
+    normalisation = 0.863
+    feynhell_points["ydata"] = normalisation * feynhell_points["ydata"]
+    threeptfn_points["ydata"] = normalisation * threeptfn_points["ydata"]
+    fig = plt.figure(figsize=(5, 4))
+    plt.errorbar(
+        feynhell_points["xdata"],
+        np.average(feynhell_points["ydata"], axis=2)[:, 0],
+        np.std(feynhell_points["ydata"], axis=2)[:, 0],
+        label="Feynman-Hellmann",
+        capsize=4,
+        elinewidth=1,
+        color=_colors[1],
+        fmt=_fmts[1],
+        # markerfacecolor="none",
+    )
+    # Plot the 3pt fn results
+    print(np.shape(threeptfn_points["ydata"][1]))
+    plt.errorbar(
+        threeptfn_points["xdata"][0],
+        np.average(threeptfn_points["ydata"][0]),
+        np.std(threeptfn_points["ydata"][0]),
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt=_fmts[3],
+        # markerfacecolor="none",
+        label=threeptfn_points["labels"][0],
+    )
+    plt.errorbar(
+        threeptfn_points["xdata"][1],
+        np.average(threeptfn_points["ydata"][1], axis=1),
+        np.std(threeptfn_points["ydata"][1], axis=1),
+        capsize=4,
+        elinewidth=1,
+        color=_colors[2],
+        fmt=_fmts[3],
+        # markerfacecolor="none",
+        label=threeptfn_points["labels"][1],
+    )
+    plt.errorbar(
+        threeptfn_points["xdata"][2],
+        np.average(threeptfn_points["ydata"][2], axis=1),
+        np.std(threeptfn_points["ydata"][2], axis=1),
+        capsize=4,
+        elinewidth=1,
+        color=_colors[3],
+        fmt=_fmts[3],
+        # markerfacecolor="none",
+        label=threeptfn_points["labels"][2],
+    )
+
+    plt.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
+    plt.legend(fontsize="xx-small")
+    plt.ylabel(
+        r"$\mel{N}{\bar{u}\gamma_{\mu}s}{\Sigma}$",
+        fontsize="small",
+    )
+    plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
+    plt.ylim(0, 1.5)
+    save_plot(fig, plotname + "_matrix_element_renorm.pdf", subdir=plotdir)
 
 
 if __name__ == "__main__":
