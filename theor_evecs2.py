@@ -334,6 +334,21 @@ def plot_both_evecs_gamma_2(
     return
 
 
+def read_aexp_fit_data(datadir, tmin_nucl, tmax_nucl):
+    with open(datadir / (f"time_window_loop_nucl_Aexp.pkl"), "rb") as file_in:
+        fitlist_nucl_1exp = pickle.load(file_in)
+
+    print([i["x"][0] for i in fitlist_nucl_1exp])
+    print([i["x"][-1] for i in fitlist_nucl_1exp])
+    chosen_nucl_fit = [
+        i
+        for i in fitlist_nucl_1exp
+        if i["x"][0] == tmin_nucl and i["x"][-1] == tmax_nucl
+    ][0]
+
+    return chosen_nucl_fit["param"]
+
+
 def main():
     plt.style.use("./mystyle.txt")
 
@@ -361,6 +376,7 @@ def main():
     dm_S = 0.0042
 
     lambda_index = 7
+    fixed_index = 0
 
     # ==================================================
     # Define the twisted boundary conditions parameters
@@ -384,8 +400,8 @@ def main():
     # order3_delta_e_0 = np.array([d["order3_fit"] for d in dataset_0])
 
     order3_corr_fits_0 = [d["order3_perturbed_corr_fits"] for d in dataset_0]
-    nucleon_amp_0 = order3_corr_fits_0[lambda_index][0][0][:, 0]
-    sigma_amp_0 = order3_corr_fits_0[lambda_index][1][1][:, 0]
+    nucleon_amp_0 = order3_corr_fits_0[fixed_index][0][0][:, 0]
+    sigma_amp_0 = order3_corr_fits_0[fixed_index][1][1][:, 0]
     print(f"{np.average(nucleon_amp_0)=}")
 
     # ==================================================
@@ -400,8 +416,8 @@ def main():
     order3_evals_right_1 = np.array([d["order3_eval_right"] for d in dataset_1])
     order3_delta_e_1 = np.array([d["order3_fit"] for d in dataset_1])
     order3_corr_fits_1 = [d["order3_perturbed_corr_fits"] for d in dataset_1]
-    nucleon_amp_1 = order3_corr_fits_1[lambda_index][0][0][:, 0]
-    sigma_amp_1 = order3_corr_fits_1[lambda_index][1][1][:, 0]
+    nucleon_amp_1 = order3_corr_fits_1[fixed_index][0][0][:, 0]
+    sigma_amp_1 = order3_corr_fits_1[fixed_index][1][1][:, 0]
 
     # ==================================================
     # Theta_4
@@ -415,8 +431,8 @@ def main():
     order3_evals_right_4 = np.array([d["order3_eval_right"] for d in dataset_4])
     order3_delta_e_4 = np.array([d["order3_fit"] for d in dataset_4])
     order3_corr_fits_4 = [d["order3_perturbed_corr_fits"] for d in dataset_4]
-    nucleon_amp_4 = order3_corr_fits_4[lambda_index][0][0][:, 0]
-    sigma_amp_4 = order3_corr_fits_4[lambda_index][1][1][:, 0]
+    nucleon_amp_4 = order3_corr_fits_4[fixed_index][0][0][:, 0]
+    sigma_amp_4 = order3_corr_fits_4[fixed_index][1][1][:, 0]
 
     # ==================================================
     # Theta_3
@@ -430,8 +446,8 @@ def main():
     order3_evals_right_2 = np.array([d["order3_eval_right"] for d in dataset_2])
     order3_delta_e_2 = np.array([d["order3_fit"] for d in dataset_2])
     order3_corr_fits_2 = [d["order3_perturbed_corr_fits"] for d in dataset_2]
-    nucleon_amp_2 = order3_corr_fits_2[lambda_index][0][0][:, 0]
-    sigma_amp_2 = order3_corr_fits_2[lambda_index][1][1][:, 0]
+    nucleon_amp_2 = order3_corr_fits_2[fixed_index][0][0][:, 0]
+    sigma_amp_2 = order3_corr_fits_2[fixed_index][1][1][:, 0]
 
     # ==================================================
     # Theta_5
@@ -445,8 +461,8 @@ def main():
     order3_evals_right_5 = np.array([d["order3_eval_right"] for d in dataset_5])
     order3_delta_e_5 = np.array([d["order3_fit"] for d in dataset_5])
     order3_corr_fits_5 = [d["order3_perturbed_corr_fits"] for d in dataset_5]
-    nucleon_amp_5 = order3_corr_fits_5[lambda_index][0][0][:, 0]
-    sigma_amp_5 = order3_corr_fits_5[lambda_index][1][1][:, 0]
+    nucleon_amp_5 = order3_corr_fits_5[fixed_index][0][0][:, 0]
+    sigma_amp_5 = order3_corr_fits_5[fixed_index][1][1][:, 0]
 
     # ==================================================
     # q_max
@@ -460,30 +476,111 @@ def main():
     order3_evals_right_qmax = np.array([d["order3_eval_right"] for d in dataset_qmax])
     order3_delta_e_qmax = np.array([d["order3_fit"] for d in dataset_qmax])
     order3_corr_fits_qmax = [d["order3_perturbed_corr_fits"] for d in dataset_qmax]
-    nucleon_amp_qmax = order3_corr_fits_qmax[lambda_index][0][0][:, 0]
-    sigma_amp_qmax = order3_corr_fits_qmax[lambda_index][1][1][:, 0]
+    nucleon_amp_qmax = order3_corr_fits_qmax[fixed_index][0][0][:, 0]
+    sigma_amp_qmax = order3_corr_fits_qmax[fixed_index][1][1][:, 0]
+
+    # ==================================================
+    # ============================================================
+    # Nucleon correlators
+    tmin_nucl = 10
+    tmax_nucl = 22
+    nucl_fit_0 = read_aexp_fit_data(datadir0, tmin_nucl, tmax_nucl)
+    nucl_fit_1 = read_aexp_fit_data(datadir1, tmin_nucl, tmax_nucl)
+    nucl_fit_4 = read_aexp_fit_data(datadir4, tmin_nucl, tmax_nucl)
+    nucl_fit_2 = read_aexp_fit_data(datadir2, tmin_nucl, tmax_nucl)
+    nucl_fit_5 = read_aexp_fit_data(datadir5, tmin_nucl, tmax_nucl)
+    nucl_fit_qmax = read_aexp_fit_data(datadirqmax, tmin_nucl, tmax_nucl)
+
+    # ============================================================
+    # Sigma correlators
+    tmin_sigma = 11
+    tmax_sigma = 24
+    with open(
+        datadirqmax / "time_window_loop_sigma_Aexp.pkl",
+        "rb",
+    ) as file_in:
+        fitlist_sigma_1exp = pickle.load(file_in)
+    chosen_sigma_fit = [
+        i
+        for i in fitlist_sigma_1exp
+        if i["x"][0] == tmin_sigma and i["x"][-1] == tmax_sigma
+    ][0]
+    sigma_fit = chosen_sigma_fit["param"]
 
     # ==================================================
     nucleon_amp_vals = np.array(
         [
-            nucleon_amp_0,
-            nucleon_amp_1,
-            nucleon_amp_4,
-            nucleon_amp_2,
-            nucleon_amp_5,
-            nucleon_amp_qmax,
+            nucl_fit_0[:, 0],
+            nucl_fit_1[:, 0],
+            nucl_fit_4[:, 0],
+            nucl_fit_2[:, 0],
+            nucl_fit_5[:, 0],
+            nucl_fit_qmax[:, 0],
         ]
     )
     sigma_amp_vals = np.array(
         [
-            sigma_amp_0,
-            sigma_amp_1,
-            sigma_amp_4,
-            sigma_amp_2,
-            sigma_amp_5,
-            sigma_amp_qmax,
+            sigma_fit[:, 0],
+            sigma_fit[:, 0],
+            sigma_fit[:, 0],
+            sigma_fit[:, 0],
+            sigma_fit[:, 0],
+            sigma_fit[:, 0],
         ]
     )
+    # ==================================================
+    print("\n\n")
+    print(np.average(order3_corr_fits_0[fixed_index][1][1], axis=0))
+    print(np.average(order3_corr_fits_1[fixed_index][1][1], axis=0))
+    print(np.average(order3_corr_fits_4[fixed_index][1][1], axis=0))
+    print(np.average(order3_corr_fits_2[fixed_index][1][1], axis=0))
+    print(np.average(order3_corr_fits_5[fixed_index][1][1], axis=0))
+    print(np.average(order3_corr_fits_qmax[fixed_index][1][1], axis=0))
+    print("\n\n")
+    print(np.average(order3_corr_fits_0[fixed_index][0][0], axis=0))
+    print(np.average(order3_corr_fits_1[fixed_index][0][0], axis=0))
+    print(np.average(order3_corr_fits_4[fixed_index][0][0], axis=0))
+    print(np.average(order3_corr_fits_2[fixed_index][0][0], axis=0))
+    print(np.average(order3_corr_fits_5[fixed_index][0][0], axis=0))
+    print(np.average(order3_corr_fits_qmax[fixed_index][0][0], axis=0))
+    print("\n\n")
+    print(f"{np.average(sigma_amp_0)=}")
+    print(f"{np.average(sigma_amp_1)=}")
+    print(f"{np.average(sigma_amp_4)=}")
+    print(f"{np.average(sigma_amp_2)=}")
+    print(f"{np.average(sigma_amp_5)=}")
+    print(f"{np.average(sigma_amp_qmax)=}")
+
+    # nucleon_amp_vals = np.array(
+    #     [
+    #         nucleon_amp_0,
+    #         nucleon_amp_1,
+    #         nucleon_amp_4,
+    #         nucleon_amp_2,
+    #         nucleon_amp_5,
+    #         nucleon_amp_qmax,
+    #     ]
+    # )
+    # sigma_amp_vals = np.array(
+    #     [
+    #         sigma_amp_0,
+    #         sigma_amp_1,
+    #         sigma_amp_4,
+    #         sigma_amp_2,
+    #         sigma_amp_5,
+    #         sigma_amp_qmax,
+    #     ]
+    # )
+    # sigma_amp_vals = np.array(
+    #     [
+    #         sigma_amp_0,
+    #         sigma_amp_0,
+    #         sigma_amp_0,
+    #         sigma_amp_0,
+    #         sigma_amp_0,
+    #         sigma_amp_0,
+    #     ]
+    # )
     nucl_sigm_amps = np.sqrt([nucleon_amp_vals, sigma_amp_vals])
     # nucl_sigm_amps = np.sqrt([sigma_amp_vals, nucleon_amp_vals])
 
@@ -661,8 +758,8 @@ def main():
         ]
     )
 
-    print(f"\n{np.average(nucl_sigm_amps,axis=2)[0,::-1]}\n")
-    print(f"\n{np.average(nucl_sigm_amps,axis=2)[1,::-1]}\n")
+    print(f"\nNucleon: {np.average(nucl_sigm_amps,axis=2)[0,::-1]}\n")
+    print(f"\nSigma: {np.average(nucl_sigm_amps,axis=2)[1,::-1]}\n")
 
     print(f"\n{np.abs(np.average(evecs_plot,axis=3))[0]}")
     print(f"{np.abs(np.average(evecs_plot_amps,axis=3))[0]}")
