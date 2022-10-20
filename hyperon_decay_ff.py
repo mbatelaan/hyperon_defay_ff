@@ -934,6 +934,14 @@ def feynhell_3pt_comparison():
     datadir_run2 = resultsdir / Path("six_point_fn_all/data/pickles/theta5/")
     datadir_run5 = resultsdir / Path("six_point_fn_all/data/pickles/theta7/")
     datadir_run1 = resultsdir / Path("six_point_fn_all/data/pickles/qmax/")
+    datadir_list = [
+        datadir_run1,
+        datadir_run2,
+        datadir_run3,
+        datadir_run4,
+        datadir_run5,
+        datadir_run6,
+    ]
 
     plotdir.mkdir(parents=True, exist_ok=True)
 
@@ -1021,19 +1029,19 @@ def feynhell_3pt_comparison():
     mat_element_run6 = np.array([mat_elements1["bootfit3"].T[0]])
 
     # --- Multiply energy factors for the form factors ---
-    pvec_list2 = np.array(
-        [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
-    )
-    twist_list = np.array(
-        [
-            [0, 0, 0],
-            [0, 0.448, 0],
-            [0, 1, 0],
-            [0, 1.6, 0],
-            [0, 2.06, 0],
-            [0, 2.25, 0],
-        ]
-    )
+    # pvec_list2 = np.array(
+    #     [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
+    # )
+    # twist_list = np.array(
+    #     [
+    #         [0, 0, 0],
+    #         [0, 0.448, 0],
+    #         [0, 1, 0],
+    #         [0, 1.6, 0],
+    #         [0, 2.06, 0],
+    #         [0, 2.25, 0],
+    #     ]
+    # )
     seq_src_matrix_elem = np.array(
         [
             mat_element_run1,
@@ -1054,6 +1062,22 @@ def feynhell_3pt_comparison():
             0.3472,
         ]
     )
+
+    # ================================================================================
+    # --- Get the energies of the nucleon and sigma  ---
+    nucl_fits, sigma_fits, nucl_energies, sigma_energies = get_energies(datadir_list)
+    # --- Multiply mat element with energies  ---
+    for ime, me in enumerate(seq_src_matrix_elem):
+        print(
+            np.average(
+                np.sqrt(
+                    2 * nucl_energies[ime] / (nucl_energies[ime] + nucl_energies[0])
+                )
+            )
+        )
+        seq_src_matrix_elem[ime] = me * np.sqrt(
+            2 * nucl_energies[ime] / (nucl_energies[ime] + nucl_energies[0])
+        )
 
     # # Divide out a common factor of all the form factors to get the FF combination
     # # in a slightly nicer form.
@@ -1082,6 +1106,25 @@ def feynhell_3pt_comparison():
     plot_matrix_element(feynhell_points, threeptfn_points, "test", plotdir)
 
     exit()
+
+
+def get_energies(datadir_list):
+    """Get the energies of the nucleon and sigma for all the momenta"""
+    nucl_fits = []
+    sigma_fits = []
+    nucl_energies = []
+    sigma_energies = []
+    for idir, datadir_ in enumerate(datadir_list):
+        with open(datadir_ / "two_point_fits.pkl", "rb") as file_in:
+            twopt_fit_data = pickle.load(file_in)
+        nucl_fits.append(twopt_fit_data["chosen_nucl_fit"])
+        sigma_fits.append(twopt_fit_data["chosen_sigma_fit"])
+        nucl_energies.append(twopt_fit_data["chosen_nucl_fit"]["param"][:, 1])
+        sigma_energies.append(twopt_fit_data["chosen_sigma_fit"]["param"][:, 1])
+        print(np.average(nucl_energies[-1]))
+        # print(np.average(sigma_energies[-1]))
+
+    return nucl_fits, sigma_fits, nucl_energies, sigma_energies
 
 
 def plot_matrix_element(feynhell_points, threeptfn_points, plotname, plotdir):
