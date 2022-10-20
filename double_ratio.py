@@ -4,6 +4,7 @@ from pathlib import Path
 import pickle
 import csv
 import scipy.optimize as syopt
+from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 
 from plot_utils import save_plot
@@ -44,10 +45,10 @@ def read_pickle(filename, nboot=200, nbin=1):
     return bsdata
 
 
-def get_double_ratios(datadir):
+def get_double_ratios(datadir, theta_name):
     # ======================================================================
     # Read data from the six_point.py gevp analysis script
-    config = read_config("theta7")
+    config = read_config(theta_name)
     defaults = read_config("defaults")
     for key, value in defaults.items():
         config.setdefault(key, value)
@@ -67,8 +68,8 @@ def get_double_ratios(datadir):
     double_ratios = []
     # Construct the correlator ratio at each lambda value and divide it by the ratio at the next lambda value
     for lambda_index, lambda_value in enumerate(lambda_list[:-1]):
-        # print(f"\n{lambda_value=}")
         lambda_value_next = lambda_list[lambda_index + 1]
+        print(f"\n{lambda_value_next-lambda_value=}")
         # Make the ratio at this lambda value
         gevp_correlators = data_fh[lambda_index]["order3_corrs"]
         gevp_ratio_fit = data_fh[lambda_index]["order3_fit"]
@@ -87,84 +88,81 @@ def get_double_ratios(datadir):
 
 def plot_fit_loop_energies(
     fit_data_list,
-    datadir,
     plotdir,
     title,
 ):
     """Plot the effective energy of the twopoint functions and their fits"""
 
-    fitparams = np.array([fit["param"] for fit in fit_data_list])
-    fit_times = [fit["x"] for fit in fit_data_list]
-
-    time = np.arange(len(fit_data_list[0]["x"]))
-    efftime = time[:-1]
-
     # ======================================================================
     # Plot the energies
-    fit_tmin = [fit["x"][0] for fit in fit_data_list[0]]
-    energies = np.array([fit["param"][:, 1::2] for fit in fit_data_list[0]])
+    fit_tmin = [fit["x"][0] for fit in fit_data_list]
+    fit_tmax = [fit["x"][-1] for fit in fit_data_list]
+    fit_redchisq = [fit["redchisq"] for fit in fit_data_list]
+    fit_weights = [fit["weight"] for fit in fit_data_list]
+    energies = np.array([fit["param"][:, 1] for fit in fit_data_list])
     energies_avg = np.average(energies, axis=1)
     energies_std = np.std(energies, axis=1)
-    energy_1 = energies[:, :, 0] + np.exp(energies[:, :, 1])
+    # print(f"{fit_tmin=}")
+    # print(f"{fit_tmax=}")
 
-    priors = best_fit["prior"][1::2]
-    priors_std = best_fit["priorsigma"][1::2]
-    prior_1 = priors[0] + np.exp(priors[1])
-    prior_1_min = priors[0] + np.exp(priors[1] - priors_std[1])
-    prior_1_max = priors[0] + np.exp(priors[1] + priors_std[1])
-
-    plt.figure(figsize=(6, 5))
-    plt.errorbar(
-        fit_tmin,
-        energies_avg[:, 0],
-        energies_std[:, 0],
+    f, axarr = plt.subplots(
+        3, 1, figsize=(12, 5), sharex=True, gridspec_kw={"height_ratios": [3, 1, 1]}
+    )
+    f.subplots_adjust(hspace=0, bottom=0.15)
+    # plt.figure(figsize=(6, 5))
+    axarr[0].errorbar(
+        # fit_tmin,
+        np.arange(len(energies_avg)),
+        energies_avg,
+        energies_std,
         elinewidth=1,
         capsize=4,
         color=_colors[0],
         fmt="s",
         label=r"$E_0$",
     )
-    plt.errorbar(
-        fit_tmin,
-        np.average(energy_1, axis=1),
-        np.std(energy_1, axis=1),
-        elinewidth=1,
-        capsize=4,
-        color=_colors[1],
-        fmt="o",
-        label=r"$E_1$",
+    axarr[0].set_ylabel(r"$E_i$")
+
+    axarr[1].plot(
+        # fit_tmin,
+        np.arange(len(energies_avg)),
+        fit_redchisq,
     )
-    plt.fill_between(
-        fit_tmin,
-        np.array([priors[0]] * len(fit_tmin))
-        - np.array([priors_std[0]] * len(fit_tmin)),
-        np.array([priors[0]] * len(fit_tmin))
-        + np.array([priors_std[0]] * len(fit_tmin)),
-        alpha=0.3,
-        linewidth=0,
-        color=_colors[0],
+    axarr[1].axhline(1, linewidth=1, alpha=0.3, color="k")
+    axarr[1].set_xticks(np.arange(len(energies_avg))[::2])
+    axarr[1].set_xticklabels(
+        [str(i) for i in fit_tmin][::2]
+        # [str(i % np.max(fit_tmin)) for i in np.arange(len(energies_avg))][::2]
     )
-    plt.fill_between(
-        fit_tmin,
-        np.array([prior_1_min] * len(fit_tmin)),
-        np.array([prior_1_max] * len(fit_tmin)),
-        alpha=0.3,
-        linewidth=0,
-        color=_colors[1],
+    axarr[1].set_ylabel(r"$\chi^2_{\textrm{dof}}$")
+    axarr[1].set_ylim(0, 2)
+
+    axarr[2].plot(
+        np.arange(len(energies_avg)),
+        fit_weights,
     )
-    plt.legend()
-    plt.ylim(0.3, 1.5)
+
+    # plt.legend()
+    # plt.ylim(0.3, 1.5)
     plt.xlabel(r"$t_{\textrm{min}}$")
-    plt.ylabel(r"$E_i$")
-    savefile = plotdir / Path(f"twopoint/energies_{title}_2exp.pdf")
+    savefile = plotdir / Path(f"energies_{title}_2exp.pdf")
     savefile.parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(savefile)
     # plt.show()
     plt.close()
 
 
+def DeltaE_diff_fn(xdata, me):
+    # energy_diff = 0
+    lmbdiff = 0.0035714285714285718
+    lmb, energy_diff = xdata
+    return np.sqrt((energy_diff) ** 2 + 4 * (lmb + lmbdiff) ** 2 * me**2) - np.sqrt(
+        (energy_diff) ** 2 + 4 * lmb**2 * me**2
+    )
+
+
 def analyse_double_ratios(
-    double_ratios, fitlists_lambda, lambda_list, datadir, plotdir
+    double_ratios, fitlists_lambda, lambda_list, datadir, plotdir, run_name
 ):
     """Go over the fitlist for each lambda value and weight/pick out a fit. Then plot them against lambda"""
     weight_tol = 0.01
@@ -172,19 +170,67 @@ def analyse_double_ratios(
     deltaE_diff = []
     # for lambda_index, lambda_value in enumerate(lambda_list[:-1]):
     for index, double_ratio in enumerate(double_ratios):
-        tmin_choice = 5
+        print(lambda_list[index])
+        # plot_fit_loop_energies(fitlists_lambda[index], plotdir, f"{lambda_list[index]}")
+        tmin_choice = 8
+        tmax_choice = 17
         fitweights = np.array([fit["weight"] for fit in fitlists_lambda[index]])
         fitweights = np.where(fitweights > weight_tol, fitweights, 0)
         fitweights = fitweights / sum(fitweights)
         fitparams = np.array([fit["param"] for fit in fitlists_lambda[index]])
         fit_times = [fit["x"] for fit in fitlists_lambda[index]]
-        weighted_fit = np.einsum("i,ijk->jk", fitweights, fitparams)
-        # chosen_time = np.where([times[0] == tmin_choice for times in fit_times])[0][0]
-        # best_fit = fitlists_lambda[index][chosen_time]
-        # weighted_fit = best_fit["param"]
-        # print(f"{np.shape(weighted_fit)=}")
-        print(f"{np.average(weighted_fit[:,1])=}")
+        # weighted_fit = np.einsum("i,ijk->jk", fitweights, fitparams)
+
+        chosen_time = np.where(
+            [
+                times[0] == tmin_choice and times[-1] == tmax_choice
+                for times in fit_times
+            ]
+        )
+        # chosen_time = np.where([times[0] == tmin_choice for times in fit_times])
+        # print(f"{chosen_time[0][0]=}")
+        # print(f"{np.array(fit_times)[chosen_time]=}")
+        best_fit = fitlists_lambda[index][chosen_time[0][0]]
+        weighted_fit = best_fit["param"]
         deltaE_diff.append(weighted_fit[:, 1])
+
+        # Fit to the energy difference using the paper expression:
+        # DeltaE_diff_fn(xdata, me)
+        print(f"{np.shape(deltaE_diff[0])=}")
+        nboot = len(deltaE_diff[0])
+        param_bs = np.zeros(nboot)
+        energydiff = 0.01
+        for iboot in range(nboot):
+            # yboot = data[iboot, :]
+            res = syopt.minimize(
+                fitfunc.chisqfn,
+                1,
+                args=(
+                    DeltaE_diff_fn,
+                    [np.array([lambda_list[index]]), energydiff],
+                    np.array([deltaE_diff[0][iboot]]),
+                    np.array([np.std(deltaE_diff)]),
+                ),
+                method="Nelder-Mead",
+                options={"disp": False},
+            )
+            param_bs[iboot] = res.x
+
+        # popt_avg, pcov_avg = curve_fit(
+        #     DeltaE_diff_fn,
+        #     # [lambda_list[index], 0],
+        #     lambda_list[index],
+        #     np.average(deltaE_diff),
+        #     p0=1,
+        #     sigma=[np.std(deltaE_diff)],
+        #     args=(0.01),
+        # )
+        print(f"{np.average(weighted_fit[:, 1])=}")
+        print(np.average(params_bs) * (2 * 0.0035714285714285718))
+        # print(f"{popt_avg*(2*0.0035714285714285718)=}")
+
+        # test
+
     deltaE_diff = np.array(deltaE_diff)
     approx_matelem = deltaE_diff / (2 * (lambda_list[1] - lambda_list[0]))
 
@@ -203,7 +249,7 @@ def analyse_double_ratios(
     plt.ylabel(r"$\Delta E(\lambda+\Delta\lambda) - \Delta E(\lambda)$")
     plt.xlabel(r"$\lambda$")
     # plt.legend()
-    savefile = plotdir / ("DeltaE_diff.pdf")
+    savefile = plotdir / (f"{run_name}_DeltaE_diff.pdf")
     plt.savefig(savefile)
 
     normalisation = 0.863
@@ -234,17 +280,17 @@ def analyse_double_ratios(
     plt.ylabel(r"$|ME|_{\textrm{approx}}$")
     plt.xlabel(r"$\lambda$")
     # plt.legend()
-    savefile = plotdir / ("approx_matrixelement.pdf")
+    savefile = plotdir / (f"{run_name}_approx_matrixelement.pdf")
     plt.savefig(savefile)
 
     return
 
 
-def fit_2ptfn_1exp(correlator, datadir, lambda_value):
+def fit_2ptfn_1exp(correlator, datadir, lambda_value, run_name):
     """Fit a two-exponential function to a 2point correlation function"""
 
     fitfunction = fitfunc.initffncs("Aexp")
-    time_limits = [[1, 12], [13, 19]]
+    time_limits = [[8, 8], [18, 18]]
     fitlist_2pt = stats.fit_loop_bayes(
         correlator,
         fitfunction,
@@ -255,13 +301,16 @@ def fit_2ptfn_1exp(correlator, datadir, lambda_value):
         weights_=True,
     )
 
-    datafile = datadir / Path(f"double_ratio_l{lambda_value:.7f}_fitlist_1exp.pkl")
+    datafile = datadir / Path(
+        f"{run_name}/double_ratio_l{lambda_value:.7f}_fitlist_1exp.pkl"
+    )
+    datafile.parent.mkdir(parents=True, exist_ok=True)
     with open(datafile, "wb") as file_out:
         pickle.dump(fitlist_2pt, file_out)
     return
 
 
-def fit_2ptfn_2exp(correlator, datadir, lambda_value):
+def fit_2ptfn_2exp(correlator, datadir, lambda_value, run_name):
     """Fit a two-exponential function to a 2point correlation function"""
 
     fitfunction = fitfunc.initffncs("Twoexp_log")
@@ -276,7 +325,10 @@ def fit_2ptfn_2exp(correlator, datadir, lambda_value):
         weights_=True,
     )
 
-    datafile = datadir / Path(f"double_ratio_l{lambda_value:.7f}_fitlist_2exp.pkl")
+    datafile = datadir / Path(
+        f"{run_name}/double_ratio_l{lambda_value:.7f}_fitlist_2exp.pkl"
+    )
+    datafile.mkdir(parents=True, exist_ok=True)
     with open(datafile, "wb") as file_out:
         pickle.dump(fitlist_2pt, file_out)
     return
@@ -299,47 +351,51 @@ def main():
     datadir_run6 = resultsdir / Path("six_point_fn_all/data/pickles/theta8/")
     plotdir.mkdir(parents=True, exist_ok=True)
     datadir.mkdir(parents=True, exist_ok=True)
+    datadir_runs = [
+        datadir_run1,
+        datadir_run2,
+        datadir_run3,
+        datadir_run4,
+        datadir_run5,
+        datadir_run6,
+    ]
+    run_names = ["run1", "run2", "run3", "run4", "run5", "run6"]
+    theta_names = ["qmax", "theta5", "theta3", "theta4", "theta7", "theta8"]
+    # datadir_runs = [datadir_run5]
+    # run_names = ["run5"]
 
-    # Read the lattice data and construct the double ratios
-    lambda_list, double_ratios = get_double_ratios(datadir_run5)
-    print(f"{np.shape(double_ratios)=}")
+    for idir, datadir_runx in enumerate(datadir_runs):
+        # Read the lattice data and construct the double ratios
+        lambda_list, double_ratios = get_double_ratios(datadir_runx, theta_names[idir])
+        print(f"{np.shape(double_ratios)=}")
 
-    # # Fit to the double ratios
-    # for lambda_index, lambda_value in enumerate(lambda_list[:-1]):
-    #     fit_2ptfn_1exp(double_ratios[lambda_index], datadir, lambda_value)
-    #     # fit_2ptfn_2exp(double_ratio, datadir, lambda_value)
+        # # Fit to the double ratios
+        # for lambda_index, lambda_value in enumerate(lambda_list[:-1]):
+        #     fit_2ptfn_1exp(
+        #         double_ratios[lambda_index], datadir, lambda_value, run_names[idir]
+        #     )
+        #     # fit_2ptfn_2exp(double_ratio, datadir, lambda_value)
 
-    # Read the fit data of  the double ratios
-    fitlists_lambda = []
-    for lambda_index, lambda_value in enumerate(lambda_list[:-1]):
-        datafile = datadir / Path(f"double_ratio_l{lambda_value:.7f}_fitlist_1exp.pkl")
-        with open(datafile, "rb") as file_in:
-            fitlist = pickle.load(file_in)
-            fitlists_lambda.append(fitlist)
+        # Read the fit data of  the double ratios
+        fitlists_lambda = []
+        # datadir_runx = datadir_runs[0]
+        # run_name = run_names[0]
+        for lambda_index, lambda_value in enumerate(lambda_list[:-1]):
+            datafile = datadir / Path(
+                f"{run_names[idir]}/double_ratio_l{lambda_value:.7f}_fitlist_1exp.pkl"
+            )
+            with open(datafile, "rb") as file_in:
+                fitlist = pickle.load(file_in)
+                fitlists_lambda.append(fitlist)
 
-    analyse_double_ratios(double_ratios, fitlists_lambda, lambda_list, datadir, plotdir)
-
-    # # normalisation = 0.863
-    # # FH_matrix_element = 0.583 / normalisation
-    # # FH_matrix_element_err = 0.036 / normalisation
-
-    # FH_data = {
-    #     "deltaE_eff": deltaE_eff,
-    #     "deltaE_fit": deltaE_fit,
-    #     "ratio_t_range": ratio_t_range,
-    #     "FH_matrix_element": FH_matrix_element,
-    #     "FH_matrix_element_err": FH_matrix_element_err,
-    # }
-
-    # double_ratio3 = ratio32 / ratio3
-    # deltaE_eff_double = stats.bs_effmass(double_ratio3) / (2 * (lambdas2 - lambdas))
-    # FH_data = {
-    #     "deltaE_eff": deltaE_eff_double,
-    #     "deltaE_fit": deltaE_fit,
-    #     "ratio_t_range": ratio_t_range,
-    #     "FH_matrix_element": FH_matrix_element,
-    #     "FH_matrix_element_err": FH_matrix_element_err,
-    # }
+        analyse_double_ratios(
+            double_ratios,
+            fitlists_lambda,
+            lambda_list,
+            datadir,
+            plotdir,
+            run_names[idir],
+        )
 
     return
 
