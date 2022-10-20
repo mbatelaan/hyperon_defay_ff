@@ -1028,20 +1028,6 @@ def feynhell_3pt_comparison():
         mat_elements1 = pickle.load(file_in)
     mat_element_run6 = np.array([mat_elements1["bootfit3"].T[0]])
 
-    # --- Multiply energy factors for the form factors ---
-    # pvec_list2 = np.array(
-    #     [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]]
-    # )
-    # twist_list = np.array(
-    #     [
-    #         [0, 0, 0],
-    #         [0, 0.448, 0],
-    #         [0, 1, 0],
-    #         [0, 1.6, 0],
-    #         [0, 2.06, 0],
-    #         [0, 2.25, 0],
-    #     ]
-    # )
     seq_src_matrix_elem = np.array(
         [
             mat_element_run1,
@@ -1066,30 +1052,16 @@ def feynhell_3pt_comparison():
     # ================================================================================
     # --- Get the energies of the nucleon and sigma  ---
     nucl_fits, sigma_fits, nucl_energies, sigma_energies = get_energies(datadir_list)
-    # --- Multiply mat element with energies  ---
+    # --- Multiply matrix element with the energy factor ---
     for ime, me in enumerate(seq_src_matrix_elem):
-        print(
-            np.average(
-                np.sqrt(
-                    2 * nucl_energies[ime] / (nucl_energies[ime] + nucl_energies[0])
-                )
-            )
-        )
-        seq_src_matrix_elem[ime] = me * np.sqrt(
+        energy_factor = np.sqrt(
             2 * nucl_energies[ime] / (nucl_energies[ime] + nucl_energies[0])
         )
 
-    # # Divide out a common factor of all the form factors to get the FF combination
-    # # in a slightly nicer form.
-    # FF_seq = []
-    # for i, pvec in enumerate(pvec_list2):
-    #     FF_facs = FF_factors(m_N, m_S, pvec, twist_list[i], NX)
-    #     # print(f"\n{FF_facs=}")
-    #     # print(f"{np.average(seq_src_points[i])=}")
-    #     new_point = seq_src_points[i] / FF_facs[-1]
-    #     # print(f"{np.average(new_point)=}")
-    #     FF_seq.append(new_point)
+        print(np.average(energy_factor))
+        seq_src_matrix_elem[ime] = me * energy_factor
 
+    # Plot all the points
     feynhell_points = {
         "xdata": seq_src_Qsq,
         "ydata": seq_src_matrix_elem,
@@ -1102,10 +1074,9 @@ def feynhell_3pt_comparison():
             "Run #6",
         ],
     }
-
     plot_matrix_element(feynhell_points, threeptfn_points, "test", plotdir)
 
-    exit()
+    return
 
 
 def get_energies(datadir_list):
