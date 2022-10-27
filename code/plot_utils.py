@@ -33,6 +33,7 @@ def run_command(command):
 
 def get_git_hash():
     """Get the identifier of the last commit in the repo."""
+    run_command(["git", "rev-parse", "HEAD"])
     return run_command(["git", "rev-parse", "HEAD"])
 
 

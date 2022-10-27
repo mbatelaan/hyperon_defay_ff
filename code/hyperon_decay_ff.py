@@ -294,6 +294,7 @@ def evffplot7(
     plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
     plt.ylim(0, 1.5)
     save_plot(fig, plotname + "_all.pdf", subdir=plotdir)
+    plt.close()
 
     fig = plt.figure(figsize=(5, 4))
     plt.errorbar(
@@ -392,6 +393,7 @@ def evffplot7_3pt(
     plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
     plt.ylim(0, 1.5)
     save_plot(fig, plotname + "_all.pdf", subdir=plotdir)
+    plt.close()
 
     fig = plt.figure(figsize=(5, 4))
     plt.errorbar(
@@ -867,7 +869,6 @@ def main():
         # extra_points_qsq=extra_points_qsq,
         show=False,
     )
-    print(f"{np.shape(extra_points)=}")
     ydata, errordata, extradata = evffplot8(
         Q_squared,
         ydata,
@@ -920,6 +921,7 @@ def feynhell_3pt_comparison():
     plt.style.use("./mystyle.txt")
     plt.rc("text.latex", preamble=r"\usepackage{physics}")
 
+    # ================================================================================
     # --- directories ---
     evffdir = Path.home() / Path("Dropbox/PhD/lattice_results/eddie/sig2n/ff/")
     threeptfn_dir = Path.home() / Path(
@@ -942,7 +944,6 @@ def feynhell_3pt_comparison():
         datadir_run5,
         datadir_run6,
     ]
-
     plotdir.mkdir(parents=True, exist_ok=True)
 
     # --- Lattice specs ---
@@ -964,18 +965,18 @@ def feynhell_3pt_comparison():
         form_factor_values_n2sig = pickle.load(file_in)
     with open(threeptfn_file_sig2n, "rb") as file_in:
         form_factor_values_sig2n = pickle.load(file_in)
-    # print(f"{np.shape(form_factor_values)=}")
-    print(f"{np.shape(form_factor_values_zeromom)=}")
+
     me_3pt_zeromom_avg = np.average(form_factor_values_zeromom)
     me_3pt_zeromom_std = np.std(form_factor_values_zeromom)
     me_3pt_n2sig_avg = np.average(form_factor_values_n2sig, axis=1)
     me_3pt_n2sig_std = np.std(form_factor_values_n2sig, axis=1)
     me_3pt_sig2n_avg = np.average(form_factor_values_sig2n, axis=1)
     me_3pt_sig2n_std = np.std(form_factor_values_sig2n, axis=1)
-    print(f"{np.shape(me_3pt_zeromom_avg)=}")
-    print(f"{np.shape(me_3pt_n2sig_avg)=}")
-    print(f"{np.shape(form_factor_values_n2sig)=}")
+    # print(f"{np.shape(me_3pt_zeromom_avg)=}")
+    # print(f"{np.shape(me_3pt_n2sig_avg)=}")
+    # print(f"{np.shape(form_factor_values_n2sig)=}")
 
+    # ================================================================================
     # Read the Q^2 values for the 3pt fn data
     datafile_sig2n = threeptfn_dir / Path(f"Qsquared_sig2n.pkl")
     datafile_n2sig = threeptfn_dir / Path(f"Qsquared_n2sig.pkl")
@@ -984,23 +985,48 @@ def feynhell_3pt_comparison():
     with open(datafile_n2sig, "rb") as file_in:
         qsquared_n2sig_list = pickle.load(file_in)
 
-    threeptfn_points = {
-        "xdata": np.array(
-            [qsquared_sig2n_list[0], qsquared_sig2n_list[1:], qsquared_n2sig_list[1:]]
-        ),
-        "ydata": np.array(
-            [
-                form_factor_values_zeromom,
-                form_factor_values_sig2n,
-                form_factor_values_n2sig,
-            ]
-        ),
-        "labels": [
-            "Double Ratio",
-            r"$\Sigma \to N$",
-            r"$N \to \Sigma$",
-        ],
-    }
+    # ================================================================================
+    # Read the fits to the 2pt functions
+    energies_nucl = []
+    energies_sigma = []
+
+    datafile_ = threeptfn_dir / Path(f"p+0+0+0_zeromom_2pt_fit_choice.pkl")
+    with open(datafile_, "rb") as file_in:
+        fit_params_n, fit_params_s = pickle.load(file_in)
+    energies_sigma.append(fit_params_s[:, 1])
+    energies_nucl.append(fit_params_n[:, 1])
+
+    transitions = ["sig2n", "n2sig"]
+    momenta = ["p+1+0+0", "p+1+1+0"]
+    for itrans, trans in enumerate(transitions):
+        for imom, mom in enumerate(momenta):
+            datafile_ = threeptfn_dir / Path(f"{mom}_{trans}_2pt_fit_choice.pkl")
+            with open(datafile_, "rb") as file_in:
+                fit_params_n, fit_params_s = pickle.load(file_in)
+            if itrans == 0:
+                energies_sigma.append(fit_params_s[:, 1])
+            elif itrans == 1:
+                energies_nucl.append(fit_params_n[:, 1])
+
+    # ================================================================================
+    # Multiply with energy factors
+    matrix_element_3ptfn_zeromom = form_factor_values_zeromom * np.sqrt(
+        4 * energies_nucl[0] * energies_sigma[0]
+    )
+    matrix_element_3ptfn_sig2n = np.array(
+        [
+            form_factor
+            * np.sqrt(2 * energies_nucl[0] * (energies_sigma[i] + energies_sigma[0]))
+            for i, form_factor in enumerate(form_factor_values_sig2n)
+        ]
+    )
+    matrix_element_3ptfn_n2sig = np.array(
+        [
+            form_factor
+            * np.sqrt(2 * energies_sigma[0] * (energies_nucl[i] + energies_nucl[0]))
+            for i, form_factor in enumerate(form_factor_values_n2sig)
+        ]
+    )
 
     # ================================================================================
     # --- Read the sequential src data ---
@@ -1030,14 +1056,26 @@ def feynhell_3pt_comparison():
 
     seq_src_matrix_elem = np.array(
         [
-            mat_element_run1,
-            mat_element_run2,
-            mat_element_run3,
-            mat_element_run4,
-            mat_element_run5,
-            mat_element_run6,
+            mat_element_run1[0],
+            mat_element_run2[0],
+            mat_element_run3[0],
+            mat_element_run4[0],
+            mat_element_run5[0],
+            mat_element_run6[0],
         ]
     )
+    print(f"{np.shape(seq_src_matrix_elem)=}")
+
+    # ================================================================================
+    # Alternative FH values:
+    datafile = resultsdir / Path("hyperon_ff/data/matrix_element_values.pkl")
+    with open(datafile, "rb") as file_in:
+        # matrix_elements_fh = pickle.load(file_in)
+        seq_src_matrix_elem = np.array(pickle.load(file_in))
+    # print(f"{np.shape(matrix_elements_fh)=}")
+
+    # ================================================================================
+    # Set Q^2 values (from the table in the paper)
     seq_src_Qsq = np.array(
         [
             -0.0095,
@@ -1050,18 +1088,60 @@ def feynhell_3pt_comparison():
     )
 
     # ================================================================================
-    # --- Get the energies of the nucleon and sigma  ---
+    print("\nbefore any energy factors")
+    for elem in seq_src_matrix_elem:
+        print(np.average(elem), np.std(elem))
+    print("\n\n")
+
+    # ================================================================================
+    # --- Get the energies of the nucleon and sigma for the FH calculation ---
     nucl_fits, sigma_fits, nucl_energies, sigma_energies = get_energies(datadir_list)
+    seq_src_form_factors = np.zeros(np.shape(seq_src_matrix_elem))
     # --- Multiply matrix element with the energy factor ---
     for ime, me in enumerate(seq_src_matrix_elem):
-        energy_factor = np.sqrt(
+        # The form factor combination
+        energy_factor_2 = np.sqrt(
             2 * nucl_energies[ime] / (nucl_energies[ime] + nucl_energies[0])
         )
-
-        print(np.average(energy_factor))
+        seq_src_form_factors[ime] = me * energy_factor_2
+        # The matrix element as written in the paper
+        energy_factor = np.sqrt(4 * nucl_energies[ime] * sigma_energies[0])
         seq_src_matrix_elem[ime] = me * energy_factor
 
+    print(f"{np.shape(seq_src_matrix_elem)=}")
+
+    print(f"\n{np.average(nucl_energies,axis=1)=}")
+    print(f"\n{np.average(sigma_energies,axis=1)=}")
+    print(f"\n{np.average(np.array(sigma_energies) - np.array(nucl_energies),axis=1)=}")
+
+    print(f"\n{np.average(energies_nucl,axis=1)=}")
+    print(f"\n{np.average(energies_sigma,axis=1)=}")
+
+    # ================================================================================
     # Plot all the points
+    threeptfn_points = {
+        "xdata": np.array(
+            [
+                qsquared_sig2n_list[0],
+                qsquared_sig2n_list[1:],
+                qsquared_n2sig_list[1:],
+            ],
+            dtype=object,
+        ),
+        "ydata": np.array(
+            [
+                matrix_element_3ptfn_zeromom,
+                matrix_element_3ptfn_sig2n,
+                matrix_element_3ptfn_n2sig,
+            ],
+            dtype=object,
+        ),
+        "labels": [
+            "Double ratio",
+            r"$\Sigma \to N$",
+            r"$N \to \Sigma$",
+        ],
+    }
     feynhell_points = {
         "xdata": seq_src_Qsq,
         "ydata": seq_src_matrix_elem,
@@ -1074,8 +1154,188 @@ def feynhell_3pt_comparison():
             "Run #6",
         ],
     }
-    plot_matrix_element(feynhell_points, threeptfn_points, "test", plotdir)
+    plot_matrix_element(
+        feynhell_points,
+        threeptfn_points,
+        "paper",
+        plotdir,
+        ylabel=r"$\mel*{N(\vec{q}{\,})}{\bar{u}\gamma_{\mu}s}{\Sigma(\vec{0}{\,})}_{\textrm{rel}}$",
+        ylabel2=r"$\mel*{N(\vec{q}, +)}{\bar{u}\gamma_{\mu}s}{\Sigma(\vec{0}, +)}_{\textrm{rel}}^{\textrm{ren}}$",
+    )
+    with open(plotdir / "data/matrix_element_paper.pkl", "wb") as file_out:
+        pickle.dump([feynhell_points, threeptfn_points], file_out)
 
+    # Print out the values of the matrix element
+    normalisation = 0.863
+    print("\n\n Matrix element (renormalized):")
+    print("FH")
+    for i, elem in enumerate(feynhell_points["xdata"]):
+        avg = np.average(normalisation * feynhell_points["ydata"][i])
+        std = np.std(normalisation * feynhell_points["ydata"][i])
+        print(f"{elem:.4f}: \t {err_brackets(avg, std)}")
+    print("3ptfn q_max")
+    avg = np.average(normalisation * threeptfn_points["ydata"][0])
+    std = np.std(normalisation * threeptfn_points["ydata"][0])
+    print(f"{threeptfn_points['xdata'][0]:.4f}: \t {err_brackets(avg,std)}")
+    print("3ptfn non-zero vec{q}")
+    for i, elem in enumerate(threeptfn_points["xdata"][1:]):
+        for j, elem_ in enumerate(elem):
+            avg = np.average(normalisation * threeptfn_points["ydata"][1:][i][j])
+            std = np.std(normalisation * threeptfn_points["ydata"][1:][i][j])
+            print(f"{elem_:.4f}: \t {err_brackets(avg,std)}")
+
+    # ================================================================================
+    # Plot all the points
+    threeptfn_points = {
+        "xdata": np.array(
+            [
+                qsquared_sig2n_list[0],
+                qsquared_sig2n_list[1:],
+                qsquared_n2sig_list[1:],
+            ],
+            dtype=object,
+        ),
+        "ydata": np.array(
+            [
+                form_factor_values_zeromom,
+                form_factor_values_sig2n,
+                form_factor_values_n2sig,
+            ],
+            dtype=object,
+        ),
+        "labels": [
+            "Double ratio",
+            r"$\Sigma \to N$",
+            r"$N \to \Sigma$",
+        ],
+    }
+    feynhell_points = {
+        "xdata": seq_src_Qsq,
+        "ydata": seq_src_form_factors,
+        "labels": [
+            "Run #1",
+            "Run #2",
+            "Run #3",
+            "Run #4",
+            "Run #5",
+            "Run #6",
+        ],
+    }
+    plot_matrix_element(
+        feynhell_points,
+        threeptfn_points,
+        "form_factors",
+        plotdir,
+        ylabel=r"$\frac{\mel{N(\vec{q}, +)}{\bar{u}\gamma_{\mu}s}{\Sigma(\vec{0}, +)}_{\textrm{rel}}}{\sqrt{M_{\Sigma}(E_N+M_N)}}$",
+        ylabel2=r"$\frac{\mel*{N(\vec{q}, +)}{\bar{u}\gamma_{\mu}s}{\Sigma(\vec{0}, +)}_{\textrm{rel}}^{\textrm{ren}}}{\sqrt{M_{\Sigma}(E_N+M_N)}}$",
+    )
+    with open(plotdir / "data/form_factor_combination.pkl", "wb") as file_out:
+        pickle.dump([feynhell_points, threeptfn_points], file_out)
+
+    print("\n\nForm factor combination (renormalized):")
+    print("FH")
+    for i, elem in enumerate(feynhell_points["xdata"]):
+        print(
+            f"{elem:.4f}: \t {normalisation * np.average(feynhell_points['ydata'][i])}"
+        )
+    print("3ptfn q_max")
+    print(
+        f"{threeptfn_points['xdata'][0]:.4f}: \t {normalisation * np.average(threeptfn_points['ydata'][0])}"
+    )
+    print("3ptfn non-zero vec{q}")
+    for i, elem in enumerate(threeptfn_points["xdata"][1:]):
+        for j, elem_ in enumerate(elem):
+            print(
+                f"{elem_:.4f}: \t {normalisation * np.average(threeptfn_points['ydata'][1:][i][j])}"
+            )
+
+    plot_energies(
+        nucl_energies,
+        sigma_energies,
+        seq_src_Qsq,
+        energies_nucl,
+        energies_sigma,
+        np.array(
+            [
+                qsquared_sig2n_list[0],
+                qsquared_sig2n_list[1:],
+                qsquared_n2sig_list[1:],
+            ],
+            dtype=object,
+        ),
+        plotdir,
+    )
+
+    return
+
+
+def plot_energies(
+    nucl_energies_fh,
+    sigma_energies_fh,
+    qsquared_fh,
+    energies_nucl,
+    energies_sigma,
+    qsquared_3ptfn,
+    plotdir,
+):
+
+    fig = plt.figure(figsize=(5, 4))
+    plt.errorbar(
+        qsquared_fh,
+        np.average(nucl_energies_fh, axis=1),
+        np.std(nucl_energies_fh, axis=1),
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt=_fmts[0],
+        label="FH nucl",
+    )
+    plt.errorbar(
+        qsquared_fh[0],
+        np.average(sigma_energies_fh, axis=1)[0],
+        np.std(sigma_energies_fh, axis=1)[0],
+        capsize=4,
+        elinewidth=1,
+        color=_colors[0],
+        fmt=_fmts[1],
+        label="FH sigma",
+    )
+
+    plt.errorbar(
+        np.append(
+            qsquared_3ptfn[0],
+            qsquared_3ptfn[2],
+        ),
+        # np.average(energies_nucl[1:], axis=1),
+        # np.std(energies_nucl[1:], axis=1),
+        np.average(energies_nucl, axis=1),
+        np.std(energies_nucl, axis=1),
+        capsize=4,
+        elinewidth=1,
+        color=_colors[2],
+        fmt=_fmts[0],
+        label="3pt nucl",
+    )
+    plt.errorbar(
+        np.append(
+            qsquared_3ptfn[0],
+            qsquared_3ptfn[1],
+        ),
+        np.average(energies_sigma, axis=1),
+        np.std(energies_sigma, axis=1),
+        # qsquared_3ptfn[2],
+        # np.average(energies_sigma[1:], axis=1),
+        # np.std(energies_sigma[1:], axis=1),
+        capsize=4,
+        elinewidth=1,
+        color=_colors[2],
+        fmt=_fmts[1],
+        label="3pt sigma",
+    )
+    plt.legend(fontsize="x-small")
+    save_plot(fig, "energies.pdf", subdir=plotdir)
+    # plt.show()
+    plt.close()
     return
 
 
@@ -1092,23 +1352,27 @@ def get_energies(datadir_list):
         sigma_fits.append(twopt_fit_data["chosen_sigma_fit"])
         nucl_energies.append(twopt_fit_data["chosen_nucl_fit"]["param"][:, 1])
         sigma_energies.append(twopt_fit_data["chosen_sigma_fit"]["param"][:, 1])
-        print(np.average(nucl_energies[-1]))
+        # print(np.average(nucl_energies[-1]))
         # print(np.average(sigma_energies[-1]))
 
     return nucl_fits, sigma_fits, nucl_energies, sigma_energies
 
 
-def plot_matrix_element(feynhell_points, threeptfn_points, plotname, plotdir):
+def plot_matrix_element(
+    feynhell_points,
+    threeptfn_points,
+    plotname,
+    plotdir,
+    ylabel=r"$\mel{N}{\bar{u}\gamma_{\mu}s}{\Sigma}$",
+    ylabel2=r"$\mel*{N(\vec{q}, +)}{\bar{u}\gamma_{\mu}s}{\Sigma(\vec{0}, +)}_{\textrm{rel}}^{\textrm{ren}}$",
+):
     """Plot the matrix element"""
-    print(np.shape(feynhell_points["xdata"]))
-    print(np.shape(np.average(feynhell_points["ydata"], axis=2)[:, 0]))
-    print(np.shape(np.std(feynhell_points["ydata"], axis=2)[:, 0]))
 
     fig = plt.figure(figsize=(5, 4))
     plt.errorbar(
         feynhell_points["xdata"],
-        np.average(feynhell_points["ydata"], axis=2)[:, 0],
-        np.std(feynhell_points["ydata"], axis=2)[:, 0],
+        np.average(feynhell_points["ydata"], axis=1),
+        np.std(feynhell_points["ydata"], axis=1),
         label="Feynman-Hellmann",
         capsize=4,
         elinewidth=1,
@@ -1117,7 +1381,6 @@ def plot_matrix_element(feynhell_points, threeptfn_points, plotname, plotdir):
         # markerfacecolor="none",
     )
     # Plot the 3pt fn results
-    print(np.shape(threeptfn_points["ydata"][1]))
     plt.errorbar(
         threeptfn_points["xdata"][0],
         np.average(threeptfn_points["ydata"][0]),
@@ -1155,12 +1418,13 @@ def plot_matrix_element(feynhell_points, threeptfn_points, plotname, plotdir):
     plt.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
     plt.legend(fontsize="xx-small")
     plt.ylabel(
-        r"$\mel{N}{\bar{u}\gamma_{\mu}s}{\Sigma}$",
+        ylabel,
         fontsize="small",
     )
     plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
     plt.ylim(0, 1.5)
     save_plot(fig, plotname + "_matrix_element.pdf", subdir=plotdir)
+    plt.close()
 
     # ======================================================================
     # Renormalised values plot
@@ -1170,8 +1434,8 @@ def plot_matrix_element(feynhell_points, threeptfn_points, plotname, plotdir):
     fig = plt.figure(figsize=(5, 4))
     plt.errorbar(
         feynhell_points["xdata"],
-        np.average(feynhell_points["ydata"], axis=2)[:, 0],
-        np.std(feynhell_points["ydata"], axis=2)[:, 0],
+        np.average(feynhell_points["ydata"], axis=1),
+        np.std(feynhell_points["ydata"], axis=1),
         label="Feynman-Hellmann",
         capsize=4,
         elinewidth=1,
@@ -1180,7 +1444,6 @@ def plot_matrix_element(feynhell_points, threeptfn_points, plotname, plotdir):
         # markerfacecolor="none",
     )
     # Plot the 3pt fn results
-    print(np.shape(threeptfn_points["ydata"][1]))
     plt.errorbar(
         threeptfn_points["xdata"][0],
         np.average(threeptfn_points["ydata"][0]),
@@ -1218,12 +1481,15 @@ def plot_matrix_element(feynhell_points, threeptfn_points, plotname, plotdir):
     plt.axvline(0, linestyle="--", color="k", linewidth=0.5, alpha=0.5)
     plt.legend(fontsize="xx-small")
     plt.ylabel(
-        r"$\mel{N}{\bar{u}\gamma_{\mu}s}{\Sigma}$",
+        ylabel2,
+        # r"$\mel*{N(\vec{q}, +)}{\bar{u}\gamma_{\mu}s}{\Sigma(\vec{0}, +)}_{\textrm{rel}}^{\textrm{ren}}$",
+        # r"$\mel{N}{\bar{u}\gamma_{\mu}s}{\Sigma}$",
         fontsize="small",
     )
     plt.xlabel(r"$Q^{2} [\textrm{GeV}^2]$")
     plt.ylim(0, 1.5)
     save_plot(fig, plotname + "_matrix_element_renorm.pdf", subdir=plotdir)
+    plt.close()
 
 
 if __name__ == "__main__":
